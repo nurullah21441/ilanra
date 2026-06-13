@@ -31,7 +31,7 @@ function GirisForm() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f7f7f5", padding: "1rem" }}>
       <div style={{ background: "#fff", borderRadius: 18, border: "0.5px solid #e8e8e5", padding: "2.5rem", width: "100%", maxWidth: 420, boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
         <Link href="/" style={{ textDecoration: "none", display: "block", marginBottom: "2rem" }}>
-          <Logo height={40} />
+          <Logo size={28} />
         </Link>
         <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 22, fontWeight: 700, marginBottom: "0.4rem" }}>Giriş yap</h1>
         <p style={{ fontSize: 13.5, color: "#888", marginBottom: "1.75rem" }}>

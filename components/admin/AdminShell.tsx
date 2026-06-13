@@ -50,7 +50,7 @@ export default function AdminShell({ activeTab, onTabChange, title, subtitle, ch
       >
         <div style={{ padding: "1.25rem 1.25rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
-            <Logo height={28} variant="light" />
+            <Logo size={24} variant="light" />
           </Link>
           <div style={{ marginTop: 10, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "#64748b" }}>
             Yönetim Paneli

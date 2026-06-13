@@ -29,7 +29,7 @@ export default function KayitPage() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8f8f6", padding: "1rem" }}>
       <div style={{ background: "#fff", borderRadius: 16, border: "0.5px solid #e5e5e5", padding: "2.5rem", width: "100%", maxWidth: 420 }}>
         <Link href="/" style={{ textDecoration: "none", display: "block", marginBottom: "2rem" }}>
-          <Logo height={40} />
+          <Logo size={28} />
         </Link>
         <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 22, fontWeight: 700, marginBottom: "0.5rem" }}>Kayıt ol</h1>
         <p style={{ fontSize: 13.5, color: "#666", marginBottom: "1.75rem" }}>Hemen ücretsiz hesap oluştur.</p>

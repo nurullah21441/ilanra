@@ -143,7 +143,7 @@ export default function Navbar() {
 
           {/* LOGO */}
           <Link href="/" style={{ textDecoration: "none", flexShrink: 0, display: "flex", alignItems: "center" }}>
-            <Logo height={34} />
+            <Logo size={27} />
           </Link>
 
           {/* KATEGORİLER DROPDOWN */}

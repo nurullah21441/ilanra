@@ -146,6 +146,34 @@ img, video { max-width: 100%; height: auto; }
 .cta-btn:hover { background: var(--brand-dark); }
 
 .brand-text { color: var(--brand); }
+
+/* ── LOGO — sade wordmark ── */
+.site-logo {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-synthesis: none;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-transform: lowercase;
+  user-select: none;
+  display: inline-block;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: opacity .15s ease;
+}
+.site-logo--default {
+  color: var(--brand);
+}
+.site-logo--light {
+  color: #fff;
+}
+a:hover .site-logo,
+button:hover .site-logo {
+  opacity: 0.78;
+}
+
 .brand-bg { background: var(--brand); color: #fff; }
 .brand-gradient { background: var(--brand-gradient); color: #fff; }
 .badge-featured { background: var(--brand); color: #fff; }

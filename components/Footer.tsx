@@ -44,7 +44,7 @@ export default function () {
           {/* BRAND */}
           <div>
             <Link href="/" style={{ display: "inline-block", marginBottom: 12, textDecoration: "none" }}>
-              <Logo height={38} variant="light" />
+              <Logo size={28} variant="light" />
             </Link>
             <p style={{ fontSize: 13.5, color: "#666", lineHeight: 1.65, maxWidth: 220, marginBottom: 20 }}>
               Türkiye&#39;nin modern ilan platformu. Milyonlarca ürün, gerçek fiyatlar, güvenli alışveriş.
