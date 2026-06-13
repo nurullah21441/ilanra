@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import IlanGallery from "@/components/IlanGallery";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function IlanDetayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,6 +19,9 @@ export default async function IlanDetayPage({ params }: { params: Promise<{ id: 
 
   if (!listing) notFound();
   await prisma.listing.update({ where: { id }, data: { views: { increment: 1 } } });
+
+  const currentUser = await getCurrentUser();
+  const isOwner = currentUser?.id === listing.user.id;
 
   const conditionMap: Record<string, string> = {
     NEW: "Sıfır", LIKE_NEW: "Sıfır Gibi", USED: "İkinci El", DEFECTIVE: "Hasarlı",
@@ -78,36 +82,38 @@ export default async function IlanDetayPage({ params }: { params: Promise<{ id: 
               <h1 style={{ fontSize: 16, fontWeight: 600, color: "#333", marginBottom: "1.5rem", lineHeight: 1.45 }}>{listing.title}</h1>
 
               {listing.isFeatured && (
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 100, background: "#fef2f2", border: "0.5px solid #fca5a5", fontSize: 12, color: "#E63946", fontWeight: 600, marginBottom: "1rem" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 100, background: "var(--brand-soft)", border: "0.5px solid var(--brand-border)", fontSize: 12, color: "var(--brand)", fontWeight: 600, marginBottom: "1rem" }}>
                   ⭐ Öne Çıkan İlan
                 </div>
               )}
 
               <a href={`tel:${listing.user.phone}`} style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                padding: "13px", background: "#E63946", color: "#fff",
+                padding: "13px", background: "var(--brand)", color: "#fff",
                 borderRadius: 11, fontWeight: 700, fontSize: 15, textDecoration: "none",
                 marginBottom: 8, transition: "background .15s",
               }} className="btn-red">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
                 Telefon ile ara
               </a>
-              <Link href={`/mesajlar?listingId=${listing.id}&receiverId=${listing.user.id}`} style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                padding: "13px", background: "#fff", color: "#333",
-                borderRadius: 11, fontWeight: 500, fontSize: 15, textDecoration: "none",
-                border: "0.5px solid #E8E8E5",
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                Mesaj gönder
-              </Link>
+              {!isOwner && (
+                <Link href={`/mesajlar?listingId=${listing.id}&receiverId=${listing.user.id}`} style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  padding: "13px", background: "#fff", color: "#333",
+                  borderRadius: 11, fontWeight: 500, fontSize: 15, textDecoration: "none",
+                  border: "0.5px solid #E8E8E5",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                  Mesaj gönder
+                </Link>
+              )}
             </div>
 
             {/* SATICI */}
             <div style={{ background: "#fff", borderRadius: 14, border: "0.5px solid #E8E8E5", padding: "1.25rem" }}>
               <p style={{ fontSize: 11.5, color: "#aaa", marginBottom: "0.75rem", textTransform: "uppercase", letterSpacing: .4, fontWeight: 600 }}>Satıcı</p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg, #E63946, #c1121f)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 20, fontWeight: 800, flexShrink: 0 }}>
+                <div style={{ width: 46, height: 46, borderRadius: "50%", background: "var(--brand-gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 20, fontWeight: 800, flexShrink: 0 }}>
                   {listing.user.name[0]}
                 </div>
                 <div>

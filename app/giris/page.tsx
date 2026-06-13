@@ -39,7 +39,7 @@ function GirisForm() {
         </p>
 
         {error && (
-          <div style={{ background: "#fef2f2", color: "#dc2626", padding: "10px 14px", borderRadius: 9, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid #fecaca" }}>⚠️ {error}</div>
+          <div style={{ background: "var(--brand-soft)", color: "#dc2626", padding: "10px 14px", borderRadius: 9, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid var(--brand-border)" }}>⚠️ {error}</div>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -54,13 +54,13 @@ function GirisForm() {
                 onChange={e => setForm({ ...form, [key]: e.target.value })}
                 required
                 style={{ width: "100%", padding: "11px 14px", border: "0.5px solid #e8e8e5", borderRadius: 9, fontSize: 14, outline: "none", fontFamily: "inherit", transition: "border-color 0.15s" }}
-                onFocus={e => (e.target as HTMLInputElement).style.borderColor = "#e63946"}
+                onFocus={e => (e.target as HTMLInputElement).style.borderColor = "var(--brand)"}
                 onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#e8e8e5"}
               />
             </div>
           ))}
           <button type="submit" disabled={loading} style={{
-            width: "100%", padding: "12px", background: loading ? "#ccc" : "#e63946",
+            width: "100%", padding: "12px", background: loading ? "#ccc" : "var(--brand)",
             color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 700,
             cursor: loading ? "not-allowed" : "pointer", fontFamily: "inherit", marginTop: 8,
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -71,11 +71,15 @@ function GirisForm() {
           </button>
         </form>
 
-        <p style={{ textAlign: "center", fontSize: 13.5, color: "#888", marginTop: "1.5rem" }}>
-          <p style={{ textAlign: "center", fontSize: 13, marginTop: "1rem" }}><Link href="/sifremi-unuttum" style={{ color: "#888", textDecoration: "none" }}>Şifremi unuttum</Link></p>
-          Hesabın yok mu?{" "}
-          <Link href="/kayit" style={{ color: "#e63946", textDecoration: "none", fontWeight: 600 }}>Kayıt ol</Link>
-        </p>
+        <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+          <p style={{ fontSize: 13, marginBottom: "0.75rem" }}>
+            <Link href="/sifremi-unuttum" style={{ color: "#888", textDecoration: "none" }}>Şifremi unuttum</Link>
+          </p>
+          <p style={{ fontSize: 13.5, color: "#888" }}>
+            Hesabın yok mu?{" "}
+            <Link href="/kayit" style={{ color: "var(--brand)", textDecoration: "none", fontWeight: 600 }}>Kayıt ol</Link>
+          </p>
+        </div>
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

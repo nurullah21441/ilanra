@@ -75,7 +75,7 @@ export default function HeroCards() {
                   <span>{demo.emoji}</span>
                 )}
                 {isTop && (
-                  <div style={{ position: "absolute", top: 8, left: 8, background: "#e63946", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 100 }}>
+                  <div style={{ position: "absolute", top: 8, left: 8, background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 100 }}>
                     YENİ
                   </div>
                 )}
@@ -91,7 +91,7 @@ export default function HeroCards() {
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "#e63946" }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "var(--brand)" }}>
                     ₺{((real?.price || demo.price)).toLocaleString("tr-TR")}
                   </div>
                   <div style={{ fontSize: 11.5, color: "#bbb", display: "flex", alignItems: "center", gap: 3 }}>
@@ -110,7 +110,7 @@ export default function HeroCards() {
         {DEMO.map((_, i) => (
           <div key={i} onClick={() => setActive(i)} style={{
             width: i === active ? 20 : 6, height: 6, borderRadius: 3,
-            background: i === active ? "#e63946" : "#e0e0de",
+            background: i === active ? "var(--brand)" : "#e0e0de",
             cursor: "pointer", transition: "all 0.3s",
           }} />
         ))}

@@ -69,7 +69,7 @@ export default function IlanlarimPage() {
           </div>
           <Link href="/ilan-ver" style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "10px 20px", background: "#E63946", color: "#fff",
+            padding: "10px 20px", background: "var(--brand)", color: "#fff",
             borderRadius: 10, textDecoration: "none", fontWeight: 700, fontSize: 14,
           }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>
@@ -88,7 +88,7 @@ export default function IlanlarimPage() {
             <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>📋</div>
             <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: 8, color: "#333" }}>Henüz ilanın yok</h3>
             <p style={{ fontSize: 14, color: "#aaa", marginBottom: "1.5rem" }}>İlk ilanını ver, alıcıları bekle!</p>
-            <Link href="/ilan-ver" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "11px 24px", background: "#E63946", color: "#fff", borderRadius: 10, textDecoration: "none", fontWeight: 600, fontSize: 14 }}>
+            <Link href="/ilan-ver" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "11px 24px", background: "var(--brand)", color: "#fff", borderRadius: 10, textDecoration: "none", fontWeight: 600, fontSize: 14 }}>
               + İlan ver
             </Link>
           </div>
@@ -117,10 +117,10 @@ export default function IlanlarimPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
                       <span style={{ fontSize: 14.5, fontWeight: 700, color: "#111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 300 }}>{listing.title}</span>
                       <span style={{ padding: "2px 8px", borderRadius: 100, background: st.bg, color: st.color, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{st.text}</span>
-                      {listing.isFeatured && <span style={{ padding: "2px 8px", borderRadius: 100, background: "#fef2f2", color: "#E63946", fontSize: 11, fontWeight: 700 }}>⭐ Öne Çıkan</span>}
+                      {listing.isFeatured && <span style={{ padding: "2px 8px", borderRadius: 100, background: "var(--brand-soft)", color: "var(--brand)", fontSize: 11, fontWeight: 700 }}>⭐ Öne Çıkan</span>}
                     </div>
                     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: "#E63946", fontFamily: "'Bricolage Grotesque', sans-serif" }}>₺{listing.price.toLocaleString("tr-TR")}</span>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: "var(--brand)", fontFamily: "'Bricolage Grotesque', sans-serif" }}>₺{listing.price.toLocaleString("tr-TR")}</span>
                       <span style={{ fontSize: 12.5, color: "#bbb", display: "flex", alignItems: "center", gap: 3 }}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         {listing.views} görüntülenme
@@ -175,9 +175,9 @@ export default function IlanlarimPage() {
                     <button onClick={() => deleteListing(listing.id)} title="Sil"
                       style={{
                         width: 36, height: 36, borderRadius: 9,
-                        border: "0.5px solid #fecaca", background: "#fef2f2",
+                        border: "0.5px solid var(--brand-border)", background: "var(--brand-soft)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        cursor: "pointer", color: "#E63946", transition: "all .15s",
+                        cursor: "pointer", color: "var(--brand)", transition: "all .15s",
                       }}
                       className="menu-item"
                     >

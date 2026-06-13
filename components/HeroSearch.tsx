@@ -32,7 +32,7 @@ export default function HeroSearch() {
         </select>
         <button type="submit" style={{
           padding: "0 26px", border: "none",
-          background: "linear-gradient(135deg, #e63946, #c1121f)",
+          background: "var(--brand-gradient)",
           color: "#fff", fontSize: 14.5, fontWeight: 600,
           fontFamily: "inherit", cursor: "pointer",
         }}>Ara</button>

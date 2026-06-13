@@ -1,3 +1,5 @@
+import { theme } from "@/lib/theme";
+
 interface LogoProps {
   height?: number;
   variant?: "default" | "light";
@@ -5,8 +7,7 @@ interface LogoProps {
   className?: string;
 }
 
-const BRAND_RED = "#E53935";
-
+const BRAND_RED = theme.brand;
 function LogoIcon({ size }: { size: number }) {
   return (
     <svg
@@ -33,7 +34,7 @@ export default function Logo({
   showText = true,
   className,
 }: LogoProps) {
-  const textColor = variant === "light" ? "#FFFFFF" : "#111111";
+  const textColor = variant === "light" ? "#FFFFFF" : theme.ink;
 
   if (!showText) {
     return (

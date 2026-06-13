@@ -106,7 +106,7 @@ export default function DuzenleePage() {
     <>
       <Navbar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "70vh", flexDirection: "column", gap: 12 }}>
-        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid #f0f0ee", borderTopColor: "#E63946", animation: "spin .7s linear infinite" }} />
+        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid #f0f0ee", borderTopColor: "var(--brand)", animation: "spin .7s linear infinite" }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     </>
@@ -128,7 +128,7 @@ export default function DuzenleePage() {
           </div>
         </div>
 
-        {error && <div style={{ background: "#fef2f2", color: "#dc2626", padding: "11px 16px", borderRadius: 10, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid #fecaca" }}>⚠️ {error}</div>}
+        {error && <div style={{ background: "var(--brand-soft)", color: "#dc2626", padding: "11px 16px", borderRadius: 10, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid var(--brand-border)" }}>⚠️ {error}</div>}
         {success && <div style={{ background: "#f0fdf4", color: "#16a34a", padding: "11px 16px", borderRadius: 10, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid #86efac" }}>✓ {success}</div>}
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -140,12 +140,12 @@ export default function DuzenleePage() {
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 2 }}>Fotoğraflar</h3>
                 <p style={{ fontSize: 12.5, color: "#aaa" }}>Sürükle sırala · En fazla 8 fotoğraf</p>
               </div>
-              <span style={{ fontSize: 12, color: "#E63946", fontWeight: 600 }}>{images.length}/8</span>
+              <span style={{ fontSize: 12, color: "var(--brand)", fontWeight: 600 }}>{images.length}/8</span>
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: images.length < 8 ? 10 : 0 }}>
               {images.map((url, i) => (
-                <div key={i} style={{ position: "relative", width: 88, height: 72, borderRadius: 10, overflow: "hidden", border: i === 0 ? "2.5px solid #E63946" : "1px solid #E8E8E5", flexShrink: 0 }}>
+                <div key={i} style={{ position: "relative", width: 88, height: 72, borderRadius: 10, overflow: "hidden", border: i === 0 ? "2.5px solid var(--brand)" : "1px solid #E8E8E5", flexShrink: 0 }}>
                   <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   {i === 0 && <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(230,57,70,.85)", color: "#fff", fontSize: 8.5, textAlign: "center", padding: "2px 0", fontWeight: 700 }}>KAPAK</div>}
                   <button onClick={() => setImages(images.filter((_, j) => j !== i))}
@@ -154,7 +154,7 @@ export default function DuzenleePage() {
               ))}
               {images.length < 8 && (
                 <label style={{ width: 88, height: 72, borderRadius: 10, border: "1.5px dashed #E8E8E5", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 4, color: "#bbb", flexShrink: 0, transition: "all .15s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E63946"; (e.currentTarget as HTMLElement).style.color = "#E63946"; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLElement).style.color = "var(--brand)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"; (e.currentTarget as HTMLElement).style.color = "#bbb"; }}>
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="9" y1="3" x2="9" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><line x1="3" y1="9" x2="15" y2="9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                   <span style={{ fontSize: 10.5 }}>{uploading ? "⏳" : "Ekle"}</span>
@@ -168,7 +168,7 @@ export default function DuzenleePage() {
                 onDrop={e => { e.preventDefault(); e.dataTransfer.files && handleUpload(e.dataTransfer.files); }}
                 onDragOver={e => e.preventDefault()}
                 style={{ border: "2px dashed #E8E8E5", borderRadius: 12, padding: "2rem", textAlign: "center", cursor: "pointer", transition: "all .15s" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E63946"; (e.currentTarget as HTMLElement).style.background = "#fef2f2"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLElement).style.background = "var(--hover-neutral)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
                 <div style={{ fontSize: 32, marginBottom: 8 }}>📸</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "#444", marginBottom: 3 }}>Fotoğraf ekle</div>
@@ -183,7 +183,7 @@ export default function DuzenleePage() {
             <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
               placeholder="İlan başlığı..." maxLength={80}
               style={{ width: "100%", padding: "12px 14px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 15, outline: "none", fontFamily: "inherit" }}
-              onFocus={e => (e.target as HTMLInputElement).style.borderColor = "#E63946"}
+              onFocus={e => (e.target as HTMLInputElement).style.borderColor = "var(--brand)"}
               onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#E8E8E5"}
             />
             <div style={{ textAlign: "right", fontSize: 11.5, color: "#bbb", marginTop: 5 }}>{form.title.length}/80</div>
@@ -195,7 +195,7 @@ export default function DuzenleePage() {
             <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
               placeholder="Ürün hakkında bilgi, özellikler..." rows={5}
               style={{ width: "100%", padding: "12px 14px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, outline: "none", fontFamily: "inherit", resize: "vertical" }}
-              onFocus={e => (e.target as HTMLTextAreaElement).style.borderColor = "#E63946"}
+              onFocus={e => (e.target as HTMLTextAreaElement).style.borderColor = "var(--brand)"}
               onBlur={e => (e.target as HTMLTextAreaElement).style.borderColor = "#E8E8E5"}
             />
           </div>
@@ -207,7 +207,7 @@ export default function DuzenleePage() {
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, color: "#444", display: "block", marginBottom: 7 }}>Fiyat (₺) *</label>
                 <div style={{ display: "flex", border: "0.5px solid #E8E8E5", borderRadius: 10, overflow: "hidden" }}
-                  onFocusCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "#E63946"}
+                  onFocusCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"}
                   onBlurCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"}>
                   <span style={{ padding: "0 14px", fontSize: 16, fontWeight: 700, color: "#555", background: "#fafaf8", borderRight: "0.5px solid #E8E8E5", display: "flex", alignItems: "center" }}>₺</span>
                   <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
@@ -221,7 +221,7 @@ export default function DuzenleePage() {
                 <div style={{ display: "flex", gap: 6 }}>
                   {[{ v: "NEW", l: "Sıfır" }, { v: "USED", l: "2. El" }].map(({ v, l }) => (
                     <button key={v} type="button" onClick={() => setForm({ ...form, condition: v })}
-                      style={{ flex: 1, padding: "11px 4px", borderRadius: 9, border: form.condition === v ? "1.5px solid #E63946" : "0.5px solid #E8E8E5", background: form.condition === v ? "#fef2f2" : "#fff", color: form.condition === v ? "#E63946" : "#555", fontSize: 13, fontWeight: form.condition === v ? 700 : 400, cursor: "pointer", fontFamily: "inherit" }}>
+                      style={{ flex: 1, padding: "11px 4px", borderRadius: 9, border: form.condition === v ? "1.5px solid var(--brand)" : "0.5px solid #E8E8E5", background: form.condition === v ? "var(--brand-soft)" : "#fff", color: form.condition === v ? "var(--brand)" : "#555", fontSize: 13, fontWeight: form.condition === v ? 700 : 400, cursor: "pointer", fontFamily: "inherit" }}>
                       {l}
                     </button>
                   ))}
@@ -256,7 +256,7 @@ export default function DuzenleePage() {
                 <div style={{ position: "relative" }}>
                   <select value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}
                     style={{ width: "100%", padding: "11px 36px 11px 14px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, fontFamily: "inherit", background: "#fff", outline: "none", appearance: "none", cursor: "pointer" }}
-                    onFocus={e => (e.target as HTMLSelectElement).style.borderColor = "#E63946"}
+                    onFocus={e => (e.target as HTMLSelectElement).style.borderColor = "var(--brand)"}
                     onBlur={e => (e.target as HTMLSelectElement).style.borderColor = "#E8E8E5"}
                   >
                     <option value="">Şehir seçin</option>
@@ -272,7 +272,7 @@ export default function DuzenleePage() {
                 <input value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}
                   placeholder="İlçe..."
                   style={{ width: "100%", padding: "11px 14px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, outline: "none", fontFamily: "inherit" }}
-                  onFocus={e => (e.target as HTMLInputElement).style.borderColor = "#E63946"}
+                  onFocus={e => (e.target as HTMLInputElement).style.borderColor = "var(--brand)"}
                   onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#E8E8E5"}
                 />
               </div>
@@ -281,7 +281,7 @@ export default function DuzenleePage() {
 
           {/* KAYDET */}
           <button onClick={handleSave} disabled={saving} style={{
-            padding: "16px", background: saving ? "#ccc" : "#E63946",
+            padding: "16px", background: saving ? "#ccc" : "var(--brand)",
             color: "#fff", border: "none", borderRadius: 14,
             fontSize: 16, fontWeight: 800, cursor: saving ? "not-allowed" : "pointer",
             fontFamily: "'Bricolage Grotesque', sans-serif",

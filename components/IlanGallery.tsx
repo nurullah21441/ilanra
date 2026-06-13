@@ -30,7 +30,7 @@ export default function IlanGallery({ images, title, isFeatured }: Props) {
           className="gallery-main-img"
         />
         {isFeatured && (
-          <div style={{ position: "absolute", top: 12, left: 12, background: "#E63946", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, letterSpacing: .3 }}>
+          <div style={{ position: "absolute", top: 12, left: 12, background: "var(--brand)", color: "#fff", fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 100, letterSpacing: .3 }}>
             ⭐ ÖNE ÇIKAN
           </div>
         )}
@@ -66,7 +66,7 @@ export default function IlanGallery({ images, title, isFeatured }: Props) {
           {images.map((url, i) => (
             <button key={i} onClick={() => setActive(i)} style={{
               width: 72, height: 56, borderRadius: 9, overflow: "hidden", padding: 0,
-              border: i === active ? "2.5px solid #E63946" : "1.5px solid #E8E8E5",
+              border: i === active ? "2.5px solid var(--brand)" : "1.5px solid #E8E8E5",
               cursor: "pointer", flexShrink: 0, transition: "border-color .15s",
               background: "#f5f5f3",
             }}>
@@ -113,7 +113,7 @@ export default function IlanGallery({ images, title, isFeatured }: Props) {
             <div style={{ position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
               {images.map((_, i) => (
                 <button key={i} onClick={e => { e.stopPropagation(); setActive(i); }}
-                  style={{ width: i === active ? 20 : 7, height: 7, borderRadius: 4, background: i === active ? "#E63946" : "rgba(255,255,255,0.4)", border: "none", cursor: "pointer", padding: 0, transition: "all .2s" }} />
+                  style={{ width: i === active ? 20 : 7, height: 7, borderRadius: 4, background: i === active ? "var(--brand)" : "rgba(255,255,255,0.4)", border: "none", cursor: "pointer", padding: 0, transition: "all .2s" }} />
               ))}
             </div>
           )}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import ListingCard from "@/components/ListingCard";
 import Navbar from "@/components/Navbar";
@@ -27,8 +27,8 @@ export default function HomeClient({ featuredListings, listings, totalListings }
       <main style={{ minHeight: "100vh" }}>
         {/* Üst başlık */}
         <section style={{
-          background: "#fff",
-          borderBottom: "0.5px solid #E8E8E5",
+          background: "var(--surface)",
+          borderBottom: "0.5px solid var(--border)",
         }}>
           <div style={{
             maxWidth: 1280, margin: "0 auto",
@@ -38,7 +38,7 @@ export default function HomeClient({ featuredListings, listings, totalListings }
           }}>
             <div style={{ minWidth: 0 }}>
               <h1 style={{
-                fontFamily: "Syne, sans-serif",
+                fontFamily: "'Bricolage Grotesque', sans-serif",
                 fontSize: "clamp(22px, 5vw, 34px)",
                 fontWeight: 800, color: "#111",
                 letterSpacing: "-0.03em", lineHeight: 1.1,
@@ -67,8 +67,8 @@ export default function HomeClient({ featuredListings, listings, totalListings }
           {featuredListings.length > 0 && (
             <section style={{ marginBottom: "2.5rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
-                <div style={{ width: 4, height: 22, background: "#E53935", borderRadius: 2 }} />
-                <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: 18, fontWeight: 800, color: "#111", letterSpacing: -0.3 }}>
+                <div style={{ width: 4, height: 22, background: "var(--brand)", borderRadius: 2 }} />
+                <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 800, color: "#111", letterSpacing: -0.3 }}>
                   Öne çıkanlar
                 </h2>
               </div>
@@ -86,7 +86,7 @@ export default function HomeClient({ featuredListings, listings, totalListings }
               {featuredListings.length > 0 && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
                   <div style={{ width: 4, height: 22, background: "#E8E8E5", borderRadius: 2 }} />
-                  <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: 18, fontWeight: 800, color: "#111", letterSpacing: -0.3 }}>
+                  <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 800, color: "#111", letterSpacing: -0.3 }}>
                     Son eklenenler
                   </h2>
                 </div>
@@ -109,7 +109,7 @@ export default function HomeClient({ featuredListings, listings, totalListings }
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 1.25rem", fontSize: 32,
               }}>📭</div>
-              <h3 style={{ fontFamily: "Syne, sans-serif", fontSize: 20, fontWeight: 800, color: "#333", marginBottom: 8 }}>
+              <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 20, fontWeight: 800, color: "#333", marginBottom: 8 }}>
                 Henüz ilan yok
               </h3>
               <p style={{ fontSize: 14, color: "#999", marginBottom: "1.5rem", maxWidth: 320, margin: "0 auto 1.5rem" }}>

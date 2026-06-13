@@ -184,14 +184,14 @@ function ComboInput({ value, onChange, options, placeholder }: {
           {filtered.map(opt => (
             <div key={opt} onClick={() => { onChange(opt); setQuery(opt); setOpen(false); }}
               style={{ padding: "9px 14px", fontSize: 13.5, cursor: "pointer", color: "#333", borderBottom: "0.5px solid #f5f5f3" }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fef2f2"}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--hover-neutral)"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
             >{opt}</div>
           ))}
           {query && !options.find(o => o.toLowerCase() === query.toLowerCase()) && (
             <div onClick={() => { onChange(query); setOpen(false); }}
-              style={{ padding: "9px 14px", fontSize: 13.5, cursor: "pointer", color: "#E63946", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fef2f2"}
+              style={{ padding: "9px 14px", fontSize: 13.5, cursor: "pointer", color: "var(--brand)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--hover-neutral)"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
             >
               <span>+</span> &quot;{query}&quot; olarak ekle
@@ -287,7 +287,7 @@ export default function IlanVerPage() {
     <>
       <Navbar />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "70vh", flexDirection: "column", gap: 12 }}>
-        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid #f0f0ee", borderTopColor: "#E63946", animation: "spin .7s linear infinite" }} />
+        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid #f0f0ee", borderTopColor: "var(--brand)", animation: "spin .7s linear infinite" }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     </>
@@ -322,7 +322,7 @@ export default function IlanVerPage() {
         </div>
         <style>{`
           .ilan-ver-cat:hover {
-            border-color: #E63946 !important;
+            border-color: var(--brand) !important;
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.08);
           }
@@ -360,7 +360,7 @@ export default function IlanVerPage() {
         </div>
 
         {error && (
-          <div style={{ background: "#fef2f2", color: "#dc2626", padding: "11px 16px", borderRadius: 10, fontSize: 13.5, marginBottom: "1.25rem", border: "0.5px solid #fecaca" }}>⚠️ {error}</div>
+          <div style={{ background: "var(--brand-soft)", color: "#dc2626", padding: "11px 16px", borderRadius: 10, fontSize: 13.5, marginBottom: "1.25rem", border: "0.5px solid var(--brand-border)" }}>⚠️ {error}</div>
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -374,7 +374,7 @@ export default function IlanVerPage() {
                   <p style={{ fontSize: 12.5, color: "#aaa" }}>İlk fotoğraf kapak olur · En fazla 10</p>
                 </div>
                 {images.length > 0 && (
-                  <span style={{ fontSize: 12, color: "#E63946", fontWeight: 600 }}>{images.length}/10</span>
+                  <span style={{ fontSize: 12, color: "var(--brand)", fontWeight: 600 }}>{images.length}/10</span>
                 )}
               </div>
             </div>
@@ -383,7 +383,7 @@ export default function IlanVerPage() {
               <div style={{ padding: "0 1.25rem 1.25rem" }}>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
                   {images.map((url, i) => (
-                    <div key={i} style={{ position: "relative", width: 88, height: 72, borderRadius: 10, overflow: "hidden", border: i === 0 ? "2.5px solid #E63946" : "1px solid #E8E8E5", flexShrink: 0 }}>
+                    <div key={i} style={{ position: "relative", width: 88, height: 72, borderRadius: 10, overflow: "hidden", border: i === 0 ? "2.5px solid var(--brand)" : "1px solid #E8E8E5", flexShrink: 0 }}>
                       <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       {i === 0 && <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(230,57,70,.85)", color: "#fff", fontSize: 8.5, textAlign: "center", padding: "2px 0", fontWeight: 700, letterSpacing: .3 }}>KAPAK</div>}
                       <button onClick={() => setImages(images.filter((_, j) => j !== i))} className="tap-btn"
@@ -392,7 +392,7 @@ export default function IlanVerPage() {
                   ))}
                   {images.length < 10 && (
                     <label style={{ width: 88, height: 72, borderRadius: 10, border: "1.5px dashed #E8E8E5", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 4, color: "#bbb", flexShrink: 0, transition: "all .15s" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E63946"; (e.currentTarget as HTMLElement).style.color = "#E63946"; }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLElement).style.color = "var(--brand)"; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"; (e.currentTarget as HTMLElement).style.color = "#bbb"; }}>
                       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="9" y1="3" x2="9" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><line x1="3" y1="9" x2="15" y2="9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span style={{ fontSize: 10.5 }}>Ekle</span>
@@ -406,7 +406,7 @@ export default function IlanVerPage() {
                 onDrop={e => { e.preventDefault(); e.dataTransfer.files && handleUpload(e.dataTransfer.files); }}
                 onDragOver={e => e.preventDefault()}
                 style={{ margin: "0 1.25rem 1.25rem", border: "2px dashed #E8E8E5", borderRadius: 12, padding: "2rem", textAlign: "center", cursor: "pointer", transition: "all .15s" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E63946"; (e.currentTarget as HTMLElement).style.background = "#fef2f2"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLElement).style.background = "var(--hover-neutral)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
                 <div style={{ fontSize: 36, marginBottom: 8 }}>{uploading ? "⏳" : "📸"}</div>
                 <div style={{ fontSize: 14.5, fontWeight: 600, color: "#444", marginBottom: 3 }}>{uploading ? "Yükleniyor..." : "Fotoğraf seç veya sürükle"}</div>
@@ -423,7 +423,7 @@ export default function IlanVerPage() {
               placeholder={`${selectedCat?.name} ilanınız için kısa bir başlık...`}
               maxLength={80}
               style={{ width: "100%", padding: "12px 14px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 15, outline: "none", fontFamily: "inherit", transition: "border-color .15s" }}
-              onFocus={e => (e.target as HTMLInputElement).style.borderColor = "#E63946"}
+              onFocus={e => (e.target as HTMLInputElement).style.borderColor = "var(--brand)"}
               onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#E8E8E5"}
             />
             <div style={{ textAlign: "right", fontSize: 11.5, color: "#bbb", marginTop: 5 }}>{form.title.length}/80</div>
@@ -447,9 +447,9 @@ export default function IlanVerPage() {
                             onClick={() => setCatValues(v => ({ ...v, [field.key]: v[field.key] === opt ? "" : opt }))}
                             style={{
                               padding: "8px 14px", borderRadius: 9,
-                              border: catValues[field.key] === opt ? "1.5px solid #E63946" : "0.5px solid #E8E8E5",
-                              background: catValues[field.key] === opt ? "#fef2f2" : "#fff",
-                              color: catValues[field.key] === opt ? "#E63946" : "#555",
+                              border: catValues[field.key] === opt ? "1.5px solid var(--brand)" : "0.5px solid #E8E8E5",
+                              background: catValues[field.key] === opt ? "var(--brand-soft)" : "#fff",
+                              color: catValues[field.key] === opt ? "var(--brand)" : "#555",
                               fontSize: 13, fontWeight: catValues[field.key] === opt ? 700 : 400,
                               cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
                             }}>
@@ -466,7 +466,7 @@ export default function IlanVerPage() {
                       />
                     ) : (
                       <div style={{ display: "flex", border: "0.5px solid #E8E8E5", borderRadius: 10, overflow: "hidden", transition: "border-color .15s" }}
-                        onFocusCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "#E63946"}
+                        onFocusCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"}
                         onBlurCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"}>
                         <input type={field.type === "number" ? "number" : "text"}
                           value={catValues[field.key] || ""}
@@ -501,7 +501,7 @@ export default function IlanVerPage() {
                       color: form.city ? "#111" : "#aaa",
                       transition: "border-color .15s",
                     }}
-                    onFocus={e => (e.target as HTMLSelectElement).style.borderColor = "#E63946"}
+                    onFocus={e => (e.target as HTMLSelectElement).style.borderColor = "var(--brand)"}
                     onBlur={e => (e.target as HTMLSelectElement).style.borderColor = "#E8E8E5"}
                   >
                     <option value="">Şehir seçin</option>
@@ -519,7 +519,7 @@ export default function IlanVerPage() {
                 <input value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}
                   placeholder="Kadıköy, Çankaya..."
                   style={{ width: "100%", padding: "11px 14px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, outline: "none", fontFamily: "inherit", transition: "border-color .15s" }}
-                  onFocus={e => (e.target as HTMLInputElement).style.borderColor = "#E63946"}
+                  onFocus={e => (e.target as HTMLInputElement).style.borderColor = "var(--brand)"}
                   onBlur={e => (e.target as HTMLInputElement).style.borderColor = "#E8E8E5"}
                 />
               </div>
@@ -532,7 +532,7 @@ export default function IlanVerPage() {
             <div className="form-2col" style={{ marginBottom: "1rem" }}>
               <div>
                 <div style={{ display: "flex", border: "0.5px solid #E8E8E5", borderRadius: 10, overflow: "hidden", transition: "border-color .15s" }}
-                  onFocusCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "#E63946"}
+                  onFocusCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--brand)"}
                   onBlurCapture={e => (e.currentTarget as HTMLElement).style.borderColor = "#E8E8E5"}>
                   <span style={{ padding: "0 14px", fontSize: 16, fontWeight: 700, color: "#555", background: "#fafaf8", borderRight: "0.5px solid #E8E8E5", display: "flex", alignItems: "center", flexShrink: 0 }}>₺</span>
                   <input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
@@ -546,7 +546,7 @@ export default function IlanVerPage() {
                 <div className="condition-btns">
                   {[{ v: "NEW", l: "Sıfır" }, { v: "LIKE_NEW", l: "Az Kullanıldı" }, { v: "USED", l: "2. El" }].map(({ v, l }) => (
                     <button key={v} type="button" onClick={() => setForm({ ...form, condition: v })}
-                      style={{ flex: 1, padding: "11px 4px", borderRadius: 9, border: form.condition === v ? "1.5px solid #E63946" : "0.5px solid #E8E8E5", background: form.condition === v ? "#fef2f2" : "#fff", color: form.condition === v ? "#E63946" : "#555", fontSize: 12, fontWeight: form.condition === v ? 700 : 400, cursor: "pointer", fontFamily: "inherit", transition: "all .12s" }}>
+                      style={{ flex: 1, padding: "11px 4px", borderRadius: 9, border: form.condition === v ? "1.5px solid var(--brand)" : "0.5px solid #E8E8E5", background: form.condition === v ? "var(--brand-soft)" : "#fff", color: form.condition === v ? "var(--brand)" : "#555", fontSize: 12, fontWeight: form.condition === v ? 700 : 400, cursor: "pointer", fontFamily: "inherit", transition: "all .12s" }}>
                       {l}
                     </button>
                   ))}
@@ -557,7 +557,7 @@ export default function IlanVerPage() {
 
           {/* ── YAYINLA ── */}
           <button onClick={publish} disabled={loading} style={{
-            padding: "16px", background: loading ? "#ccc" : "#E63946",
+            padding: "16px", background: loading ? "#ccc" : "var(--brand)",
             color: "#fff", border: "none", borderRadius: 14,
             fontSize: 16, fontWeight: 800, cursor: loading ? "not-allowed" : "pointer",
             fontFamily: "'Bricolage Grotesque', sans-serif",

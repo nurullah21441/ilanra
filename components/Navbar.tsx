@@ -4,6 +4,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { useRouter, usePathname } from "next/navigation";
 import { getCategoryStyle } from "@/lib/categoryStyles";
+import { UnreadBadge } from "@/lib/messages-ui";
 
 interface User { id: string; name: string; email: string; role: string; }
 interface Category { id: string; name: string; icon: string; slug: string; }
@@ -25,6 +26,7 @@ export default function Navbar() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const catRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,41 @@ export default function Navbar() {
     fetch("/api/auth/me").then(r => r.json()).then(d => { if (d.user) setUser(d.user); }).catch(() => {});
     fetch("/api/categories").then(r => r.json()).then(d => setCategories(d.categories || []));
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadMessages(0);
+      return;
+    }
+
+    function refreshUnread() {
+      fetch("/api/messages/unread-count")
+        .then((r) => r.json())
+        .then((d) => setUnreadMessages(d.count || 0))
+        .catch(() => {});
+    }
+
+    refreshUnread();
+    const interval = setInterval(refreshUnread, 30000);
+    const onUpdate = () => refreshUnread();
+    window.addEventListener("ilanra:messages-updated", onUpdate);
+    window.addEventListener("focus", onUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("ilanra:messages-updated", onUpdate);
+      window.removeEventListener("focus", onUpdate);
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetch("/api/messages/unread-count")
+        .then((r) => r.json())
+        .then((d) => setUnreadMessages(d.count || 0))
+        .catch(() => {});
+    }
+  }, [user, pathname]);
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -113,7 +150,7 @@ export default function Navbar() {
             <button
               onMouseEnter={() => setCatOpen(true)}
               onClick={() => setCatOpen(v => !v)}
-              style={{ display: "flex", alignItems: "center", gap: 6, height: 38, padding: "0 14px", borderRadius: 10, border: catOpen ? "0.5px solid #E63946" : "0.5px solid #E8E8E5", background: catOpen ? "#fef2f2" : "#fff", cursor: "pointer", fontSize: 13.5, color: catOpen ? "#E63946" : "#333", fontFamily: "inherit", fontWeight: 500, transition: "all .15s" }}
+              style={{ display: "flex", alignItems: "center", gap: 6, height: 38, padding: "0 14px", borderRadius: 10, border: catOpen ? "0.5px solid var(--brand)" : "0.5px solid #E8E8E5", background: catOpen ? "var(--brand-soft)" : "#fff", cursor: "pointer", fontSize: 13.5, color: catOpen ? "var(--brand)" : "#333", fontFamily: "inherit", fontWeight: 500, transition: "all .15s" }}
             >
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                 <rect x=".5" y=".5" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
@@ -172,8 +209,8 @@ export default function Navbar() {
                   })}
                 </div>
                 <div style={{ borderTop: "0.5px solid #f0f0ee", marginTop: 10, paddingTop: 10 }}>
-                  <Link href="/ilanlar" onClick={() => setCatOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 10, fontSize: 13.5, color: "#E63946", textDecoration: "none", fontWeight: 600, transition: "background .12s" }}
-                    onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "#fef2f2"}
+                  <Link href="/ilanlar" onClick={() => setCatOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 10, fontSize: 13.5, color: "var(--brand)", textDecoration: "none", fontWeight: 600, transition: "background .12s" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--hover-neutral)"}
                     onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "transparent"}
                   >Tüm ilanları gör →</Link>
                 </div>
@@ -188,7 +225,7 @@ export default function Navbar() {
               <div style={{
                 display: "flex", alignItems: "center", height: 48,
                 background: searchOpen ? "#fff" : "#F7F7F5",
-                border: searchOpen ? "1.5px solid #E63946" : "1.5px solid #E8E8E5",
+                border: searchOpen ? "1.5px solid var(--brand)" : "1.5px solid #E8E8E5",
                 borderRadius: searchOpen ? "14px 14px 0 0" : 14,
                 transition: "all .22s ease", overflow: "hidden", width: "100%",
                 boxShadow: searchOpen
@@ -196,7 +233,7 @@ export default function Navbar() {
                   : "0 2px 10px rgba(0,0,0,0.04)",
               }}>
                 <svg width="17" height="17" viewBox="0 0 15 15" fill="none"
-                  style={{ marginLeft: 16, color: searchOpen ? "#E63946" : "#999", flexShrink: 0, transition: "color .2s" }}>
+                  style={{ marginLeft: 16, color: searchOpen ? "var(--brand)" : "#999", flexShrink: 0, transition: "color .2s" }}>
                   <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
                   <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
@@ -213,7 +250,7 @@ export default function Navbar() {
                 )}
                 <button type="submit" style={{
                   height: 36, marginRight: 6, padding: "0 22px", border: "none", borderRadius: 10,
-                  background: searchVal.trim() || searchOpen ? "linear-gradient(135deg, #E63946, #c1121f)" : "#E4E4E1",
+                  background: searchVal.trim() || searchOpen ? "var(--brand-gradient)" : "#E4E4E1",
                   color: searchVal.trim() || searchOpen ? "#fff" : "#888",
                   fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer",
                   transition: "all .2s ease", flexShrink: 0,
@@ -225,7 +262,7 @@ export default function Navbar() {
             {searchOpen && !searchVal.trim() && (
               <div style={{
                 position: "absolute", top: "100%", left: 0, right: 0,
-                background: "#fff", border: "1.5px solid #E63946", borderTop: "none",
+                background: "#fff", border: "1.5px solid var(--brand)", borderTop: "none",
                 borderRadius: "0 0 14px 14px", padding: "12px 14px 14px",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.1)", zIndex: 300,
               }}>
@@ -234,7 +271,7 @@ export default function Navbar() {
                   {searchHints.map(term => (
                     <button key={term} type="button" onClick={() => { setSearchVal(term); handleSearchChange(term); }}
                       style={{ padding: "7px 12px", borderRadius: 999, border: "0.5px solid #E8E8E5", background: "#FAFAF8", color: "#555", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#E63946"; (e.currentTarget as HTMLButtonElement).style.color = "#E63946"; (e.currentTarget as HTMLButtonElement).style.background = "#fef2f2"; }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--brand)"; (e.currentTarget as HTMLButtonElement).style.background = "var(--hover-neutral)"; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#E8E8E5"; (e.currentTarget as HTMLButtonElement).style.color = "#555"; (e.currentTarget as HTMLButtonElement).style.background = "#FAFAF8"; }}
                     >{term}</button>
                   ))}
@@ -247,14 +284,14 @@ export default function Navbar() {
               <div style={{
                 position: "absolute", top: "100%", left: 0, right: 0,
                 background: "#fff",
-                border: "1.5px solid #E63946", borderTop: "none",
+                border: "1.5px solid var(--brand)", borderTop: "none",
                 borderRadius: "0 0 12px 12px",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.12)",
                 zIndex: 300, overflow: "hidden",
               }}>
                 {searching ? (
                   <div style={{ padding: "16px", textAlign: "center", color: "#aaa", fontSize: 13.5 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #f0f0ee", borderTopColor: "#E63946", animation: "spin .7s linear infinite", margin: "0 auto 8px" }} />
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #f0f0ee", borderTopColor: "var(--brand)", animation: "spin .7s linear infinite", margin: "0 auto 8px" }} />
                     Aranıyor...
                   </div>
                 ) : searchResults.length > 0 ? (
@@ -282,15 +319,15 @@ export default function Navbar() {
                             <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>{r.category.name} · {r.city}</div>
                           </div>
                           {/* Fiyat */}
-                          <div style={{ fontSize: 14, fontWeight: 800, color: "#E63946", flexShrink: 0, fontFamily: "'Bricolage Grotesque', sans-serif" }}>
+                          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--brand)", flexShrink: 0, fontFamily: "'Bricolage Grotesque', sans-serif" }}>
                             ₺{r.price.toLocaleString("tr-TR")}
                           </div>
                         </div>
                       </Link>
                     ))}
                     <Link href={`/ilanlar?q=${encodeURIComponent(searchVal)}`} onClick={() => setSearchOpen(false)} style={{ textDecoration: "none" }}>
-                      <div style={{ padding: "12px 14px", borderTop: "0.5px solid #f0f0ee", fontSize: 13, color: "#E63946", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, cursor: "pointer", transition: "background .12s" }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fef2f2"}
+                      <div style={{ padding: "12px 14px", borderTop: "0.5px solid #f0f0ee", fontSize: 13, color: "var(--brand)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, cursor: "pointer", transition: "background .12s" }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--hover-neutral)"}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
                       >
                         <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5"/><path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
@@ -314,16 +351,21 @@ export default function Navbar() {
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
             {user ? (
               <>
-                <Link href="/ilan-ver" className="d-only" style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 38, padding: "0 16px", borderRadius: 9, background: "#E63946", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none", transition: "background .15s" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "#c1121f"}
-                  onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "#E63946"}
+                <Link href="/ilan-ver" className="d-only" style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 38, padding: "0 16px", borderRadius: 9, background: "var(--brand)", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none", transition: "background .15s" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--brand-dark)"}
+                  onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--brand)"}
                 >
                   <span style={{ fontSize: 16 }}>+</span> İlan ver
                 </Link>
 
+                <Link href="/mesajlar" className="d-only" title="Mesajlar" style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 9, border: "0.5px solid #E8E8E5", background: "#fff", color: "#444", textDecoration: "none" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                  <UnreadBadge count={unreadMessages} />
+                </Link>
+
                 <div ref={menuRef} style={{ position: "relative" }}>
-                  <button onClick={() => setMenuOpen(!menuOpen)} style={{ display: "flex", alignItems: "center", gap: 7, height: 38, padding: "0 10px 0 6px", borderRadius: 100, border: "0.5px solid #E8E8E5", background: "#fff", cursor: "pointer" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg,#E63946,#c1121f)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
+                  <button onClick={() => setMenuOpen(!menuOpen)} style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, height: 38, padding: "0 10px 0 6px", borderRadius: 100, border: "0.5px solid #E8E8E5", background: "#fff", cursor: "pointer" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--brand-gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
                       {user.name[0].toUpperCase()}
                     </div>
                     <span className="d-only" style={{ fontSize: 13.5, color: "#222", fontWeight: 500, maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -340,22 +382,28 @@ export default function Navbar() {
                         <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{user.name}</div>
                         <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>{user.email}</div>
                       </div>
+                      {user.role === "ADMIN" && (
+                        <Link href="/admin" className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", fontSize: 13.5, color: "var(--brand)", fontWeight: 600, textDecoration: "none", background: "var(--brand-soft)" }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                          Kontrol Paneli
+                        </Link>
+                      )}
                       {[
                         { href: "/profil", label: "Profilim", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
                         { href: "/ilanlarim", label: "İlanlarım", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
                         { href: "/mesajlar", label: "Mesajlar", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
                         { href: "/favoriler", label: "Favoriler", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> },
                       ].map(item => (
-                        <Link key={item.href} href={item.href} className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", fontSize: 13.5, color: "#444", textDecoration: "none" }}>
-                          <span style={{ color: "#888" }}>{item.svg}</span>{item.label}
+                        <Link key={item.href} href={item.href} className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", fontSize: 13.5, color: "#444", textDecoration: "none", position: "relative" }}>
+                          <span style={{ color: "#888" }}>{item.svg}</span>
+                          {item.label}
+                          {item.href === "/mesajlar" && unreadMessages > 0 && (
+                            <span style={{ marginLeft: "auto", minWidth: 18, height: 18, borderRadius: 100, background: "var(--brand)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 5px" }}>
+                              {unreadMessages > 99 ? "99+" : unreadMessages}
+                            </span>
+                          )}
                         </Link>
                       ))}
-                      {user.role === "ADMIN" && (
-                        <Link href="/admin" className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", fontSize: 13.5, color: "#E63946", fontWeight: 600, textDecoration: "none", borderTop: "0.5px solid #f0f0ee" }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                          Admin Panel
-                        </Link>
-                      )}
                       <button onClick={logout} className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 16px", fontSize: 13.5, color: "#999", border: "none", background: "transparent", cursor: "pointer", borderTop: "0.5px solid #f0f0ee", fontFamily: "inherit" }}>
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                         Çıkış yap
@@ -369,7 +417,7 @@ export default function Navbar() {
                 <Link href="/giris" className="d-only" style={{ height: 38, padding: "0 14px", display: "inline-flex", alignItems: "center", borderRadius: 9, border: "0.5px solid #E8E8E5", background: "transparent", fontSize: 13.5, color: "#333", textDecoration: "none", fontWeight: 500 }}>
                   Giriş yap
                 </Link>
-                <Link href="/ilan-ver" style={{ height: 38, padding: "0 16px", display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, background: "#E63946", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none" }}>
+                <Link href="/ilan-ver" style={{ height: 38, padding: "0 16px", display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, background: "var(--brand)", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none" }}>
                   <span style={{ fontSize: 16 }}>+</span> İlan ver
                 </Link>
               </>
@@ -390,7 +438,7 @@ export default function Navbar() {
               <div style={{ display: "flex", border: "1px solid #E8E8E5", borderRadius: 14, overflow: "hidden", background: "#F7F7F5", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
                 <input value={searchVal} onChange={e => handleSearchChange(e.target.value)} placeholder="Ne arıyorsun? Araç, daire, telefon..."
                   style={{ flex: 1, padding: "13px 14px", border: "none", background: "transparent", fontSize: 14.5, outline: "none", fontFamily: "inherit" }} />
-                <button type="submit" style={{ padding: "0 20px", border: "none", background: "linear-gradient(135deg, #E63946, #c1121f)", color: "#fff", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>Ara</button>
+                <button type="submit" style={{ padding: "0 20px", border: "none", background: "var(--brand-gradient)", color: "#fff", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>Ara</button>
               </div>
             </form>
             <div className="mobile-cat-grid" style={{ marginBottom: "1rem", paddingBottom: "1rem", borderBottom: "0.5px solid #f0f0ee" }}>
@@ -406,23 +454,28 @@ export default function Navbar() {
                 );
               })}
             </div>
-            <Link href="/ilanlar" onClick={() => setMobileOpen(false)} style={{ display: "block", textAlign: "center", padding: "10px", marginBottom: "1rem", borderRadius: 10, fontSize: 13.5, color: "#E63946", fontWeight: 600, textDecoration: "none", background: "#fef2f2" }}>
+            <Link href="/ilanlar" onClick={() => setMobileOpen(false)} style={{ display: "block", textAlign: "center", padding: "10px", marginBottom: "1rem", borderRadius: 10, fontSize: 13.5, color: "var(--brand)", fontWeight: 600, textDecoration: "none", background: "var(--brand-soft)" }}>
               Tüm ilanları gör →
             </Link>
             {user ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "#E63946", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "var(--brand)", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
                   + İlan ver
                 </Link>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {mobileNavLinks.map(item => (
-                    <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "12px 8px", background: "#f5f5f3", borderRadius: 10, fontSize: 13.5, color: "#333", textDecoration: "none", fontWeight: 500 }}>
+                    <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{ position: "relative", textAlign: "center", padding: "12px 8px", background: "#f5f5f3", borderRadius: 10, fontSize: 13.5, color: "#333", textDecoration: "none", fontWeight: 500 }}>
                       {item.label}
+                      {item.href === "/mesajlar" && unreadMessages > 0 && (
+                        <span style={{ position: "absolute", top: 6, right: 8, minWidth: 16, height: 16, borderRadius: 100, background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
+                          {unreadMessages > 9 ? "9+" : unreadMessages}
+                        </span>
+                      )}
                     </Link>
                   ))}
                 </div>
                 {user.role === "ADMIN" && (
-                  <Link href="/admin" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "11px", borderRadius: 10, fontSize: 13.5, color: "#E63946", fontWeight: 600, textDecoration: "none", border: "0.5px solid #fca5a5", background: "#fef2f2" }}>
+                  <Link href="/admin" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "11px", borderRadius: 10, fontSize: 13.5, color: "var(--brand)", fontWeight: 600, textDecoration: "none", border: "0.5px solid var(--brand-border)", background: "var(--brand-soft)" }}>
                     Admin Panel
                   </Link>
                 )}
@@ -436,7 +489,7 @@ export default function Navbar() {
                   <Link href="/giris" onClick={() => setMobileOpen(false)} style={{ flex: 1, textAlign: "center", padding: "12px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, color: "#333", textDecoration: "none", fontWeight: 500 }}>Giriş yap</Link>
                   <Link href="/kayit" onClick={() => setMobileOpen(false)} style={{ flex: 1, textAlign: "center", padding: "12px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, color: "#333", textDecoration: "none", fontWeight: 500 }}>Kayıt ol</Link>
                 </div>
-                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "#E63946", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "var(--brand)", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
                   + İlan ver
                 </Link>
               </div>

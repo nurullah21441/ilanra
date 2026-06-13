@@ -74,9 +74,9 @@ function IlanlarContent() {
           <button onClick={() => setShowFilters(!showFilters)} style={{
             display: "flex", alignItems: "center", gap: 7,
             padding: "8px 16px", borderRadius: 9,
-            border: showFilters ? "1px solid #e63946" : "0.5px solid #e8e8e5",
-            background: showFilters ? "#fef2f2" : "#fff",
-            color: showFilters ? "#e63946" : "#555",
+            border: showFilters ? "1px solid var(--brand)" : "0.5px solid #e8e8e5",
+            background: showFilters ? "var(--brand-soft)" : "#fff",
+            color: showFilters ? "var(--brand)" : "#555",
             fontSize: 13.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
             transition: "all 0.15s",
           }}>
@@ -84,7 +84,7 @@ function IlanlarContent() {
               <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             Filtrele
-            {hasFilters && <span style={{ background: "#e63946", color: "#fff", borderRadius: "50%", width: 18, height: 18, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>!</span>}
+            {hasFilters && <span style={{ background: "var(--brand)", color: "#fff", borderRadius: "50%", width: 18, height: 18, fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>!</span>}
           </button>
         </div>
 
@@ -137,10 +137,10 @@ function IlanlarContent() {
         {/* AKTİF FİLTRE BADGE'LERİ */}
         {hasFilters && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "1rem" }}>
-            {city && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "#fef2f2", border: "0.5px solid #fca5a5", fontSize: 12.5, color: "#e63946", fontWeight: 500 }}>📍 {city} <button onClick={() => setParam("city", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "#e63946", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
-            {condition && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "#fef2f2", border: "0.5px solid #fca5a5", fontSize: 12.5, color: "#e63946", fontWeight: 500 }}>{conditions.find(c => c.value === condition)?.label} <button onClick={() => setParam("condition", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "#e63946", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
-            {minPrice && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "#fef2f2", border: "0.5px solid #fca5a5", fontSize: 12.5, color: "#e63946", fontWeight: 500 }}>Min ₺{minPrice} <button onClick={() => setParam("minPrice", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "#e63946", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
-            {maxPrice && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "#fef2f2", border: "0.5px solid #fca5a5", fontSize: 12.5, color: "#e63946", fontWeight: 500 }}>Max ₺{maxPrice} <button onClick={() => setParam("maxPrice", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "#e63946", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
+            {city && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "var(--brand-soft)", border: "0.5px solid var(--brand-border)", fontSize: 12.5, color: "var(--brand)", fontWeight: 500 }}>📍 {city} <button onClick={() => setParam("city", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand)", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
+            {condition && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "var(--brand-soft)", border: "0.5px solid var(--brand-border)", fontSize: 12.5, color: "var(--brand)", fontWeight: 500 }}>{conditions.find(c => c.value === condition)?.label} <button onClick={() => setParam("condition", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand)", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
+            {minPrice && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "var(--brand-soft)", border: "0.5px solid var(--brand-border)", fontSize: 12.5, color: "var(--brand)", fontWeight: 500 }}>Min ₺{minPrice} <button onClick={() => setParam("minPrice", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand)", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
+            {maxPrice && <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 100, background: "var(--brand-soft)", border: "0.5px solid var(--brand-border)", fontSize: 12.5, color: "var(--brand)", fontWeight: 500 }}>Max ₺{maxPrice} <button onClick={() => setParam("maxPrice", "")} className="tap-btn" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand)", padding: 4, fontSize: 16, lineHeight: 1, minWidth: 28, minHeight: 28 }}>×</button></span>}
           </div>
         )}
 
@@ -174,7 +174,7 @@ function IlanlarContent() {
                   const p = pages <= 7 ? i + 1 : page <= 4 ? i + 1 : page >= pages - 3 ? pages - 6 + i : page - 3 + i;
                   return (
                     <button key={p} onClick={() => setParam("page", String(p))} className="tap-btn"
-                      style={{ width: 44, height: 44, borderRadius: 9, border: p === page ? "none" : "0.5px solid #e8e8e5", background: p === page ? "#e63946" : "#fff", color: p === page ? "#fff" : "#333", fontSize: 13.5, fontWeight: p === page ? 700 : 400, cursor: "pointer" }}>
+                      style={{ width: 44, height: 44, borderRadius: 9, border: p === page ? "none" : "0.5px solid #e8e8e5", background: p === page ? "var(--brand)" : "#fff", color: p === page ? "#fff" : "#333", fontSize: 13.5, fontWeight: p === page ? 700 : 400, cursor: "pointer" }}>
                       {p}
                     </button>
                   );
@@ -193,7 +193,7 @@ function IlanlarContent() {
             <p style={{ fontSize: 14, color: "#aaa", marginBottom: "1.5rem" }}>
               {q ? `"${q}" için ilan yok.` : "Bu kriterlere uygun ilan bulunamadı."}
             </p>
-            <button onClick={() => router.push("/ilanlar")} style={{ padding: "10px 24px", background: "#e63946", color: "#fff", border: "none", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={() => router.push("/ilanlar")} style={{ padding: "10px 24px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
               Tüm ilanları gör
             </button>
           </div>

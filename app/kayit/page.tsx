@@ -34,7 +34,7 @@ export default function KayitPage() {
         <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 22, fontWeight: 700, marginBottom: "0.5rem" }}>Kayıt ol</h1>
         <p style={{ fontSize: 13.5, color: "#666", marginBottom: "1.75rem" }}>Hemen ücretsiz hesap oluştur.</p>
 
-        {error && <div style={{ background: "#fef2f2", color: "#dc2626", padding: "10px 14px", borderRadius: 8, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid #fecaca" }}>{error}</div>}
+        {error && <div style={{ background: "var(--brand-soft)", color: "#dc2626", padding: "10px 14px", borderRadius: 8, fontSize: 13.5, marginBottom: "1rem", border: "0.5px solid var(--brand-border)" }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {[
@@ -56,14 +56,14 @@ export default function KayitPage() {
             </div>
           ))}
 
-          <button type="submit" disabled={loading} style={{ width: "100%", padding: "12px", background: "#e63946", color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, fontFamily: "inherit", marginTop: 8 }}>
+          <button type="submit" disabled={loading} style={{ width: "100%", padding: "12px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, fontFamily: "inherit", marginTop: 8 }}>
             {loading ? "Kaydediliyor..." : "Kayıt ol"}
           </button>
         </form>
 
         <p style={{ textAlign: "center", fontSize: 13.5, color: "#666", marginTop: "1.5rem" }}>
           Zaten hesabın var mı?{" "}
-          <Link href="/giris" style={{ color: "#e63946", textDecoration: "none", fontWeight: 500 }}>Giriş yap</Link>
+          <Link href="/giris" style={{ color: "var(--brand)", textDecoration: "none", fontWeight: 500 }}>Giriş yap</Link>
         </p>
       </div>
     </div>

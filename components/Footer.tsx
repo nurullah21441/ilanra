@@ -35,7 +35,7 @@ export default function () {
   };
 
   return (
-    <footer style={{ background: "#111", padding: "48px 1.5rem 28px", marginTop: 0 }}>
+    <footer className="site-footer" style={{ background: "var(--surface-dark)", padding: "48px 1.5rem 28px", marginTop: 0 }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
 
         {/* TOP GRID */}
@@ -102,7 +102,7 @@ export default function () {
         {/* BOTTOM */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div style={{ fontSize: 12.5, color: "#444" }}>
-            © 2025 <span style={{ color: "#E63946" }}>ilanra.com</span> — Tüm hakları saklıdır.
+            © 2025 <span className="brand-text">ilanra.com</span> — Tüm hakları saklıdır.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {[

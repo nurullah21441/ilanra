@@ -55,7 +55,7 @@ export default function IletisimPage() {
             </div>
             <div style={{ fontSize: 12.5, color: "#aaa", marginBottom: 8 }}>{card.desc}</div>
             {card.href ? (
-              <a href={card.href} style={{ fontSize: 14.5, fontWeight: 600, color: "#E63946", textDecoration: "none" }}>
+              <a href={card.href} style={{ fontSize: 14.5, fontWeight: 600, color: "var(--brand)", textDecoration: "none" }}>
                 {card.value}
               </a>
             ) : (
@@ -106,11 +106,11 @@ export default function IletisimPage() {
         marginTop: "2rem",
         padding: "1.25rem 1.5rem",
         borderRadius: 14,
-        background: "linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%)",
-        border: "0.5px solid #fecaca",
+        background: "linear-gradient(135deg, var(--brand-soft) 0%, #fff5f5 100%)",
+        border: "0.5px solid var(--brand-border)",
       }}>
         <p style={{ margin: 0, fontSize: 14.5, color: "#555", lineHeight: 1.65 }}>
-          <strong style={{ color: "#E63946" }}>Not:</strong> {SITE_NAME}, kullanıcılar arasındaki
+          <strong style={{ color: "var(--brand)" }}>Not:</strong> {SITE_NAME}, kullanıcılar arasındaki
           alım-satım işlemlerine taraf değildir. Ürün teslimatı, ödeme veya anlaşmazlıklar doğrudan
           alıcı ile satıcı arasında çözülmelidir. Dolandırıcılık şüphesi durumunda derhal bize
           bildirin ve yasal mercilere başvurun.

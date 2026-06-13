@@ -18,7 +18,7 @@ export default function FavorilerPage() {
     <>
       <Navbar />
       <div style={{ maxWidth: 1280, margin: "2rem auto", padding: "0 1.5rem" }}>
-        <h1 style={{ fontFamily: "Syne, sans-serif", fontSize: 22, fontWeight: 700, marginBottom: "1.5rem" }}>Favorilerim</h1>
+        <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 22, fontWeight: 700, marginBottom: "1.5rem" }}>Favorilerim</h1>
         {loading ? <p style={{ color: "#999" }}>Yükleniyor...</p> : favorites.length > 0 ? (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
             {favorites.map((f) => <ListingCard key={f.listing.id} listing={{ ...f.listing, createdAt: String(f.listing.createdAt) }} />)}

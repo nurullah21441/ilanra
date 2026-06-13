@@ -12,7 +12,7 @@ const conditionLabel: Record<string, { text: string; color: string; bg: string }
   NEW:      { text: "Sıfır",         color: "#16a34a", bg: "#f0fdf4" },
   LIKE_NEW: { text: "Az Kullanıldı", color: "#0284c7", bg: "#f0f9ff" },
   USED:     { text: "2. El",         color: "#555",    bg: "#f5f5f3" },
-  DEFECTIVE:{ text: "Hasarlı",       color: "#dc2626", bg: "#fef2f2" },
+  DEFECTIVE:{ text: "Hasarlı",       color: "#dc2626", bg: "var(--brand-soft)" },
 };
 
 function timeAgo(date: string) {
@@ -101,7 +101,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   return (
     <Link href={"/ilan/" + listing.id} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
-      <article className="listing-card" style={{ background: "#fff", border: listing.isFeatured ? "1.5px solid #E63946" : "0.5px solid #E8E8E5", borderRadius: 16, overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
+      <article className="listing-card" style={{ background: "#fff", border: listing.isFeatured ? "1.5px solid var(--brand)" : "0.5px solid #E8E8E5", borderRadius: 16, overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
         <div style={{ position: "relative", height: 185, background: "#f5f5f3", flexShrink: 0, overflow: "hidden" }}>
           {img && !imgError ? (
             <img src={img} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform .4s ease" }} onError={() => setImgError(true)} />
@@ -109,10 +109,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 44, opacity: 0.2 }}>📦</div>
           )}
           <button onClick={toggleFav} className="fav-btn tap-btn" style={{ position: "absolute", top: 8, right: 8, width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(4px)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill={favorited ? "#E63946" : "none"} stroke={favorited ? "#E63946" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={favorited ? "var(--brand)" : "none"} stroke={favorited ? "var(--brand)" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
           </button>
           <div style={{ position: "absolute", top: 10, left: 10, display: "flex", flexDirection: "column", gap: 4 }}>
-            {listing.isFeatured && <span style={{ background: "#E53935", color: "#fff", fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: 100, letterSpacing: .4 }}>ÖNE ÇIKAN</span>}
+            {listing.isFeatured && <span style={{ background: "var(--brand)", color: "#fff", fontSize: 9.5, fontWeight: 800, padding: "3px 9px", borderRadius: 100, letterSpacing: .4 }}>ÖNE ÇIKAN</span>}
             {cond && <span style={{ background: cond.bg, color: cond.color, fontSize: 9.5, fontWeight: 700, padding: "3px 9px", borderRadius: 100 }}>{cond.text}</span>}
           </div>
           {listing.images.length > 1 && (

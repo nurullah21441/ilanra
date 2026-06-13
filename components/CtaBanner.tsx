@@ -20,7 +20,7 @@ export default function CtaBanner() {
         </div>
         <Link href="/ilan-ver" className="cta-btn" style={{
           display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0,
-          padding: "13px 28px", background: "#E63946", color: "#fff",
+          padding: "13px 28px", background: "var(--brand)", color: "#fff",
           borderRadius: 12, textDecoration: "none", fontWeight: 700, fontSize: 15,
           boxShadow: "0 4px 20px rgba(230,57,70,.4)", transition: "background .15s",
         }}
