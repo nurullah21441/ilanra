@@ -91,7 +91,7 @@ export default function HeroCards() {
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "var(--brand)" }}>
+                  <div className="price-text" style={{ fontSize: 18, fontWeight: 800 }}>
                     ₺{((real?.price || demo.price)).toLocaleString("tr-TR")}
                   </div>
                   <div style={{ fontSize: 11.5, color: "#bbb", display: "flex", alignItems: "center", gap: 3 }}>

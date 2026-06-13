@@ -1,5 +1,3 @@
-import { theme } from "@/lib/theme";
-
 interface LogoProps {
   /** Yazı boyutu (px) */
   size?: number;
@@ -22,14 +20,13 @@ export default function Logo({
   className,
 }: LogoProps) {
   const fontSize = resolveSize(size, height);
-  const color = variant === "light" ? "#FFFFFF" : theme.brand;
 
   return (
     <span
       className={`site-logo site-logo--${variant}${className ? ` ${className}` : ""}`}
       role="img"
       aria-label="ilanra"
-      style={{ fontSize, color }}
+      style={{ fontSize }}
     >
       ilanra
     </span>

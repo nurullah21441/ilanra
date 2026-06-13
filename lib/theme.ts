@@ -6,6 +6,7 @@ export const theme = {
   brandMuted: "#FDF3F3",
   brandBorder: "#FECACA",
   ink: "#1A1A1A",
+  price: "#111111",
   inkMuted: "#6B6B6B",
   inkLight: "#999999",
   surface: "#FFFFFF",

@@ -1,118 +1,114 @@
-# ilanra.com 🔴
+# ilanra.com
 
-Türkiye'nin modern ilan platformu — sahibinden.com rakibi.
+Türkiye'nin modern ilan platformu.
 
 ## Tech Stack
 
-- **Frontend + Backend**: Next.js 15 (App Router)
-- **Veritabanı**: PostgreSQL + Prisma ORM
-- **Kimlik Doğrulama**: JWT (httpOnly cookie)
-- **Fotoğraf**: Cloudinary
-- **Deploy**: Vercel
+| Katman | Teknoloji |
+|--------|-----------|
+| Uygulama | Next.js 16 (App Router), React 19 |
+| Sunucu | `server.mjs` (Next.js + Socket.IO) |
+| Veritabanı | PostgreSQL + Prisma |
+| Kimlik doğrulama | JWT (httpOnly cookie) |
+| Fotoğraf | Cloudinary |
+| E-posta | Resend (şifre sıfırlama, e-posta doğrulama) |
+| Mesajlaşma | Socket.IO (gerçek zamanlı) + REST API |
 
-## Kurulum
+## Gereksinimler
 
-### 1. Gereksinimler
 - Node.js 20+
-- PostgreSQL (ya da Docker)
+- PostgreSQL 14+
 
-### 2. PostgreSQL başlat (Docker)
+## Hızlı başlangıç
+
+### 1. PostgreSQL (Docker)
+
 ```bash
 docker run --name ilanra-db -e POSTGRES_USER=ilanra -e POSTGRES_PASSWORD=ilanra123 -e POSTGRES_DB=ilanra -p 5432:5432 -d postgres
 ```
 
-### 3. .env dosyasını düzenle
+### 2. Ortam değişkenleri
+
 ```bash
 cp .env.example .env
-# .env dosyasını aç ve DATABASE_URL, JWT_SECRET, Cloudinary bilgilerini gir
 ```
 
-### 4. Bağımlılıkları yükle
+`.env` içinde en az `DATABASE_URL` ve `JWT_SECRET` doldurun. Fotoğraf yüklemek için Cloudinary, e-posta için Resend anahtarı gerekir (opsiyonel — dev modda linkler konsola yazılır).
+
+### 3. Kurulum
+
 ```bash
 npm install
-```
-
-### 5. Veritabanı schema oluştur
-```bash
-npx prisma db push
-```
-
-### 6. Seed (kategoriler + admin hesabı)
-```bash
-npx ts-node --compiler-options '{"module":"CommonJS"}' lib/seed.ts
-```
-
-Admin giriş bilgileri:
-- E-posta: `admin@ilanra.com`
-- Şifre: `admin123`
-
-### 7. Geliştirme sunucusu
-```bash
+npm run db:push
+npx prisma generate
+npm run seed
 npm run dev
 ```
 
-http://localhost:3000 adresinden aç.
+Tarayıcı: http://localhost:3000
 
-## Admin Panel
+Terminalde `Socket.IO aktif` görünmeli.
 
-`/admin` adresine gidince admin giriş gerektirir.
+### Admin hesabı (seed)
 
-**Admin yetenekleri:**
-- Tüm ilanları görme, silme, aktif/pasif yapma
-- **Öne Çıkar butonu** ile ilanı vitrine alma
-- Kullanıcıları yönetme
-- İstatistikleri görme
+| Alan | Değer |
+|------|-------|
+| E-posta | `admin@ilanra.com` |
+| Şifre | `admin123` |
 
-## Sayfalar
+## NPM komutları
+
+| Komut | Açıklama |
+|-------|----------|
+| `npm run dev` | Geliştirme sunucusu (Socket.IO dahil) |
+| `npm run build` | Production build (Webpack) |
+| `npm run start` | Production sunucu |
+| `npm run seed` | Kategoriler + alt kategoriler + admin |
+| `npm run db:push` | Prisma şemasını veritabanına uygula |
+| `npm run db:studio` | Prisma Studio |
+
+## Önemli sayfalar
 
 | Sayfa | Açıklama |
 |-------|----------|
 | `/` | Ana sayfa |
-| `/ilanlar` | Tüm ilanlar + filtreleme |
-| `/ilan/[id]` | İlan detay |
-| `/ilan-ver` | İlan oluştur |
-| `/giris` | Giriş |
-| `/kayit` | Kayıt |
-| `/profil` | Kullanıcı profili |
-| `/admin` | Admin paneli |
-| `/mesajlar` | Mesajlaşma |
-| `/favoriler` | Favori ilanlar |
+| `/ilanlar` | Arama, filtre, sıralama, kayıtlı arama |
+| `/kategori/[slug]` | Kategori hub + alt kategoriler |
+| `/ilan/[id]` | İlan detay, favori, şikayet |
+| `/satici/[id]` | Satıcı profili |
+| `/ilan-ver` | İlan oluştur (kategori özellikleri) |
+| `/mesajlar` | Gerçek zamanlı mesajlaşma |
+| `/profil` | Hesap, doğrulama, kayıtlı aramalar |
+| `/admin` | Yönetim paneli (ilanlar, şikayetler, kullanıcılar) |
+| `/eposta-dogrula` | E-posta doğrulama linki |
 
-## API Endpoints
+## Özellikler
 
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| POST | `/api/auth/register` | Kayıt |
-| POST | `/api/auth/login` | Giriş |
-| POST | `/api/auth/logout` | Çıkış |
-| GET | `/api/auth/me` | Mevcut kullanıcı |
-| GET | `/api/listings` | İlan listesi (filtreleme destekler) |
-| POST | `/api/listings` | İlan oluştur |
-| GET | `/api/listings/[id]` | İlan detay |
-| PATCH | `/api/listings/[id]` | İlan güncelle |
-| DELETE | `/api/listings/[id]` | İlan sil |
-| GET | `/api/categories` | Kategoriler |
-| POST | `/api/upload` | Fotoğraf yükle |
-| GET | `/api/favorites` | Favoriler |
-| POST | `/api/favorites` | Favori ekle/çıkar |
-| GET | `/api/messages` | Mesajlar |
-| POST | `/api/messages` | Mesaj gönder |
-| GET | `/api/admin/stats` | Admin istatistikleri |
-| GET | `/api/admin/listings` | Admin ilan listesi |
-| PATCH | `/api/admin/listings/[id]` | **Öne çıkar / durum değiştir** |
-| DELETE | `/api/admin/listings/[id]` | İlan sil |
-| GET | `/api/admin/users` | Kullanıcı listesi |
+- **Auth:** Kayıt, giriş, şifre sıfırlama, e-posta doğrulama
+- **Gizlilik:** Telefon varsayılan gizli; mesaj öncelikli iletişim
+- **İlanlar:** Yapılandırılmış `attributes`, benzer ilanlar, favoriler
+- **Moderasyon:** İlan şikayeti + admin inceleme kuyruğu
+- **Arama:** Kayıtlı aramalar, ilçe filtresi, sıralama
+- **Kategoriler:** Parent + alt kategori seed (50+ alt kategori)
 
-## Vercel Deploy
+## Build notu (Windows)
+
+Proje yolu Türkçe karakter içeriyorsa (`Masaüstü` vb.) Turbopack build hatası verebilir. Bu yüzden production build `--webpack` ile çalışır. Mümkünse projeyi ASCII yollu bir dizine taşıyın (ör. `C:\dev\ilanra`).
+
+## Deploy
+
+Production:
 
 ```bash
-npm install -g vercel
-vercel --prod
+npm run build
+set NODE_ENV=production
+npm run start
 ```
 
-Vercel'de şu environment variables ekle:
-- `DATABASE_URL`
-- `JWT_SECRET`
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
+Vercel'de Socket.IO custom server desteklenmez; tam mesajlaşma için Node sunucusu (Railway, Render, VPS) önerilir. Vercel'de polling ile mesajlar yine çalışır.
+
+Gerekli environment variables: `.env.example` dosyasına bakın.
+
+## Legacy klasörler
+
+`backend/` ve `frontend/` eski Express + statik HTML sürümüdür. Aktif uygulama kök dizindeki Next.js projesidir; yeni geliştirmeler burada yapılır.

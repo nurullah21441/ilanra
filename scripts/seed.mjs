@@ -1,36 +1,33 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { PARENT_CATEGORIES, SUBCATEGORIES } from "./category-data.mjs";
 
 const prisma = new PrismaClient();
 
-const categories = [
-  { name: "Araçlar", slug: "araclar", icon: "🚗" },
-  { name: "Emlak", slug: "emlak", icon: "🏠" },
-  { name: "Elektronik", slug: "elektronik", icon: "📱" },
-  { name: "Giyim", slug: "giyim", icon: "👗" },
-  { name: "Ev & Yaşam", slug: "ev-yasam", icon: "🛋️" },
-  { name: "Oyun & Hobi", slug: "oyun-hobi", icon: "🎮" },
-  { name: "Bisiklet", slug: "bisiklet", icon: "🚲" },
-  { name: "Kitap & Müzik", slug: "kitap-muzik", icon: "📚" },
-  { name: "Spor", slug: "spor", icon: "⚽" },
-  { name: "Özel Ders", slug: "ozel-ders", icon: "📖" },
-  { name: "İş İlanları", slug: "is-ilanlari", icon: "💼" },
-  { name: "Tarım & Bahçe", slug: "tarim-bahce", icon: "🌱" },
-  { name: "Kozmetik & Bakım", slug: "kozmetik", icon: "💄" },
-  { name: "Yiyecek & İçecek", slug: "yiyecek", icon: "🍕" },
-  { name: "Hizmetler", slug: "hizmetler", icon: "🔧" },
-  { name: "Nakliyat", slug: "nakliyat", icon: "🚚" },
-  { name: "Diğer", slug: "diger", icon: "📦" },
-];
-
-for (const cat of categories) {
-  await prisma.category.upsert({
+for (const cat of PARENT_CATEGORIES) {
+  const parent = await prisma.category.upsert({
     where: { slug: cat.slug },
-    update: { name: cat.name, icon: cat.icon },
-    create: cat,
+    update: { name: cat.name, icon: cat.icon, parentId: null },
+    create: { name: cat.name, slug: cat.slug, icon: cat.icon },
   });
+
+  const children = SUBCATEGORIES[cat.slug];
+  if (!children) continue;
+
+  for (const child of children) {
+    await prisma.category.upsert({
+      where: { slug: child.slug },
+      update: { name: child.name, icon: cat.icon, parentId: parent.id },
+      create: {
+        name: child.name,
+        slug: child.slug,
+        icon: cat.icon,
+        parentId: parent.id,
+      },
+    });
+  }
 }
-console.log("✅ Kategoriler güncellendi");
+console.log("✅ Kategoriler ve alt kategoriler güncellendi");
 
 const adminPassword = await bcrypt.hash("admin123", 12);
 await prisma.user.upsert({

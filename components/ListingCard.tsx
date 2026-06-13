@@ -1,13 +1,16 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginPath } from "@/lib/auth-url";
 import FavoriteButton from "@/components/FavoriteButton";
+import { attributesToSpecs, type ListingAttributes } from "@/lib/listing-attributes";
 
 interface Listing {
   id: string; title: string; price: number; city: string; district?: string | null;
   isFeatured: boolean; createdAt: string; condition?: string; description?: string;
+  attributes?: ListingAttributes | null;
   images: { url: string }[]; category: { name: string; slug: string };
 }
 
@@ -95,7 +98,12 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
   const img = listing.images[0]?.url;
   const formatted = new Intl.NumberFormat("tr-TR").format(listing.price);
   const cond = listing.condition ? conditionLabel[listing.condition] : null;
-  const specs = listing.description ? parseSpecs(listing.description) : {};
+  const attrs = listing.attributes ?? null;
+  const specs = attrs
+    ? attributesToSpecs(listing.category.slug, attrs)
+    : listing.description
+      ? parseSpecs(listing.description)
+      : {};
   const badges = getBadges(listing.category.slug, specs);
   const isCompact = variant === "compact";
 
@@ -128,7 +136,7 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
   const pad = isCompact ? "10px 11px 11px" : "12px 14px 14px";
 
   return (
-    <Link href={"/ilan/" + listing.id} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
+    <Link href={"/ilan/" + listing.id} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%", minWidth: 0 }}>
       <article
         className={cardClass}
         style={{
@@ -145,7 +153,14 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
       >
         <div style={{ position: "relative", height: imgH, background: "#f5f5f3", flexShrink: 0, overflow: "hidden" }}>
           {img && !imgError ? (
-            <img src={img} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImgError(true)} />
+            <Image
+              src={img}
+              alt={listing.title}
+              fill
+              sizes={isCompact ? "220px" : "280px"}
+              style={{ objectFit: "cover" }}
+              onError={() => setImgError(true)}
+            />
           ) : (
             <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: isCompact ? 32 : 44, opacity: 0.2 }}>📦</div>
           )}

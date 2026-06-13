@@ -12,7 +12,8 @@ model User {
   name          String
   email         String    @unique
   password      String
-  phone         String?
+  phone               String?
+  showPhoneOnListings Boolean   @default(false)
   avatar        String?
   role          Role      @default(USER)
   isVerified    Boolean   @default(false)
@@ -22,6 +23,28 @@ model User {
   sentMessages     Message[] @relation("sender")
   receivedMessages Message[] @relation("receiver")
   favorites     Favorite[]
+  resetTokens   PasswordResetToken[]
+  verifyTokens  EmailVerificationToken[]
+  reports       ListingReport[]
+  savedSearches SavedSearch[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 enum Role {
@@ -53,6 +76,7 @@ model Listing {
   views       Int           @default(0)
   city        String
   district    String?
+  attributes  Json?
   images      ListingImage[]
   categoryId  String
   category    Category      @relation(fields: [categoryId], references: [id])
@@ -60,6 +84,7 @@ model Listing {
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   favorites   Favorite[]
   messages    Message[]
+  reports     ListingReport[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -106,4 +131,32 @@ model Favorite {
   listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   @@unique([userId, listingId])
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+model ListingReport {
+  id         String       @id @default(cuid())
+  listingId  String
+  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  details    String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  @@unique([listingId, reporterId])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
+  filters   Json
+  createdAt DateTime @default(now())
 }

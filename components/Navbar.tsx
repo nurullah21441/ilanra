@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { getCategoryStyle } from "@/lib/categoryStyles";
 import { UnreadBadge } from "@/lib/messages-ui";
 import { loginPath } from "@/lib/auth-url";
@@ -15,6 +15,7 @@ interface SearchResult {
 }
 
 const searchHints = ["iPhone 15", "Kiralık daire", "Clio", "PlayStation 5", "MacBook"];
+const QUICK_CAT_SLUGS = ["emlak", "araclar", "elektronik", "giyim", "ev-yasam", "oyun-hobi", "is-ilanlari", "hizmetler"];
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
@@ -31,9 +32,14 @@ export default function Navbar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const catRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLAnchorElement>(null);
+  const oyunHobiCatRef = useRef<HTMLAnchorElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [searchWidth, setSearchWidth] = useState<number | null>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeCategorySlug = searchParams.get("category");
 
   useEffect(() => {
     fetch("/api/auth/me").then(r => r.json()).then(d => { if (d.user) setUser(d.user); }).catch(() => {});
@@ -106,6 +112,40 @@ export default function Navbar() {
     { href: "/favoriler", label: "Favoriler" },
   ];
 
+  const quickCategories = QUICK_CAT_SLUGS
+    .map((slug) => categories.find((c) => c.slug === slug))
+    .filter((c): c is Category => Boolean(c));
+
+  const mobileCategories = [
+    ...quickCategories,
+    ...categories.filter((c) => !QUICK_CAT_SLUGS.includes(c.slug)),
+  ];
+
+  useEffect(() => {
+    function syncSearchWidth() {
+      if (window.innerWidth < 769) {
+        setSearchWidth(null);
+        return;
+      }
+      const logo = logoRef.current;
+      const cat = oyunHobiCatRef.current;
+      if (!logo || !cat) return;
+      const next = Math.round(cat.getBoundingClientRect().right - logo.getBoundingClientRect().right - 16);
+      if (next > 160) setSearchWidth(next);
+    }
+
+    syncSearchWidth();
+    const ro = new ResizeObserver(syncSearchWidth);
+    if (catRef.current) ro.observe(catRef.current);
+    if (logoRef.current) ro.observe(logoRef.current);
+    window.addEventListener("resize", syncSearchWidth);
+    requestAnimationFrame(syncSearchWidth);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", syncSearchWidth);
+    };
+  }, [quickCategories.length, categories.length]);
+
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null); router.push("/"); router.refresh();
@@ -132,281 +172,203 @@ export default function Navbar() {
     router.push(`/ilanlar?q=${encodeURIComponent(searchVal.trim())}`);
   }
 
+  const categoryMegaMenu = catOpen && (
+    <div
+      onMouseLeave={() => setCatOpen(false)}
+      style={{
+        position: "absolute",
+        top: "calc(100% + 2px)",
+        left: "auto",
+        right: "1.25rem",
+        background: "#fff",
+        border: "1px solid var(--border)",
+        borderRadius: 8,
+        width: 440,
+        maxHeight: "min(70vh, 520px)",
+        overflowY: "auto",
+        boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
+        padding: "16px",
+        zIndex: 200,
+        animation: "dropDown .18s cubic-bezier(.4,0,.2,1)",
+      }}
+    >
+      <div style={{ fontSize: 11, color: "#aaa", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 12 }}>Tüm Kategoriler</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+        {categories.map((cat) => {
+          const c = getCategoryStyle(cat.slug, 20);
+          return (
+            <Link key={cat.id} href={`/kategori/${cat.slug}`} onClick={() => setCatOpen(false)} style={{ textDecoration: "none" }}>
+              <div className="cat-hover-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px", borderRadius: 8, transition: "background .12s" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = c.bg; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              >
+                <div className="cat-hover-icon" style={{
+                  width: 36, height: 36, borderRadius: 8,
+                  background: c.gradient, color: c.color,
+                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                }}>
+                  {c.iconNode}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#222" }}>{cat.name}</span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+      <div style={{ borderTop: "1px solid #f0f0ee", marginTop: 8, paddingTop: 8 }}>
+        <Link href="/ilanlar" onClick={() => setCatOpen(false)} style={{ display: "block", textAlign: "center", padding: "8px", fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>
+          Tüm ilanları gör →
+        </Link>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <nav style={{
-        background: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)",
-        borderBottom: "0.5px solid #E8E8E5", position: "sticky", top: 0, zIndex: 100,
-        boxShadow: scrolled ? "0 1px 20px rgba(0,0,0,0.07)" : "none", transition: "box-shadow .25s",
-      }}>
-        <div className="nav-inner nav-inner-mobile" style={{ maxWidth: 1320, margin: "0 auto", padding: "0 1.5rem", height: 68, display: "flex", alignItems: "center", gap: 14 }}>
-
-          {/* LOGO */}
-          <Link href="/" style={{ textDecoration: "none", flexShrink: 0, display: "flex", alignItems: "center" }}>
-            <Logo size={27} />
+      <header className={`site-navbar${scrolled ? " site-navbar--scrolled" : ""}`}>
+        {/* ÜST SATIR: logo + arama + aksiyonlar */}
+        <div className="navbar-top">
+          <Link href="/" className="navbar-logo" ref={logoRef}>
+            <Logo size={32} />
           </Link>
 
-          {/* KATEGORİLER DROPDOWN */}
-          <div ref={catRef} style={{ position: "relative", flexShrink: 0 }} className="d-only">
-            <button
-              onMouseEnter={() => setCatOpen(true)}
-              onClick={() => setCatOpen(v => !v)}
-              style={{ display: "flex", alignItems: "center", gap: 6, height: 38, padding: "0 14px", borderRadius: 10, border: catOpen ? "0.5px solid var(--brand)" : "0.5px solid #E8E8E5", background: catOpen ? "var(--brand-soft)" : "#fff", cursor: "pointer", fontSize: 13.5, color: catOpen ? "var(--brand)" : "#333", fontFamily: "inherit", fontWeight: 500, transition: "all .15s" }}
-            >
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <rect x=".5" y=".5" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
-                <rect x="7.5" y=".5" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
-                <rect x=".5" y="7.5" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
-                <rect x="7.5" y="7.5" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
-              </svg>
-              Kategoriler
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transition: "transform .2s", transform: catOpen ? "rotate(180deg)" : "none", color: "#aaa" }}>
-                <path d="M1.5 3.5L5 7L8.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-
-            {catOpen && (
-              <div onMouseLeave={() => setCatOpen(false)} style={{
-                position: "absolute", top: "calc(100% + 10px)", left: 0,
-                background: "#fff", border: "0.5px solid #E8E8E5",
-                borderRadius: 18, width: 440, maxHeight: "min(70vh, 520px)", overflowY: "auto",
-                boxShadow: "0 24px 64px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.02)",
-                padding: "18px", zIndex: 200,
-                animation: "dropDown .18s cubic-bezier(.4,0,.2,1)",
-              }}>
-                <div style={{ fontSize: 11, color: "#bbb", fontWeight: 700, letterSpacing: .6, textTransform: "uppercase", marginBottom: 14, paddingLeft: 4 }}>Tüm Kategoriler</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {categories.map(cat => {
-                    const c = getCategoryStyle(cat.slug, 20);
-                    return (
-                      <Link key={cat.id} href={`/ilanlar?category=${cat.slug}`} onClick={() => setCatOpen(false)} style={{ textDecoration: "none" }}>
-                        <div className="cat-hover-item" style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 12px", borderRadius: 13, border: "0.5px solid transparent", transition: "all .18s ease", cursor: "pointer" }}
-                          onMouseEnter={e => {
-                            const el = e.currentTarget as HTMLElement;
-                            el.style.background = c.bg;
-                            el.style.borderColor = `${c.color}22`;
-                            el.style.transform = "translateY(-1px)";
-                          }}
-                          onMouseLeave={e => {
-                            const el = e.currentTarget as HTMLElement;
-                            el.style.background = "transparent";
-                            el.style.borderColor = "transparent";
-                            el.style.transform = "none";
-                          }}
-                        >
-                          <div className="cat-hover-icon" style={{
-                            width: 40, height: 40, borderRadius: 12,
-                            background: c.gradient, color: c.color,
-                            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                            boxShadow: `inset 0 0 0 1px ${c.color}18`,
-                            transition: "transform .18s ease, box-shadow .18s ease",
-                          }}>
-                            {c.iconNode}
-                          </div>
-                          <span style={{ fontSize: 13.5, fontWeight: 600, color: "#222", lineHeight: 1.25 }}>{cat.name}</span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-                <div style={{ borderTop: "0.5px solid #f0f0ee", marginTop: 10, paddingTop: 10 }}>
-                  <Link href="/ilanlar" onClick={() => setCatOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 10, fontSize: 13.5, color: "var(--brand)", textDecoration: "none", fontWeight: 600, transition: "background .12s" }}
-                    onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--hover-neutral)"}
-                    onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "transparent"}
-                  >Tüm ilanları gör →</Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* AKILLI ARAMA */}
-          <div className="nav-search-wrap d-only">
-            <div ref={searchRef} style={{ width: "100%", position: "relative" }}>
+          <div
+            className="navbar-search-wrap"
+            ref={searchRef}
+            style={searchWidth ? { width: searchWidth, maxWidth: searchWidth } : undefined}
+          >
+            <div className={`navbar-search-box${searchOpen ? " navbar-search-box--open" : ""}`}>
             <form onSubmit={handleSearchSubmit}>
-              <div style={{
-                display: "flex", alignItems: "center", height: 48,
-                background: searchOpen ? "#fff" : "#F7F7F5",
-                border: searchOpen ? "1.5px solid var(--brand)" : "1.5px solid #E8E8E5",
-                borderRadius: searchOpen ? "14px 14px 0 0" : 14,
-                transition: "all .22s ease", overflow: "hidden", width: "100%",
-                boxShadow: searchOpen
-                  ? "0 0 0 4px rgba(230,57,70,.08), 0 8px 24px rgba(0,0,0,0.06)"
-                  : "0 2px 10px rgba(0,0,0,0.04)",
-              }}>
-                <svg width="17" height="17" viewBox="0 0 15 15" fill="none"
-                  style={{ marginLeft: 16, color: searchOpen ? "var(--brand)" : "#999", flexShrink: 0, transition: "color .2s" }}>
+              <div className={`navbar-search-form${searchOpen ? " navbar-search-form--open" : ""}`}>
+                <svg width="16" height="16" viewBox="0 0 15 15" fill="none" style={{ marginLeft: 12, color: searchOpen ? "var(--brand)" : "#999", flexShrink: 0 }}>
                   <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
                   <path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
                 <input
+                  className="navbar-search-input"
                   value={searchVal}
-                  onChange={e => handleSearchChange(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   onFocus={() => setSearchOpen(true)}
-                  placeholder="Ne arıyorsun? Araç, daire, telefon, bisiklet..."
-                  style={{ flex: 1, padding: "0 12px", height: "100%", border: "none", background: "transparent", fontSize: 14.5, outline: "none", fontFamily: "inherit", color: "#111", minWidth: 0 }}
+                  placeholder="Ne arıyorsun? Araç, emlak, telefon..."
                 />
                 {searchVal && (
                   <button type="button" onClick={() => { setSearchVal(""); setSearchResults([]); setSearchOpen(false); }}
-                    style={{ background: "#eee", border: "none", cursor: "pointer", width: 24, height: 24, borderRadius: "50%", color: "#888", fontSize: 16, lineHeight: 1, flexShrink: 0, marginRight: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "#999", fontSize: 18, padding: "0 8px", lineHeight: 1 }}>×</button>
                 )}
-                <button type="submit" style={{
-                  height: 36, marginRight: 6, padding: "0 22px", border: "none", borderRadius: 10,
-                  background: searchVal.trim() || searchOpen ? "var(--brand-gradient)" : "#E4E4E1",
-                  color: searchVal.trim() || searchOpen ? "#fff" : "#888",
-                  fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer",
-                  transition: "all .2s ease", flexShrink: 0,
-                  boxShadow: searchVal.trim() || searchOpen ? "0 4px 12px rgba(230,57,70,.25)" : "none",
-                }}>Ara</button>
+                <button type="submit" className={`navbar-search-btn${searchVal.trim() || searchOpen ? "" : " navbar-search-btn--muted"}`}>Ara</button>
               </div>
             </form>
 
             {searchOpen && !searchVal.trim() && (
-              <div style={{
-                position: "absolute", top: "100%", left: 0, right: 0,
-                background: "#fff", border: "1.5px solid var(--brand)", borderTop: "none",
-                borderRadius: "0 0 14px 14px", padding: "12px 14px 14px",
-                boxShadow: "0 16px 40px rgba(0,0,0,0.1)", zIndex: 300,
-              }}>
-                <div style={{ fontSize: 11, color: "#aaa", fontWeight: 700, letterSpacing: .5, textTransform: "uppercase", marginBottom: 10 }}>Popüler aramalar</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {searchHints.map(term => (
+              <div className="navbar-search-panel" style={{ padding: "12px 14px" }}>
+                <div style={{ fontSize: 11, color: "#aaa", fontWeight: 700, letterSpacing: 0.4, textTransform: "uppercase", marginBottom: 8 }}>Popüler aramalar</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {searchHints.map((term) => (
                     <button key={term} type="button" onClick={() => { setSearchVal(term); handleSearchChange(term); }}
-                      style={{ padding: "7px 12px", borderRadius: 999, border: "0.5px solid #E8E8E5", background: "#FAFAF8", color: "#555", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--brand)"; (e.currentTarget as HTMLButtonElement).style.background = "var(--hover-neutral)"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#E8E8E5"; (e.currentTarget as HTMLButtonElement).style.color = "#555"; (e.currentTarget as HTMLButtonElement).style.background = "#FAFAF8"; }}
+                      style={{ padding: "6px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "#fafaf8", color: "#555", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
                     >{term}</button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ARAMA SONUÇLARI */}
             {searchOpen && searchVal.trim() && (
-              <div style={{
-                position: "absolute", top: "100%", left: 0, right: 0,
-                background: "#fff",
-                border: "1.5px solid var(--brand)", borderTop: "none",
-                borderRadius: "0 0 12px 12px",
-                boxShadow: "0 16px 40px rgba(0,0,0,0.12)",
-                zIndex: 300, overflow: "hidden",
-              }}>
+              <div className="navbar-search-panel">
                 {searching ? (
-                  <div style={{ padding: "16px", textAlign: "center", color: "#aaa", fontSize: 13.5 }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", border: "2px solid #f0f0ee", borderTopColor: "var(--brand)", animation: "spin .7s linear infinite", margin: "0 auto 8px" }} />
+                  <div style={{ padding: 16, textAlign: "center", color: "#aaa", fontSize: 13 }}>
+                    <div style={{ width: 18, height: 18, borderRadius: "50%", border: "2px solid #f0f0ee", borderTopColor: "var(--brand)", animation: "spin .7s linear infinite", margin: "0 auto 6px" }} />
                     Aranıyor...
                   </div>
                 ) : searchResults.length > 0 ? (
                   <>
-                    <div style={{ padding: "8px 12px 4px", fontSize: 11, color: "#bbb", fontWeight: 600, letterSpacing: .4, textTransform: "uppercase" }}>
-                      Sonuçlar
-                    </div>
-                    {searchResults.map(r => (
+                    {searchResults.map((r) => (
                       <Link key={r.id} href={`/ilan/${r.id}`} onClick={() => { setSearchOpen(false); setSearchVal(""); }} style={{ textDecoration: "none" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", transition: "background .12s", cursor: "pointer" }}
-                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fafaf8"}
-                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", transition: "background .12s" }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#fafaf8"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                         >
-                          {/* Thumbnail */}
-                          <div style={{ width: 44, height: 36, borderRadius: 8, overflow: "hidden", background: "#f5f5f3", flexShrink: 0 }}>
+                          <div style={{ width: 40, height: 32, borderRadius: 4, overflow: "hidden", background: "#f5f5f3", flexShrink: 0 }}>
                             {r.images[0] ? (
                               <img src={r.images[0].url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             ) : (
-                              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📦</div>
+                              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>📦</div>
                             )}
                           </div>
-                          {/* Bilgi */}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.title}</div>
-                            <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>{r.category.name} · {r.city}</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "#111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.title}</div>
+                            <div style={{ fontSize: 11.5, color: "#999", marginTop: 1 }}>{r.category.name} · {r.city}</div>
                           </div>
-                          {/* Fiyat */}
-                          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--brand)", flexShrink: 0, fontFamily: "'Bricolage Grotesque', sans-serif" }}>
+                          <div className="price-text" style={{ fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
                             ₺{r.price.toLocaleString("tr-TR")}
                           </div>
                         </div>
                       </Link>
                     ))}
                     <Link href={`/ilanlar?q=${encodeURIComponent(searchVal)}`} onClick={() => setSearchOpen(false)} style={{ textDecoration: "none" }}>
-                      <div style={{ padding: "12px 14px", borderTop: "0.5px solid #f0f0ee", fontSize: 13, color: "var(--brand)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, cursor: "pointer", transition: "background .12s" }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--hover-neutral)"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-                      >
-                        <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5"/><path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                        &quot;{searchVal}&quot; için tüm sonuçları gör →
+                      <div style={{ padding: "10px 12px", borderTop: "1px solid #f0f0ee", fontSize: 12.5, color: "var(--brand)", fontWeight: 600 }}>
+                        &quot;{searchVal}&quot; için tüm sonuçlar →
                       </div>
                     </Link>
                   </>
-                ) : searchVal && !searching ? (
-                  <div style={{ padding: "20px", textAlign: "center", color: "#aaa" }}>
-                    <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
-                    <div style={{ fontSize: 13.5, fontWeight: 600, color: "#444", marginBottom: 4 }}>Sonuç bulunamadı</div>
-                    <div style={{ fontSize: 12.5 }}>&quot;{searchVal}&quot; için ilan yok</div>
-                  </div>
-                ) : null}
+                ) : (
+                  <div style={{ padding: 16, textAlign: "center", color: "#aaa", fontSize: 13 }}>Sonuç bulunamadı</div>
+                )}
               </div>
             )}
             </div>
           </div>
 
-          {/* SAĞ */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+          <div className="navbar-actions">
+            <Link href={user ? "/ilan-ver" : loginPath("/ilan-ver")} className="navbar-btn-primary m-only" style={{ height: 34, padding: "0 10px", fontSize: 12 }}>+ İlan</Link>
             {user ? (
               <>
-                <Link href="/ilan-ver" className="d-only" style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 38, padding: "0 16px", borderRadius: 9, background: "var(--brand)", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none", transition: "background .15s" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--brand-dark)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--brand)"}
-                >
-                  <span style={{ fontSize: 16 }}>+</span> İlan ver
-                </Link>
-
-                <Link href="/mesajlar" className="d-only" title="Mesajlar" style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 9, border: "0.5px solid #E8E8E5", background: "#fff", color: "#444", textDecoration: "none" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                <Link href="/ilan-ver" className="navbar-btn-primary d-only">+ İlan ver</Link>
+                <Link href="/mesajlar" className="navbar-icon-btn d-only" title="Mesajlar">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                   <UnreadBadge count={unreadMessages} />
                 </Link>
-
                 <div ref={menuRef} style={{ position: "relative" }}>
-                  <button onClick={() => setMenuOpen(!menuOpen)} style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, height: 38, padding: "0 10px 0 6px", borderRadius: 100, border: "0.5px solid #E8E8E5", background: "#fff", cursor: "pointer" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--brand-gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
+                  <button type="button" onClick={() => setMenuOpen(!menuOpen)} className="d-only" style={{
+                    display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 8px 0 4px",
+                    borderRadius: 4, border: "1px solid var(--border)", background: "#fff", cursor: "pointer", fontFamily: "inherit",
+                  }}>
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--brand-gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, fontWeight: 700 }}>
                       {user.name[0].toUpperCase()}
                     </div>
-                    <span className="d-only" style={{ fontSize: 13.5, color: "#222", fontWeight: 500, maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span style={{ fontSize: 13, color: "#222", fontWeight: 500, maxWidth: 72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {user.name.split(" ")[0]}
                     </span>
-                    <svg className="d-only" width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transition: "transform .2s", transform: menuOpen ? "rotate(180deg)" : "none", color: "#aaa" }}>
-                      <path d="M1.5 3.5L5 7L8.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ color: "#aaa", transform: menuOpen ? "rotate(180deg)" : "none", transition: "transform .2s" }}>
+                      <path d="M1.5 3.5L5 7L8.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                     </svg>
                   </button>
-
                   {menuOpen && (
-                    <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", background: "#fff", border: "0.5px solid #E8E8E5", borderRadius: 14, minWidth: 200, boxShadow: "0 16px 48px rgba(0,0,0,.12)", overflow: "hidden", animation: "dropDown .15s ease" }}>
-                      <div style={{ padding: "12px 16px 10px", borderBottom: "0.5px solid #f0f0ee" }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{user.name}</div>
-                        <div style={{ fontSize: 12, color: "#aaa", marginTop: 2 }}>{user.email}</div>
+                    <div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", background: "#fff", border: "1px solid var(--border)", borderRadius: 8, minWidth: 200, boxShadow: "0 12px 40px rgba(0,0,0,.1)", overflow: "hidden", animation: "dropDown .15s ease" }}>
+                      <div style={{ padding: "10px 14px", borderBottom: "1px solid #f0f0ee" }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 600 }}>{user.name}</div>
+                        <div style={{ fontSize: 11.5, color: "#999", marginTop: 2 }}>{user.email}</div>
                       </div>
                       {user.role === "ADMIN" && (
-                        <Link href="/admin" className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", fontSize: 13.5, color: "var(--brand)", fontWeight: 600, textDecoration: "none", background: "var(--brand-soft)" }}>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <Link href="/admin" className="menu-item" style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 14px", fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none", background: "var(--brand-soft)" }}>
                           Kontrol Paneli
                         </Link>
                       )}
                       {[
-                        { href: "/profil", label: "Profilim", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
-                        { href: "/ilanlarim", label: "İlanlarım", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
-                        { href: "/mesajlar", label: "Mesajlar", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
-                        { href: "/favoriler", label: "Favoriler", svg: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> },
-                      ].map(item => (
-                        <Link key={item.href} href={item.href} className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", fontSize: 13.5, color: "#444", textDecoration: "none", position: "relative" }}>
-                          <span style={{ color: "#888" }}>{item.svg}</span>
+                        { href: "/profil", label: "Profilim" },
+                        { href: "/ilanlarim", label: "İlanlarım" },
+                        { href: "/mesajlar", label: "Mesajlar" },
+                        { href: "/favoriler", label: "Favoriler" },
+                      ].map((item) => (
+                        <Link key={item.href} href={item.href} className="menu-item" style={{ display: "flex", alignItems: "center", padding: "9px 14px", fontSize: 13, color: "#444", textDecoration: "none" }}>
                           {item.label}
                           {item.href === "/mesajlar" && unreadMessages > 0 && (
-                            <span style={{ marginLeft: "auto", minWidth: 18, height: 18, borderRadius: 100, background: "var(--brand)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 5px" }}>
+                            <span style={{ marginLeft: "auto", minWidth: 18, height: 18, borderRadius: 100, background: "var(--brand)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
                               {unreadMessages > 99 ? "99+" : unreadMessages}
                             </span>
                           )}
                         </Link>
                       ))}
-                      <button onClick={logout} className="menu-item" style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 16px", fontSize: 13.5, color: "#999", border: "none", background: "transparent", cursor: "pointer", borderTop: "0.5px solid #f0f0ee", fontFamily: "inherit" }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                      <button type="button" onClick={logout} className="menu-item" style={{ display: "flex", width: "100%", padding: "9px 14px", fontSize: 13, color: "#999", border: "none", borderTop: "1px solid #f0f0ee", background: "transparent", cursor: "pointer", fontFamily: "inherit" }}>
                         Çıkış yap
                       </button>
                     </div>
@@ -415,60 +377,109 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/giris" className="d-only" style={{ height: 38, padding: "0 14px", display: "inline-flex", alignItems: "center", borderRadius: 9, border: "0.5px solid #E8E8E5", background: "transparent", fontSize: 13.5, color: "#333", textDecoration: "none", fontWeight: 500 }}>
-                  Giriş yap
-                </Link>
-                <Link href={loginPath("/ilan-ver")} style={{ height: 38, padding: "0 16px", display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, background: "var(--brand)", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none" }}>
-                  <span style={{ fontSize: 16 }}>+</span> İlan ver
-                </Link>
+                <Link href="/giris" className="navbar-btn-outline d-only">Giriş yap</Link>
+                <Link href="/kayit" className="navbar-btn-outline d-only">Kayıt ol</Link>
+                <Link href={loginPath("/ilan-ver")} className="navbar-btn-primary">+ İlan ver</Link>
               </>
             )}
 
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="m-only tap-btn" aria-label="Menü" style={{ background: "none", border: "none", cursor: "pointer", padding: 10, flexDirection: "column", gap: 5, display: "none", minWidth: 44, minHeight: 44 }}>
+            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} className="m-only tap-btn" aria-label="Menü" style={{ background: "none", border: "none", cursor: "pointer", padding: 8, flexDirection: "column", gap: 5, minWidth: 44, minHeight: 44 }}>
               <span style={{ display: "block", width: 22, height: 1.5, background: "#333", borderRadius: 2, transition: "transform .2s", transform: mobileOpen ? "rotate(45deg) translate(5px,5px)" : "none" }} />
-              <span style={{ display: "block", width: 22, height: 1.5, background: "#333", borderRadius: 2, transition: "opacity .2s", opacity: mobileOpen ? 0 : 1 }} />
+              <span style={{ display: "block", width: 22, height: 1.5, background: "#333", borderRadius: 2, opacity: mobileOpen ? 0 : 1, transition: "opacity .2s" }} />
               <span style={{ display: "block", width: 22, height: 1.5, background: "#333", borderRadius: 2, transition: "transform .2s", transform: mobileOpen ? "rotate(-45deg) translate(5px,-5px)" : "none" }} />
             </button>
           </div>
         </div>
 
-        {/* MOBİL MENÜ */}
+        {/* ALT SATIR: yatay kategoriler (Sahibinden tarzı) */}
+        <div className="navbar-cats d-only" ref={catRef} style={{ position: "relative" }}>
+          <div className="navbar-cats-inner">
+            {quickCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/kategori/${cat.slug}`}
+                ref={cat.slug === "oyun-hobi" ? oyunHobiCatRef : undefined}
+                className={`navbar-cat-link${(pathname === "/ilanlar" && activeCategorySlug === cat.slug) || pathname === `/kategori/${cat.slug}` ? " navbar-cat-link--active" : ""}`}
+              >
+                {cat.name}
+              </Link>
+            ))}
+            <button type="button" className="navbar-cat-all" onMouseEnter={() => setCatOpen(true)} onClick={() => setCatOpen((v) => !v)}>
+              Tümü
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: catOpen ? "rotate(180deg)" : "none", transition: "transform .2s" }}>
+                <path d="M1.5 3.5L5 7L8.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          {categoryMegaMenu}
+        </div>
+
+        {/* Mobil: yatay kaydırmalı kategori şeridi */}
+        <div className="navbar-cats-mobile">
+          <div className="navbar-cats-mobile-inner">
+            {quickCategories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/kategori/${cat.slug}`}
+                className={`navbar-cat-chip${
+                  (pathname === "/ilanlar" && activeCategorySlug === cat.slug) || pathname === `/kategori/${cat.slug}`
+                    ? " navbar-cat-chip--active"
+                    : ""
+                }`}
+              >
+                {cat.name}
+              </Link>
+            ))}
+            <button
+              type="button"
+              className="navbar-cat-chip--all"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Tüm kategorileri aç"
+            >
+              Tümü
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1.5 3.5L5 7L8.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
         {mobileOpen && (
-          <div style={{ borderTop: "0.5px solid #E8E8E5", background: "#fff", padding: "1rem 1.25rem 1.25rem" }}>
+          <div className="navbar-mobile-panel">
             <form onSubmit={handleSearchSubmit} style={{ marginBottom: "1rem" }}>
-              <div style={{ display: "flex", border: "1px solid #E8E8E5", borderRadius: 14, overflow: "hidden", background: "#F7F7F5", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
-                <input value={searchVal} onChange={e => handleSearchChange(e.target.value)} placeholder="Ne arıyorsun? Araç, daire, telefon..."
-                  style={{ flex: 1, padding: "13px 14px", border: "none", background: "transparent", fontSize: 14.5, outline: "none", fontFamily: "inherit" }} />
-                <button type="submit" style={{ padding: "0 20px", border: "none", background: "var(--brand-gradient)", color: "#fff", fontSize: 13.5, fontWeight: 700, fontFamily: "inherit", cursor: "pointer" }}>Ara</button>
+              <div className="navbar-search-form">
+                <input className="navbar-search-input" value={searchVal} onChange={(e) => handleSearchChange(e.target.value)} placeholder="Ne arıyorsun?" />
+                <button type="submit" className="navbar-search-btn">Ara</button>
               </div>
             </form>
-            <div className="mobile-cat-grid" style={{ marginBottom: "1rem", paddingBottom: "1rem", borderBottom: "0.5px solid #f0f0ee" }}>
-              {categories.slice(0, 12).map(cat => {
+            <div className="mobile-cats-section">
+              <div className="mobile-cats-section-title">Kategoriler ({mobileCategories.length})</div>
+              <div className="mobile-cat-grid">
+              {mobileCategories.map((cat) => {
                 const c = getCategoryStyle(cat.slug, 18);
                 return (
-                  <Link key={cat.id} href={`/ilanlar?category=${cat.slug}`} onClick={() => setMobileOpen(false)} style={{ textDecoration: "none" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, padding: "10px 4px", borderRadius: 12, background: c.gradient, boxShadow: `inset 0 0 0 1px ${c.color}14` }}>
+                  <Link key={cat.id} href={`/kategori/${cat.slug}`} onClick={() => setMobileOpen(false)} style={{ textDecoration: "none", minWidth: 0 }}>
+                    <div className="mobile-cat-item" style={{ background: c.gradient }}>
                       <span style={{ color: c.color }}>{c.iconNode}</span>
-                      <span style={{ fontSize: 10, color: "#555", textAlign: "center", lineHeight: 1.2, fontWeight: 600 }}>{cat.name}</span>
+                      <span className="mobile-cat-item-name">{cat.name}</span>
                     </div>
                   </Link>
                 );
               })}
+              </div>
             </div>
-            <Link href="/ilanlar" onClick={() => setMobileOpen(false)} style={{ display: "block", textAlign: "center", padding: "10px", marginBottom: "1rem", borderRadius: 10, fontSize: 13.5, color: "var(--brand)", fontWeight: 600, textDecoration: "none", background: "var(--brand-soft)" }}>
+            <Link href="/ilanlar" onClick={() => setMobileOpen(false)} style={{ display: "block", textAlign: "center", padding: 10, marginBottom: "1rem", borderRadius: 4, fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none", background: "var(--brand-soft)" }}>
               Tüm ilanları gör →
             </Link>
             {user ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "var(--brand)", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-                  + İlan ver
-                </Link>
+                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} className="navbar-btn-primary" style={{ justifyContent: "center" }}>+ İlan ver</Link>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {mobileNavLinks.map(item => (
-                    <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{ position: "relative", textAlign: "center", padding: "12px 8px", background: "#f5f5f3", borderRadius: 10, fontSize: 13.5, color: "#333", textDecoration: "none", fontWeight: 500 }}>
+                  {mobileNavLinks.map((item) => (
+                    <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{ position: "relative", textAlign: "center", padding: 12, background: "#f5f5f3", borderRadius: 4, fontSize: 13, color: "#333", textDecoration: "none", fontWeight: 500 }}>
                       {item.label}
                       {item.href === "/mesajlar" && unreadMessages > 0 && (
-                        <span style={{ position: "absolute", top: 6, right: 8, minWidth: 16, height: 16, borderRadius: 100, background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
+                        <span style={{ position: "absolute", top: 6, right: 8, minWidth: 16, height: 16, borderRadius: 100, background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           {unreadMessages > 9 ? "9+" : unreadMessages}
                         </span>
                       )}
@@ -476,56 +487,33 @@ export default function Navbar() {
                   ))}
                 </div>
                 {user.role === "ADMIN" && (
-                  <Link href="/admin" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "11px", borderRadius: 10, fontSize: 13.5, color: "var(--brand)", fontWeight: 600, textDecoration: "none", border: "0.5px solid var(--brand-border)", background: "var(--brand-soft)" }}>
+                  <Link href="/admin" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: 10, borderRadius: 4, fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none", border: "1px solid var(--brand-border)", background: "var(--brand-soft)" }}>
                     Admin Panel
                   </Link>
                 )}
-                <button onClick={() => { setMobileOpen(false); logout(); }} style={{ padding: "12px", borderRadius: 10, border: "0.5px solid #E8E8E5", background: "#fff", fontSize: 13.5, color: "#888", cursor: "pointer", fontFamily: "inherit", fontWeight: 500 }}>
+                <button type="button" onClick={() => { setMobileOpen(false); logout(); }} className="navbar-btn-outline" style={{ justifyContent: "center", width: "100%", cursor: "pointer", fontFamily: "inherit" }}>
                   Çıkış yap
                 </button>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <Link href="/giris" onClick={() => setMobileOpen(false)} style={{ flex: 1, textAlign: "center", padding: "12px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, color: "#333", textDecoration: "none", fontWeight: 500 }}>Giriş yap</Link>
-                  <Link href="/kayit" onClick={() => setMobileOpen(false)} style={{ flex: 1, textAlign: "center", padding: "12px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, color: "#333", textDecoration: "none", fontWeight: 500 }}>Kayıt ol</Link>
+                  <Link href="/giris" onClick={() => setMobileOpen(false)} className="navbar-btn-outline" style={{ flex: 1, justifyContent: "center" }}>Giriş yap</Link>
+                  <Link href="/kayit" onClick={() => setMobileOpen(false)} className="navbar-btn-outline" style={{ flex: 1, justifyContent: "center" }}>Kayıt ol</Link>
                 </div>
-                <Link href={loginPath("/ilan-ver")} onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "var(--brand)", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-                  + İlan ver
-                </Link>
+                <Link href={loginPath("/ilan-ver")} onClick={() => setMobileOpen(false)} className="navbar-btn-primary" style={{ justifyContent: "center" }}>+ İlan ver</Link>
               </div>
             )}
           </div>
         )}
-      </nav>
+      </header>
 
       <style>{`
-        .nav-search-wrap {
-          flex: 1 1 420px;
-          min-width: 280px;
-          max-width: 640px;
-          display: flex;
-          justify-content: center;
-          padding: 0 4px;
-        }
-        .nav-inner > .d-only:first-of-type { flex-shrink: 0; }
-        @media (min-width: 1100px) {
-          .nav-search-wrap { flex: 1 1 520px; max-width: 720px; }
-        }
-        .d-only { display: flex !important; }
-        .m-only  { display: none !important; }
-        @media (max-width: 768px) {
-          .d-only { display: none !important; }
-          .m-only  { display: flex !important; }
-        }
-        .cat-hover-item:hover .cat-hover-icon {
-          transform: scale(1.06);
-          box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        }
+        .cat-hover-item:hover .cat-hover-icon { transform: scale(1.04); }
         .menu-item:hover { background: #fafaf8; }
         @keyframes dropDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(-6px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>

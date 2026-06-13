@@ -115,7 +115,7 @@ export default function DuzenleePage() {
   return (
     <>
       <Navbar />
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "2rem 1.25rem 5rem" }}>
+      <div className="page-container" style={{ maxWidth: 680, paddingTop: "2rem", paddingBottom: "5rem" }}>
 
         {/* Başlık */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "2rem" }}>
@@ -203,7 +203,7 @@ export default function DuzenleePage() {
           {/* FİYAT & DURUM */}
           <div style={{ background: "#fff", borderRadius: 16, border: "0.5px solid #E8E8E5", padding: "1.25rem" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: "1rem" }}>Fiyat & Durum</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div className="form-2col">
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, color: "#444", display: "block", marginBottom: 7 }}>Fiyat (₺) *</label>
                 <div style={{ display: "flex", border: "0.5px solid #E8E8E5", borderRadius: 10, overflow: "hidden" }}
@@ -250,7 +250,7 @@ export default function DuzenleePage() {
           {/* KONUM */}
           <div style={{ background: "#fff", borderRadius: 16, border: "0.5px solid #E8E8E5", padding: "1.25rem" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: "1rem" }}>Konum</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div className="form-2col">
               <div>
                 <label style={{ fontSize: 13, fontWeight: 600, color: "#444", display: "block", marginBottom: 7 }}>Şehir *</label>
                 <div style={{ position: "relative" }}>

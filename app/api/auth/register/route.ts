@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/jwt";
+import { issueAndSendVerificationEmail } from "@/lib/email-verification";
 import { z } from "zod";
 
 const schema = z.object({
@@ -21,8 +22,13 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: { name: data.name, email: data.email, password: hashed, phone: data.phone },
     });
+
+    issueAndSendVerificationEmail(user.id, user.email).catch(() => {});
+
     const token = signToken({ userId: user.id, role: user.role });
-    const res = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    const res = NextResponse.json({
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, isVerified: false },
+    });
     res.cookies.set("token", token, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: "/" });
     return res;
   } catch (e: unknown) {

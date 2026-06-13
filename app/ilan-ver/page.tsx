@@ -262,6 +262,9 @@ export default function IlanVerPage() {
     const specLines = fields.filter(f => catValues[f.key]).map(f =>
       `${f.label}: ${catValues[f.key]}${f.suffix ? " " + f.suffix : ""}`
     );
+    const attributes = Object.fromEntries(
+      Object.entries(catValues).filter(([, v]) => v?.trim())
+    );
     const description = specLines.join("\n") || form.title;
 
     const res = await fetch("/api/listings", {
@@ -276,6 +279,7 @@ export default function IlanVerPage() {
         city: form.city,
         district: form.district,
         images,
+        attributes: Object.keys(attributes).length ? attributes : undefined,
       }),
     });
     const data = await res.json();

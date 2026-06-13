@@ -21,13 +21,10 @@ export default function IlanlarimPage() {
     fetch("/api/auth/me").then(r => r.json()).then(d => {
       if (!d.user) { router.replace(loginPath("/ilanlarim")); return; }
       setUser(d.user);
-      fetch(`/api/listings?limit=50&userId=${d.user.id}`)
+      fetch("/api/listings?mine=1&limit=50")
         .then(r => r.json())
         .then(data => {
-          const myListings = (data.listings || []).filter((l: Listing & { user?: { id: string } }) =>
-            !l.user || l.user.id === d.user.id
-          );
-          setListings(myListings);
+          setListings(data.listings || []);
         })
         .finally(() => setLoading(false));
     });
@@ -60,7 +57,7 @@ export default function IlanlarimPage() {
   return (
     <>
       <Navbar />
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1.25rem 4rem" }}>
+      <div className="page-wrap" style={{ maxWidth: 900 }}>
 
         {/* Başlık */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", flexWrap: "wrap", gap: 12 }}>
@@ -98,10 +95,9 @@ export default function IlanlarimPage() {
             {listings.map(listing => {
               const st = statusLabel[listing.status] || statusLabel.INACTIVE;
               return (
-                <div key={listing.id} style={{
+                <div key={listing.id} className="listing-row" style={{
                   background: "#fff", borderRadius: 14, border: "0.5px solid #E8E8E5",
                   padding: "1rem 1.25rem",
-                  display: "flex", alignItems: "center", gap: 14,
                   transition: "box-shadow .15s",
                 }}>
                   {/* Resim */}
@@ -114,14 +110,14 @@ export default function IlanlarimPage() {
                   </div>
 
                   {/* Bilgi */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="listing-row-body">
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 14.5, fontWeight: 700, color: "#111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 300 }}>{listing.title}</span>
+                      <span className="listing-row-title">{listing.title}</span>
                       <span style={{ padding: "2px 8px", borderRadius: 100, background: st.bg, color: st.color, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{st.text}</span>
                       {listing.isFeatured && <span style={{ padding: "2px 8px", borderRadius: 100, background: "var(--brand-soft)", color: "var(--brand)", fontSize: 11, fontWeight: 700 }}>⭐ Öne Çıkan</span>}
                     </div>
                     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: "var(--brand)", fontFamily: "'Bricolage Grotesque', sans-serif" }}>₺{listing.price.toLocaleString("tr-TR")}</span>
+                      <span className="price-text" style={{ fontSize: 15, fontWeight: 800, fontFamily: "'Bricolage Grotesque', sans-serif" }}>₺{listing.price.toLocaleString("tr-TR")}</span>
                       <span style={{ fontSize: 12.5, color: "#bbb", display: "flex", alignItems: "center", gap: 3 }}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         {listing.views} görüntülenme
@@ -132,7 +128,7 @@ export default function IlanlarimPage() {
                   </div>
 
                   {/* Butonlar */}
-                  <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <div className="listing-row-actions">
                     {/* Düzenle */}
                     <Link href={`/ilan/${listing.id}/duzenle`} title="Düzenle" style={{
                       width: 36, height: 36, borderRadius: 9, border: "0.5px solid #E8E8E5",

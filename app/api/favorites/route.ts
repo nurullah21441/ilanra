@@ -2,9 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const listingId = searchParams.get("listingId");
+
   const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Giriş yapılmamış" }, { status: 401 });
+  if (!user) {
+    if (listingId) return NextResponse.json({ favorited: false });
+    return NextResponse.json({ error: "Giriş yapılmamış" }, { status: 401 });
+  }
+
+  if (listingId) {
+    const exists = await prisma.favorite.findUnique({
+      where: { userId_listingId: { userId: user.id, listingId } },
+    });
+    return NextResponse.json({ favorited: !!exists });
+  }
+
   const favorites = await prisma.favorite.findMany({
     where: { userId: user.id },
     include: {

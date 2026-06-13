@@ -52,9 +52,9 @@ export default function GizlilikPolitikasiPage() {
       <h2>4. Verilerin Paylaşılması</h2>
       <p>
         Kişisel verileriniz, yasal zorunluluklar dışında üçüncü taraflarla paylaşılmaz.
-        İlanlarda paylaştığınız iletişim bilgileri (telefon, e-posta vb.) diğer kullanıcılar
-        tarafından görülebilir; bu bilgileri ilan içeriğine eklemeyi tercih ettiğinizde sorumluluk
-        size aittir.
+        Telefon numaranız varsayılan olarak ilanlarda gösterilmez; profil ayarlarından açıkça
+        izin vermeniz hâlinde diğer kullanıcılar görebilir. Aksi hâlde iletişim platform
+        içi mesajlaşma üzerinden sağlanır.
       </p>
       <p>
         Hizmet altyapımız için güvenilir teknik hizmet sağlayıcıları (sunucu barındırma, e-posta

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminShell, { type AdminTab } from "@/components/admin/AdminShell";
 
-interface Stats { totalListings: number; activeListings: number; featuredListings: number; totalUsers: number; totalMessages: number; }
+interface Stats { totalListings: number; activeListings: number; featuredListings: number; totalUsers: number; totalMessages: number; pendingReports: number; }
 interface AdminListing {
   id: string; title: string; price: number; status: string; isFeatured: boolean; city: string;
   createdAt: string; user: { name: string; email: string }; category: { name: string };
@@ -14,6 +14,7 @@ interface AdminListing {
 const TAB_TITLES: Record<AdminTab, { title: string; subtitle: string }> = {
   genel: { title: "Genel Bakış", subtitle: "Platform özeti ve istatistikler" },
   ilanlar: { title: "İlan Yönetimi", subtitle: "Tüm ilanları görüntüle, düzenle ve yönet" },
+  sikayetler: { title: "Şikayetler", subtitle: "Kullanıcı bildirimlerini incele ve işlem yap" },
   kullanicilar: { title: "Kullanıcılar", subtitle: "Kayıtlı kullanıcıları ve rollerini görüntüle" },
 };
 
@@ -21,7 +22,10 @@ function AdminPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get("tab");
-  const tab: AdminTab = tabParam === "ilanlar" || tabParam === "kullanicilar" ? tabParam : "genel";
+  const tab: AdminTab =
+    tabParam === "ilanlar" || tabParam === "kullanicilar" || tabParam === "sikayetler"
+      ? tabParam
+      : "genel";
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [listings, setListings] = useState<AdminListing[]>([]);
@@ -118,6 +122,7 @@ function AdminPageContent() {
               { label: "Öne Çıkan", value: stats.featuredListings, icon: "⭐", color: "var(--brand)" },
               { label: "Kullanıcı", value: stats.totalUsers, icon: "👥", color: "#8b5cf6" },
               { label: "Mesaj", value: stats.totalMessages, icon: "💬", color: "#f59e0b" },
+              { label: "Bekleyen Şikayet", value: stats.pendingReports, icon: "🚩", color: "#ef4444" },
             ].map(({ label, value, icon, color }) => (
               <div key={label} style={{ background: "#fff", borderRadius: 14, border: "0.5px solid var(--border)", padding: "1.35rem", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
                 <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
@@ -149,7 +154,7 @@ function AdminPageContent() {
             <span style={{ fontSize: 13, color: "var(--ink-light)" }}>{total} ilan</span>
           </div>
 
-          <div style={{ background: "#fff", borderRadius: 14, border: "0.5px solid var(--border)", overflow: "auto" }}>
+          <div className="table-scroll" style={{ background: "#fff", borderRadius: 14, border: "0.5px solid var(--border)" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5, minWidth: 720 }}>
               <thead>
                 <tr style={{ borderBottom: "0.5px solid var(--border)", background: "var(--surface-page)" }}>
@@ -210,6 +215,8 @@ function AdminPageContent() {
       )}
 
       {tab === "kullanicilar" && <AdminUsers />}
+
+      {tab === "sikayetler" && <AdminReports />}
     </AdminShell>
   );
 }
@@ -223,7 +230,7 @@ function AdminUsers() {
   }, []);
 
   return (
-    <div style={{ background: "#fff", borderRadius: 14, border: "0.5px solid var(--border)", overflow: "auto" }}>
+    <div className="table-scroll" style={{ background: "#fff", borderRadius: 14, border: "0.5px solid var(--border)" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5, minWidth: 600 }}>
         <thead>
           <tr style={{ borderBottom: "0.5px solid var(--border)", background: "var(--surface-page)" }}>
@@ -257,6 +264,142 @@ function AdminUsers() {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+const REPORT_LABELS: Record<string, string> = {
+  spam: "Spam",
+  fake: "Sahte / Yanıltıcı",
+  inappropriate: "Uygunsuz",
+  scam: "Dolandırıcılık",
+  other: "Diğer",
+};
+
+function AdminReports() {
+  const [reports, setReports] = useState<{
+    id: string; reason: string; details: string | null; status: string; createdAt: string;
+    listing: { id: string; title: string; status: string; user: { name: string; email: string } };
+    reporter: { name: string; email: string };
+  }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("PENDING");
+
+  function load() {
+    setLoading(true);
+    fetch(`/api/admin/reports?status=${filter}`)
+      .then((r) => r.json())
+      .then((d) => setReports(d.reports || []))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => { load(); }, [filter]);
+
+  async function handleReport(id: string, status: "REVIEWED" | "DISMISSED", deactivateListing?: boolean) {
+    await fetch(`/api/admin/reports/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, deactivateListing }),
+    });
+    load();
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: "1rem", flexWrap: "wrap" }}>
+        {[
+          { value: "PENDING", label: "Bekleyen" },
+          { value: "REVIEWED", label: "İncelenen" },
+          { value: "DISMISSED", label: "Reddedilen" },
+          { value: "all", label: "Tümü" },
+        ].map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setFilter(f.value)}
+            style={{
+              padding: "8px 14px",
+              borderRadius: 8,
+              border: filter === f.value ? "1px solid var(--brand)" : "0.5px solid var(--border)",
+              background: filter === f.value ? "var(--brand-soft)" : "#fff",
+              color: filter === f.value ? "var(--brand)" : "var(--ink)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="table-scroll" style={{ background: "#fff", borderRadius: 14, border: "0.5px solid var(--border)" }}>
+        {loading ? (
+          <p style={{ padding: "2rem", textAlign: "center", color: "var(--ink-light)" }}>Yükleniyor...</p>
+        ) : reports.length === 0 ? (
+          <p style={{ padding: "2rem", textAlign: "center", color: "var(--ink-light)" }}>Şikayet bulunamadı</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5, minWidth: 720 }}>
+            <thead>
+              <tr style={{ borderBottom: "0.5px solid var(--border)", background: "var(--surface-page)" }}>
+                {["İlan", "Sebep", "Bildiren", "Tarih", "İşlem"].map((h) => (
+                  <th key={h} style={{ padding: "12px 14px", textAlign: "left", fontWeight: 600, color: "var(--ink-muted)", fontSize: 12 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {reports.map((r) => (
+                <tr key={r.id} style={{ borderBottom: "0.5px solid var(--border-light)" }}>
+                  <td style={{ padding: "10px 14px", maxWidth: 220 }}>
+                    <Link href={`/ilan/${r.listing.id}`} style={{ color: "var(--ink)", fontWeight: 600, textDecoration: "none" }}>
+                      {r.listing.title.slice(0, 50)}{r.listing.title.length > 50 ? "…" : ""}
+                    </Link>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-light)", marginTop: 2 }}>
+                      {r.listing.user.name} · {r.listing.status}
+                    </div>
+                    {r.details && <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 4 }}>{r.details}</div>}
+                  </td>
+                  <td style={{ padding: "10px 14px" }}>{REPORT_LABELS[r.reason] || r.reason}</td>
+                  <td style={{ padding: "10px 14px", color: "var(--ink-muted)" }}>{r.reporter.name}</td>
+                  <td style={{ padding: "10px 14px", color: "var(--ink-light)", whiteSpace: "nowrap" }}>
+                    {new Date(r.createdAt).toLocaleDateString("tr-TR")}
+                  </td>
+                  <td style={{ padding: "10px 14px" }}>
+                    {r.status === "PENDING" ? (
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          onClick={() => handleReport(r.id, "REVIEWED", true)}
+                          style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "#fef2f2", color: "#dc2626", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}
+                        >
+                          İlanı kapat
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleReport(r.id, "REVIEWED")}
+                          style={{ padding: "5px 10px", borderRadius: 6, border: "0.5px solid var(--border)", background: "#fff", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}
+                        >
+                          İncelendi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleReport(r.id, "DISMISSED")}
+                          style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: "#f5f5f5", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}
+                        >
+                          Reddet
+                        </button>
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>{r.status}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }

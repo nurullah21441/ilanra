@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { emitNewMessage } from "@/lib/socket-server";
 
 function conversationKey(otherUserId: string, listingId: string | null) {
   return `${otherUserId}:${listingId || ""}`;
@@ -96,6 +97,13 @@ export async function POST(req: NextRequest) {
     data: { senderId: user.id, receiverId, content, listingId: listingId || null },
     include: {
       sender: { select: { id: true, name: true, avatar: true } },
+    },
+  });
+
+  emitNewMessage(receiverId, user.id, {
+    message: {
+      ...message,
+      createdAt: message.createdAt.toISOString(),
     },
   });
 

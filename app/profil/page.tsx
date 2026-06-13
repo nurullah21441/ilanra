@@ -4,8 +4,17 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ListingCard from "@/components/ListingCard";
 import { loginPath } from "@/lib/auth-url";
+import { describeSavedSearch, filtersToSearchParams, type SavedSearchFilters } from "@/lib/saved-search";
 
-interface User { id: string; name: string; email: string; phone: string; role: string; }
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  showPhoneOnListings: boolean;
+  isVerified: boolean;
+  role: string;
+}
 interface Listing { id: string; title: string; price: number; city: string; isFeatured: boolean; createdAt: string; status: string; images: { url: string }[]; category: { name: string; slug: string }; }
 
 export default function ProfilPage() {
@@ -17,21 +26,62 @@ export default function ProfilPage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [contactPhone, setContactPhone] = useState("");
+  const [showPhoneOnListings, setShowPhoneOnListings] = useState(false);
+  const [contactError, setContactError] = useState("");
+  const [contactSuccess, setContactSuccess] = useState("");
+  const [contactLoading, setContactLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState("");
+  const [verifyDevUrl, setVerifyDevUrl] = useState("");
+  const [savedSearches, setSavedSearches] = useState<{ id: string; name: string | null; filters: SavedSearchFilters; createdAt: string }[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => r.json()).then((d) => {
       if (!d.user) { router.replace(loginPath("/profil")); return; }
       setUser(d.user);
+      setContactPhone(d.user.phone || "");
+      setShowPhoneOnListings(!!d.user.showPhoneOnListings);
     });
   }, [router]);
 
   useEffect(() => {
     if (!user) return;
-    fetch("/api/listings?limit=50").then((r) => r.json()).then((d) => {
-      setListings((d.listings || []).filter((l: Listing & { user: { id: string } }) => l.user?.id === user.id));
+    fetch("/api/listings?mine=1&limit=50").then((r) => r.json()).then((d) => {
+      setListings(d.listings || []);
     }).finally(() => setLoading(false));
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/saved-searches").then((r) => r.json()).then((d) => {
+      setSavedSearches((d.searches || []).map((s: { id: string; name: string | null; filters: SavedSearchFilters; createdAt: string }) => ({
+        ...s,
+        filters: (s.filters || {}) as SavedSearchFilters,
+      })));
+    });
+  }, [user]);
+
+  async function sendVerification() {
+    setVerifyLoading(true);
+    setVerifyMsg("");
+    setVerifyDevUrl("");
+    const res = await fetch("/api/auth/send-verification", { method: "POST" });
+    const data = await res.json();
+    setVerifyLoading(false);
+    if (!res.ok) {
+      setVerifyMsg(data.error || "Gönderilemedi");
+      return;
+    }
+    setVerifyMsg(data.message || "Doğrulama e-postası gönderildi.");
+    if (data.devVerifyUrl) setVerifyDevUrl(data.devVerifyUrl);
+  }
+
+  async function deleteSavedSearch(id: string) {
+    await fetch(`/api/saved-searches/${id}`, { method: "DELETE" });
+    setSavedSearches((prev) => prev.filter((s) => s.id !== id));
+  }
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
@@ -65,15 +115,43 @@ export default function ProfilPage() {
     setShowPasswordForm(false);
   }
 
+  async function handleContactSave(e: React.FormEvent) {
+    e.preventDefault();
+    setContactError("");
+    setContactSuccess("");
+    setContactLoading(true);
+
+    const res = await fetch("/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: contactPhone.trim() || null,
+        showPhoneOnListings: showPhoneOnListings && !!contactPhone.trim(),
+      }),
+    });
+    const data = await res.json();
+    setContactLoading(false);
+
+    if (!res.ok) {
+      setContactError(data.error || "Ayarlar kaydedilemedi");
+      return;
+    }
+
+    setUser(data.user);
+    setContactPhone(data.user.phone || "");
+    setShowPhoneOnListings(!!data.user.showPhoneOnListings);
+    setContactSuccess("İletişim ayarları güncellendi.");
+  }
+
   if (!user) return <><Navbar /><div style={{ textAlign: "center", padding: "4rem", color: "#999" }}>Yükleniyor...</div></>;
 
   return (
     <>
       <Navbar />
-      <div style={{ maxWidth: 1100, margin: "2rem auto", padding: "0 1.5rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "2rem", alignItems: "start" }}>
+      <div className="page-wrap">
+        <div className="profile-grid">
           {/* SIDEBAR */}
-          <div style={{ background: "#fff", borderRadius: 12, border: "0.5px solid #e5e5e5", padding: "1.5rem", position: "sticky", top: 76 }}>
+          <div className="profile-sidebar" style={{ background: "#fff", borderRadius: 12, border: "0.5px solid #e5e5e5", padding: "1.5rem" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: "1.5rem", paddingBottom: "1.5rem", borderBottom: "0.5px solid #f0f0f0" }}>
               <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 28, fontWeight: 700 }}>
                 {user.name[0]}
@@ -81,11 +159,38 @@ export default function ProfilPage() {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontWeight: 700, fontSize: 17 }}>{user.name}</div>
                 <div style={{ fontSize: 13, color: "#999" }}>{user.email}</div>
+                {user.isVerified ? (
+                  <span style={{ fontSize: 11, background: "#ecfdf5", color: "#15803d", padding: "2px 8px", borderRadius: 100, fontWeight: 600, marginTop: 4, display: "inline-block" }}>✓ Doğrulanmış</span>
+                ) : (
+                  <span style={{ fontSize: 11, background: "#fff7ed", color: "#c2410c", padding: "2px 8px", borderRadius: 100, fontWeight: 600, marginTop: 4, display: "inline-block" }}>E-posta doğrulanmadı</span>
+                )}
                 {user.role === "ADMIN" && (
                   <span style={{ fontSize: 11, background: "var(--brand-soft)", color: "var(--brand)", padding: "2px 8px", borderRadius: 100, fontWeight: 600, marginTop: 4, display: "inline-block" }}>ADMIN</span>
                 )}
               </div>
             </div>
+
+            {!user.isVerified && (
+              <div style={{ marginTop: 12, padding: "12px", borderRadius: 10, background: "#fff7ed", border: "0.5px solid #fed7aa" }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: "#c2410c", marginBottom: 6 }}>E-postanı doğrula</div>
+                <p style={{ fontSize: 12, color: "#9a3412", lineHeight: 1.45, marginBottom: 10 }}>
+                  Güvenlik için e-posta adresini doğrulamanı öneririz.
+                </p>
+                {verifyMsg && <p style={{ fontSize: 12, color: "#166534", marginBottom: 8 }}>{verifyMsg}</p>}
+                {verifyDevUrl && (
+                  <p style={{ fontSize: 11, color: "#888", wordBreak: "break-all", marginBottom: 8 }}>{verifyDevUrl}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={sendVerification}
+                  disabled={verifyLoading}
+                  style={{ width: "100%", padding: "9px", borderRadius: 8, border: "none", background: "#ea580c", color: "#fff", fontWeight: 600, fontSize: 13, cursor: verifyLoading ? "wait" : "pointer", opacity: verifyLoading ? 0.7 : 1 }}
+                >
+                  {verifyLoading ? "Gönderiliyor..." : "Doğrulama linki gönder"}
+                </button>
+              </div>
+            )}
+
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {user.role === "ADMIN" && (
                 <>
@@ -93,6 +198,7 @@ export default function ProfilPage() {
                   <a href="/admin" style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13.5, color: "#fff", fontWeight: 600, textDecoration: "none", display: "block", background: "var(--surface-dark)" }}>📊 Kontrol Paneli</a>
                   <a href="/admin?tab=ilanlar" style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13.5, color: "var(--ink)", textDecoration: "none", display: "block" }}>📋 Tüm İlanlar</a>
                   <a href="/admin?tab=kullanicilar" style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13.5, color: "var(--ink)", textDecoration: "none", display: "block" }}>👥 Kullanıcılar</a>
+                  <a href="/admin?tab=sikayetler" style={{ padding: "10px 14px", borderRadius: 8, fontSize: 13.5, color: "var(--ink)", textDecoration: "none", display: "block" }}>🚩 Şikayetler</a>
                   <div style={{ height: 1, background: "#f0f0f0", margin: "8px 0" }} />
                   <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", color: "#aaa", padding: "4px 14px", textTransform: "uppercase" }}>Hesabım</div>
                 </>
@@ -148,15 +254,99 @@ export default function ProfilPage() {
                 </button>
               </form>
             )}
+
+            <form onSubmit={handleContactSave} style={{ marginTop: 16, paddingTop: 16, borderTop: "0.5px solid #f0f0f0" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#666", marginBottom: 10 }}>İletişim ayarları</div>
+              {contactError && (
+                <div style={{ background: "var(--brand-soft)", color: "#dc2626", padding: "8px 10px", borderRadius: 8, fontSize: 12.5, marginBottom: 10 }}>
+                  {contactError}
+                </div>
+              )}
+              {contactSuccess && (
+                <div style={{ background: "#ecfdf5", color: "#15803d", padding: "8px 10px", borderRadius: 8, fontSize: 12.5, marginBottom: 10 }}>
+                  {contactSuccess}
+                </div>
+              )}
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: "block", fontSize: 12, color: "#666", marginBottom: 4 }}>Telefon (opsiyonel)</label>
+                <input
+                  type="tel"
+                  value={contactPhone}
+                  onChange={(e) => {
+                    setContactPhone(e.target.value);
+                    if (!e.target.value.trim()) setShowPhoneOnListings(false);
+                  }}
+                  placeholder="0532 000 00 00"
+                  style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: "0.5px solid #e5e5e5", fontSize: 13, boxSizing: "border-box" }}
+                />
+              </div>
+              <label style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 12.5, color: "#444", lineHeight: 1.45, cursor: contactPhone.trim() ? "pointer" : "not-allowed", opacity: contactPhone.trim() ? 1 : 0.55 }}>
+                <input
+                  type="checkbox"
+                  checked={showPhoneOnListings}
+                  disabled={!contactPhone.trim()}
+                  onChange={(e) => setShowPhoneOnListings(e.target.checked)}
+                  style={{ marginTop: 2, accentColor: "var(--brand)" }}
+                />
+                <span>İlanlarımda telefon numaramı göster</span>
+              </label>
+              <p style={{ fontSize: 11.5, color: "#999", marginTop: 8, lineHeight: 1.45 }}>
+                Varsayılan olarak numaran gizlidir. İstersen mesajlaşma sonrası sohbet içinde de paylaşabilirsin.
+              </p>
+              <button
+                type="submit"
+                disabled={contactLoading}
+                style={{ width: "100%", marginTop: 12, padding: "10px", borderRadius: 8, border: "none", background: "var(--brand)", color: "#fff", fontWeight: 600, fontSize: 13.5, cursor: contactLoading ? "wait" : "pointer", opacity: contactLoading ? 0.7 : 1 }}
+              >
+                {contactLoading ? "Kaydediliyor..." : "Kaydet"}
+              </button>
+            </form>
           </div>
 
           {/* MAIN */}
           <div>
+            {savedSearches.length > 0 && (
+              <div style={{ marginBottom: "2rem" }}>
+                <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: "1rem" }}>Kayıtlı aramalar</h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {savedSearches.map((s) => (
+                    <div
+                      key={s.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        padding: "12px 14px",
+                        background: "#fff",
+                        borderRadius: 10,
+                        border: "0.5px solid #e5e5e5",
+                      }}
+                    >
+                      <a
+                        href={`/ilanlar?${filtersToSearchParams(s.filters)}`}
+                        style={{ textDecoration: "none", color: "#111", fontSize: 13.5, fontWeight: 600, flex: 1, minWidth: 0 }}
+                      >
+                        {s.name || describeSavedSearch(s.filters)}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => deleteSavedSearch(s.id)}
+                        style={{ background: "none", border: "none", color: "#999", fontSize: 12, cursor: "pointer", flexShrink: 0 }}
+                      >
+                        Sil
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 700, marginBottom: "1.5rem" }}>İlanlarım</h2>
             {loading ? (
               <p style={{ color: "#999" }}>Yükleniyor...</p>
             ) : listings.length > 0 ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
+              <div className="listing-cards-grid">
                 {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
               </div>
             ) : (

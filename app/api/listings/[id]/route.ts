@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { stripPrivatePhone } from "@/lib/user-contact";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -9,12 +10,23 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     include: {
       images: { orderBy: { order: "asc" } },
       category: true,
-      user: { select: { id: true, name: true, phone: true, avatar: true, createdAt: true } },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          showPhoneOnListings: true,
+          avatar: true,
+          createdAt: true,
+        },
+      },
     },
   });
   if (!listing) return NextResponse.json({ error: "İlan bulunamadı" }, { status: 404 });
   await prisma.listing.update({ where: { id }, data: { views: { increment: 1 } } });
-  return NextResponse.json({ listing });
+  return NextResponse.json({
+    listing: { ...listing, user: stripPrivatePhone(listing.user) },
+  });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

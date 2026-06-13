@@ -13,7 +13,7 @@ export default function IlanGallery({ images, title, isFeatured }: Props) {
 
   if (!images.length) {
     return (
-      <div style={{ height: 400, background: "#f5f5f3", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 56, color: "#ddd" }}>
+      <div className="gallery-main-img gallery-placeholder" style={{ background: "#f5f5f3", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 56, color: "#ddd" }}>
         📦
       </div>
     );

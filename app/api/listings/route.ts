@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { categoryIdsForSlug } from "@/lib/category-seed";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -12,6 +13,7 @@ const createSchema = z.object({
   city: z.string(),
   district: z.string().optional(),
   images: z.array(z.string()).max(10),
+  attributes: z.record(z.string(), z.string()).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -20,34 +22,72 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get("limit") || "24");
   const category = searchParams.get("category");
   const city = searchParams.get("city");
+  const district = searchParams.get("district");
   const q = searchParams.get("q");
   const featured = searchParams.get("featured");
   const minPrice = searchParams.get("minPrice");
   const maxPrice = searchParams.get("maxPrice");
+  const condition = searchParams.get("condition");
+  const mine = searchParams.get("mine");
+  const status = searchParams.get("status");
+  const sort = searchParams.get("sort");
 
-  const where: Record<string, unknown> = { status: "ACTIVE" };
-  if (category) where.category = { slug: category };
+  const where: Record<string, unknown> = {};
+
+  if (mine === "1" || mine === "true") {
+    const user = await getCurrentUser();
+    if (!user) return NextResponse.json({ error: "Giriş yapılmamış" }, { status: 401 });
+    where.userId = user.id;
+    if (status && ["ACTIVE", "SOLD", "INACTIVE"].includes(status)) {
+      where.status = status;
+    }
+  } else {
+    where.status = "ACTIVE";
+  }
+
+  if (category) {
+    const ids = await categoryIdsForSlug(category);
+    if (ids) where.categoryId = { in: ids };
+    else where.category = { slug: category };
+  }
   if (city) where.city = { contains: city, mode: "insensitive" };
+  if (district) where.district = { contains: district, mode: "insensitive" };
   if (q) where.OR = [
     { title: { contains: q, mode: "insensitive" } },
     { description: { contains: q, mode: "insensitive" } },
   ];
   if (featured === "true") where.isFeatured = true;
+  if (condition && ["NEW", "LIKE_NEW", "USED", "DEFECTIVE"].includes(condition)) {
+    where.condition = condition;
+  }
   if (minPrice || maxPrice) {
     where.price = {};
     if (minPrice) (where.price as Record<string, number>).gte = parseFloat(minPrice);
     if (maxPrice) (where.price as Record<string, number>).lte = parseFloat(maxPrice);
   }
 
+  const orderBy =
+    sort === "price_asc" ? [{ price: "asc" as const }] :
+    sort === "price_desc" ? [{ price: "desc" as const }] :
+    sort === "date_asc" ? [{ createdAt: "asc" as const }] :
+    [{ isFeatured: "desc" as const }, { createdAt: "desc" as const }];
+
+  const include = mine === "1" || mine === "true"
+    ? {
+        images: { orderBy: { order: "asc" as const }, take: 1 },
+        category: { select: { name: true, slug: true } },
+      }
+    : {
+        images: { orderBy: { order: "asc" as const }, take: 1 },
+        category: { select: { name: true, slug: true } },
+        user: { select: { id: true, name: true } },
+      };
+
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
       where,
-      include: {
-        images: { orderBy: { order: "asc" }, take: 1 },
-        category: { select: { name: true, slug: true } },
-        user: { select: { id: true, name: true } },
-      },
-      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+      include,
+      orderBy,
       skip: (page - 1) * limit,
       take: limit,
     }),
@@ -74,6 +114,7 @@ export async function POST(req: NextRequest) {
         categoryId: data.categoryId,
         city: data.city,
         district: data.district,
+        attributes: data.attributes ?? undefined,
         userId: user.id,
         images: {
           create: data.images.map((url, i) => ({ url, order: i })),

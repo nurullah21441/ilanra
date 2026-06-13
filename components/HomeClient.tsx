@@ -67,7 +67,7 @@ export default function HomeClient({ featuredListings, listings, totalListings }
           {featuredListings.length > 0 && (
             <section style={{ marginBottom: "2.5rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1rem" }}>
-                <div style={{ width: 4, height: 22, background: "var(--brand)", borderRadius: 2 }} />
+                <div style={{ width: 4, height: 22, background: "var(--ink)", borderRadius: 2 }} />
                 <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 800, color: "#111", letterSpacing: -0.3 }}>
                   Öne çıkanlar
                 </h2>

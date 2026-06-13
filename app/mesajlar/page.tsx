@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { notifyMessagesUpdated } from "@/lib/messages-ui";
 import { loginPath } from "@/lib/auth-url";
+import { useMessageSocket } from "@/lib/use-message-socket";
 
 interface Message { id: string; content: string; senderId: string; createdAt: string; sender: { name: string; avatar: string | null }; }
 interface Conversation {
@@ -11,6 +12,12 @@ interface Conversation {
   listing: { id: string; title: string } | null;
   lastMessage: { id: string; content: string; senderId: string; createdAt: string };
   unreadCount: number;
+}
+
+const POLL_MS = 30000;
+
+function formatMsgTime(date: string) {
+  return new Date(date).toLocaleString("tr-TR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 function MesajlarContent() {
@@ -24,14 +31,31 @@ function MesajlarContent() {
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesBoxRef = useRef<HTMLDivElement>(null);
 
   const isSelfChat = !!(me && receiverId && receiverId === me.id);
 
-  function loadConversations() {
+  const loadConversations = useCallback(() => {
     fetch("/api/messages")
       .then((r) => r.json())
-      .then((d) => setConversations(d.conversations || []));
-  }
+      .then((d) => setConversations(d.conversations || []))
+      .catch(() => {});
+  }, []);
+
+  const loadThread = useCallback(() => {
+    if (!receiverId || isSelfChat) {
+      setMessages([]);
+      return;
+    }
+    const qs = new URLSearchParams({ with: receiverId });
+    if (listingId) qs.set("listingId", listingId);
+
+    fetch(`/api/messages?${qs}`)
+      .then((r) => r.json())
+      .then((d) => setMessages(d.messages || []))
+      .catch(() => {});
+  }, [receiverId, listingId, isSelfChat]);
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => r.json()).then((d) => {
@@ -43,13 +67,11 @@ function MesajlarContent() {
       setMe(d.user);
     });
     loadConversations();
-  }, [router]);
+  }, [router, loadConversations]);
 
   useEffect(() => {
     if (!me || !receiverId) return;
-    if (receiverId === me.id) {
-      router.replace("/mesajlar");
-    }
+    if (receiverId === me.id) router.replace("/mesajlar");
   }, [me, receiverId, router]);
 
   useEffect(() => {
@@ -58,12 +80,7 @@ function MesajlarContent() {
       return;
     }
 
-    const qs = new URLSearchParams({ with: receiverId });
-    if (listingId) qs.set("listingId", listingId);
-
-    fetch(`/api/messages?${qs}`)
-      .then((r) => r.json())
-      .then((d) => setMessages(d.messages || []));
+    loadThread();
 
     fetch("/api/messages/read", {
       method: "POST",
@@ -73,7 +90,34 @@ function MesajlarContent() {
       loadConversations();
       notifyMessagesUpdated();
     });
-  }, [receiverId, listingId, isSelfChat]);
+  }, [receiverId, listingId, isSelfChat, loadThread, loadConversations]);
+
+  const refreshMessages = useCallback(() => {
+    loadConversations();
+    if (receiverId && !isSelfChat) loadThread();
+    notifyMessagesUpdated();
+  }, [loadConversations, loadThread, receiverId, isSelfChat]);
+
+  useMessageSocket(me?.id, refreshMessages);
+
+  useEffect(() => {
+    if (!me) return;
+    const tick = () => {
+      loadConversations();
+      if (receiverId && !isSelfChat) loadThread();
+    };
+    const interval = setInterval(tick, POLL_MS);
+    const onFocus = () => tick();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [me, receiverId, isSelfChat, loadConversations, loadThread]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   function openConversation(otherId: string, convListingId: string | null) {
     if (me && otherId === me.id) return;
@@ -101,6 +145,7 @@ function MesajlarContent() {
       setMessages((prev) => [...prev, data.message]);
       setNewMsg("");
       loadConversations();
+      notifyMessagesUpdated();
     }
     setSending(false);
   }
@@ -111,15 +156,22 @@ function MesajlarContent() {
 
   const visibleConversations = conversations.filter((c) => c.otherUser.id !== me?.id);
 
+  function closeThread() {
+    router.push("/mesajlar");
+  }
+
   return (
     <>
       <Navbar />
-      <div style={{ maxWidth: 1100, margin: "2rem auto", padding: "0 1.5rem" }}>
-        <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 22, fontWeight: 700, marginBottom: "1.5rem" }}>Mesajlar</h1>
-        <div style={{ background: "#fff", borderRadius: 12, border: "0.5px solid #e5e5e5", overflow: "hidden", display: "grid", gridTemplateColumns: "minmax(240px, 280px) 1fr", minHeight: 500 }}>
-          <div style={{ borderRight: "0.5px solid #e5e5e5", overflowY: "auto" }}>
+      <div className="page-wrap">
+        <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(20px, 4vw, 22px)", fontWeight: 700, marginBottom: "1.5rem" }}>Mesajlar</h1>
+        <div className={`messages-layout${receiverId && !isSelfChat ? " messages-layout--thread" : ""}`} style={{ background: "#fff", borderRadius: 12, border: "0.5px solid #e5e5e5", overflow: "hidden" }}>
+          <div className="messages-list">
             {visibleConversations.length === 0 ? (
-              <div style={{ padding: "2rem", textAlign: "center", color: "#999", fontSize: 13 }}>Henüz mesajınız yok</div>
+              <div style={{ padding: "2rem", textAlign: "center", color: "#999", fontSize: 13, lineHeight: 1.6 }}>
+                Henüz mesajın yok.<br />
+                Bir ilandan &quot;Mesaj gönder&quot; ile sohbet başlatabilirsin.
+              </div>
             ) : visibleConversations.map((c) => {
               const active = receiverId === c.otherUser.id && (listingId || null) === (c.listing?.id || null);
               return (
@@ -130,12 +182,9 @@ function MesajlarContent() {
                   style={{
                     width: "100%",
                     padding: "12px 14px",
-                    borderBottom: "0.5px solid #f5f5f5",
                     cursor: "pointer",
                     border: "none",
-                    borderBottomWidth: "0.5px",
-                    borderBottomStyle: "solid",
-                    borderBottomColor: "#f5f5f5",
+                    borderBottom: "0.5px solid #f5f5f5",
                     background: active ? "var(--brand-soft)" : c.unreadCount > 0 ? "#fffafa" : "#fff",
                     textAlign: "left",
                     fontFamily: "inherit",
@@ -175,43 +224,52 @@ function MesajlarContent() {
               );
             })}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", minHeight: 500 }}>
+          <div className="messages-thread">
             {receiverId ? (
               <>
-                {activeOther && (
-                  <div style={{ padding: "12px 16px", borderBottom: "0.5px solid #e5e5e5", fontWeight: 600, fontSize: 14 }}>
-                    {activeOther.name}
-                  </div>
-                )}
-                <div style={{ flex: 1, padding: "1.5rem", overflowY: "auto" }}>
+                <div className="messages-thread-header">
+                  <button type="button" className="messages-back-btn tap-btn" onClick={closeThread} aria-label="Sohbet listesine dön">
+                    <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+                  <span className="overflow-safe" style={{ flex: 1, minWidth: 0 }}>{activeOther?.name || "Sohbet"}</span>
+                </div>
+                <div ref={messagesBoxRef} style={{ flex: 1, padding: "1.5rem", overflowY: "auto", minWidth: 0 }}>
                   {messages.map((m) => (
-                    <div key={m.id} style={{ display: "flex", justifyContent: m.senderId === me?.id ? "flex-end" : "flex-start", marginBottom: 10 }}>
-                      <div style={{ background: m.senderId === me?.id ? "var(--brand)" : "#f5f5f5", color: m.senderId === me?.id ? "#fff" : "#1a1a1a", padding: "10px 14px", borderRadius: 12, fontSize: 14, maxWidth: "70%" }}>
+                    <div key={m.id} style={{ display: "flex", flexDirection: "column", alignItems: m.senderId === me?.id ? "flex-end" : "flex-start", marginBottom: 12 }}>
+                      <div className="msg-bubble" style={{ background: m.senderId === me?.id ? "var(--brand)" : "#f5f5f5", color: m.senderId === me?.id ? "#fff" : "#1a1a1a", padding: "10px 14px", borderRadius: 12, fontSize: 14, lineHeight: 1.45 }}>
                         {m.content}
                       </div>
+                      <span style={{ fontSize: 10.5, color: "#bbb", marginTop: 4, padding: "0 4px" }}>
+                        {formatMsgTime(m.createdAt)}
+                      </span>
                     </div>
                   ))}
                   {messages.length === 0 && (
                     <div style={{ textAlign: "center", color: "#999", padding: "2rem", fontSize: 13 }}>Mesaj göndererek sohbet başlatın</div>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
-                <div style={{ padding: "1rem", borderTop: "0.5px solid #e5e5e5", display: "flex", gap: 10 }}>
+                {sendError && (
+                  <div style={{ padding: "8px 16px", fontSize: 13, color: "#dc2626", background: "var(--brand-soft)", borderTop: "0.5px solid var(--brand-border)" }}>
+                    {sendError}
+                  </div>
+                )}
+                <div className="messages-compose">
                   <input
                     value={newMsg}
                     onChange={(e) => setNewMsg(e.target.value)}
                     placeholder="Mesajınızı yazın..."
-                    onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
-                    style={{ flex: 1, padding: "10px 14px", border: "0.5px solid #e5e5e5", borderRadius: 8, fontSize: 14, outline: "none", fontFamily: "inherit" }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                   />
-                  <button type="button" onClick={sendMessage} disabled={sending}
-                    style={{ padding: "10px 20px", background: "var(--brand)", color: "#fff", border: "none", borderRadius: 8, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
-                    Gönder
+                  <button type="button" onClick={sendMessage} disabled={sending || !newMsg.trim()}
+                    style={{ opacity: sending || !newMsg.trim() ? 0.7 : 1, cursor: sending ? "wait" : "pointer" }}>
+                    {sending ? "..." : "Gönder"}
                   </button>
                 </div>
               </>
             ) : (
-              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: 14, padding: "2rem" }}>
-                Soldan bir sohbet seçin
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: 14, padding: "2rem", textAlign: "center", lineHeight: 1.6 }}>
+                Soldan bir sohbet seçin<br />veya bir ilandan mesaj gönderin
               </div>
             )}
           </div>

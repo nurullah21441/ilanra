@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 
-type AdminTab = "genel" | "ilanlar" | "kullanicilar";
+type AdminTab = "genel" | "ilanlar" | "kullanicilar" | "sikayetler";
 
 interface AdminUser {
   name: string;
@@ -21,6 +21,7 @@ interface AdminShellProps {
 const NAV: { id: AdminTab; label: string; icon: string }[] = [
   { id: "genel", label: "Genel Bakış", icon: "📊" },
   { id: "ilanlar", label: "İlanlar", icon: "📋" },
+  { id: "sikayetler", label: "Şikayetler", icon: "🚩" },
   { id: "kullanicilar", label: "Kullanıcılar", icon: "👥" },
 ];
 
@@ -34,20 +35,8 @@ export default function AdminShell({ activeTab, onTabChange, title, subtitle, ch
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", background: "var(--surface-page)" }}>
-      <aside
-        style={{
-          width: 260,
-          flexShrink: 0,
-          background: "var(--surface-dark)",
-          color: "#e2e8f0",
-          display: "flex",
-          flexDirection: "column",
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-        }}
-      >
+    <div className="admin-layout">
+      <aside className="admin-sidebar">
         <div style={{ padding: "1.25rem 1.25rem 1rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
             <Logo size={24} variant="light" />
@@ -163,9 +152,9 @@ export default function AdminShell({ activeTab, onTabChange, title, subtitle, ch
         </div>
       </aside>
 
-      <main style={{ flex: 1, minWidth: 0, padding: "1.75rem 2rem" }}>
+      <main className="admin-main">
         <header style={{ marginBottom: "1.75rem" }}>
-          <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 26, fontWeight: 800, color: "var(--ink)", marginBottom: 4 }}>
+          <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(22px, 5vw, 26px)", fontWeight: 800, color: "var(--ink)", marginBottom: 4 }}>
             {title}
           </h1>
           {subtitle && <p style={{ fontSize: 14, color: "var(--ink-light)" }}>{subtitle}</p>}
