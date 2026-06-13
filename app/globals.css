@@ -109,8 +109,27 @@ img, video { max-width: 100%; height: auto; }
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.fav-btn { transition: opacity .12s; }
-.fav-btn:hover { opacity: 0.85; }
+.fav-btn {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.fav-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.18);
+}
+.fav-btn:active {
+  transform: scale(0.96);
+}
+.fav-btn-icon {
+  transition: transform .2s cubic-bezier(0.34, 1.4, 0.64, 1), fill .15s ease, stroke .15s ease;
+}
+.fav-btn--active .fav-btn-icon {
+  animation: favPop .28s ease;
+}
+@keyframes favPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
 
 .menu-item { transition: background .12s; }
 .menu-item:hover { background: var(--hover-neutral); }

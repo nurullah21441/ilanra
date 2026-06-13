@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginPath } from "@/lib/auth-url";
+import FavoriteButton from "@/components/FavoriteButton";
 
 interface Listing {
   id: string; title: string; price: number; city: string; district?: string | null;
@@ -148,26 +149,11 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
           ) : (
             <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: isCompact ? 32 : 44, opacity: 0.2 }}>📦</div>
           )}
-          <button
+          <FavoriteButton
+            active={favorited}
             onClick={toggleFav}
-            className="fav-btn tap-btn"
-            style={{
-              position: "absolute",
-              top: isCompact ? 6 : 8,
-              right: isCompact ? 6 : 8,
-              width: isCompact ? 32 : 40,
-              height: isCompact ? 32 : 40,
-              borderRadius: isCompact ? 4 : "50%",
-              background: "rgba(255,255,255,0.95)",
-              border: "1px solid var(--border)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width={isCompact ? 13 : 15} height={isCompact ? 13 : 15} viewBox="0 0 24 24" fill={favorited ? "var(--brand)" : "none"} stroke={favorited ? "var(--brand)" : "#888"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-          </button>
+            size={isCompact ? "sm" : "md"}
+          />
           <div style={{ position: "absolute", top: isCompact ? 6 : 10, left: isCompact ? 6 : 10, display: "flex", flexDirection: "column", gap: 3 }}>
             {listing.isFeatured && (
               <span style={{ background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, padding: isCompact ? "2px 6px" : "3px 9px", borderRadius: isCompact ? 3 : 100, letterSpacing: 0.3 }}>
