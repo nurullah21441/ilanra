@@ -302,6 +302,16 @@ export default function IlanVerPage() {
     <>
       <Navbar />
       <div className="page-container" style={{ maxWidth: 820, paddingTop: "2.5rem", paddingBottom: "5rem" }}>
+        <div className="promo-banner" style={{ marginBottom: "2rem", cursor: "default", pointerEvents: "none" }}>
+          <div className="promo-banner-glow" />
+          <div className="promo-banner-content">
+            <div>
+              <div className="promo-banner-eyebrow">2 dakikada yayında</div>
+              <div className="promo-banner-title">Ücretsiz ilan ver, hemen satışa başla</div>
+              <div className="promo-banner-sub">Komisyon yok · Fotoğraf ekle · Mesajla anlaş</div>
+            </div>
+          </div>
+        </div>
         <h1 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "clamp(22px, 5vw, 26px)", fontWeight: 800, letterSpacing: -0.5, marginBottom: 6 }}>Ne satıyorsun?</h1>
         <p style={{ fontSize: 14, color: "#888", marginBottom: "2rem" }}>Kategori seç, sana özel form gelsin.</p>
         <div className="listing-grid ilan-ver-cat-grid" style={{ gap: 12 }}>

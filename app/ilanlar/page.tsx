@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ListingCard from "@/components/ListingCard";
+import PostListingPromoCard from "@/components/PostListingPromoCard";
 import { CITIES, SORT_OPTIONS, PAGE_SIZE } from "@/lib/cities";
 import { loginPath } from "@/lib/auth-url";
 import type { SavedSearchFilters } from "@/lib/saved-search";
@@ -143,6 +145,13 @@ function IlanlarContent() {
             </p>
           </div>
           <div className="toolbar-actions">
+            <Link href="/ilan-ver" className="hero-cta" style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 16px", borderRadius: 9, textDecoration: "none",
+              fontWeight: 700, fontSize: 13, whiteSpace: "nowrap",
+            }}>
+              + İlan ver
+            </Link>
             <select
               value={sort}
               onChange={(e) => setParam("sort", e.target.value)}
@@ -342,8 +351,14 @@ function IlanlarContent() {
           </div>
         ) : listings.length > 0 ? (
           <>
+            <PostListingPromoCard variant="banner" />
             <div className="listing-grid" style={{ gap: 10 }}>
-              {listings.map((l) => <ListingCard key={l.id} listing={l} variant="compact" />)}
+              {listings.flatMap((l, i) => {
+                const cards = [<ListingCard key={l.id} listing={l} variant="compact" />];
+                if ((i + 1) % 8 === 0) cards.push(<PostListingPromoCard key={`promo-${l.id}`} />);
+                return cards;
+              })}
+              {listings.length < 8 && <PostListingPromoCard key="promo-end" />}
             </div>
 
             {pages > 1 && (

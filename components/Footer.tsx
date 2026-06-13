@@ -35,7 +35,7 @@ export default function () {
   };
 
   return (
-    <footer className="site-footer" style={{ background: "var(--surface-dark)", padding: "48px 1.5rem 28px", marginTop: 0 }}>
+    <footer className="site-footer" style={{ padding: "48px 1.5rem 28px", marginTop: 0 }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
 
         {/* TOP GRID */}

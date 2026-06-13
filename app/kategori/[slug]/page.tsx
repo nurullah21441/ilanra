@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import ListingCard from "@/components/ListingCard";
+import PostListingPromoCard from "@/components/PostListingPromoCard";
 import { parseAttributesJson } from "@/lib/listing-attributes";
 import { categoryIdsForSlug } from "@/lib/category-seed";
 
@@ -122,41 +123,26 @@ export default async function KategoriPage({ params }: { params: Promise<{ slug:
         </div>
 
         {serialized.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "3rem 1rem",
-              color: "#999",
-              background: "#fff",
-              borderRadius: 14,
-              border: "0.5px solid #E8E8E5",
-            }}
-          >
-            Bu kategoride henüz ilan yok.
-            <div style={{ marginTop: "1rem" }}>
-              <Link
-                href="/ilan-ver"
-                style={{
-                  display: "inline-block",
-                  padding: "10px 20px",
-                  background: "var(--brand)",
-                  color: "#fff",
-                  borderRadius: 10,
-                  fontWeight: 700,
-                  fontSize: 14,
-                  textDecoration: "none",
-                }}
-              >
-                İlan ver
-              </Link>
-            </div>
+          <div className="promo-empty-state">
+            <div className="promo-empty-icon">📦</div>
+            <h3 className="promo-empty-title">Bu kategoride ilk sen ol</h3>
+            <p className="promo-empty-text">
+              {category.name} kategorisinde henüz ilan yok — ücretsiz ver, hemen öne çık.
+            </p>
+            <Link href="/ilan-ver" className="home-hero-cta-primary" style={{ animation: "none" }}>
+              İlan ver →
+            </Link>
           </div>
         ) : (
           <>
+            <PostListingPromoCard variant="banner" />
             <div className="listing-grid">
-              {serialized.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
+              {serialized.flatMap((listing, i) => {
+                const cards = [<ListingCard key={listing.id} listing={listing} />];
+                if ((i + 1) % 8 === 0) cards.push(<PostListingPromoCard key={`promo-${listing.id}`} />);
+                return cards;
+              })}
+              {serialized.length < 8 && <PostListingPromoCard key="promo-end" />}
             </div>
             {totalActive > serialized.length && (
               <div style={{ textAlign: "center", marginTop: "2rem" }}>

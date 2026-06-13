@@ -33,6 +33,10 @@ function timeAgo(date: string) {
   return days < 7 ? days + "g" : new Date(date).toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
 }
 
+function isFreshListing(date: string) {
+  return Date.now() - new Date(date).getTime() < 48 * 60 * 60 * 1000;
+}
+
 function parseSpecs(desc: string): Record<string, string> {
   const s: Record<string, string> = {};
   for (const line of desc.split("\n")) {
@@ -106,6 +110,7 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
       : {};
   const badges = getBadges(listing.category.slug, specs);
   const isCompact = variant === "compact";
+  const isNew = isFreshListing(listing.createdAt);
 
   async function toggleFav(e: React.MouseEvent) {
     e.preventDefault();
@@ -129,8 +134,8 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
   }
 
   const cardClass = isCompact ? "listing-card-compact" : "listing-card-vitrin";
-  const radius = isCompact ? 4 : 10;
-  const imgH = isCompact ? 128 : 168;
+  const radius = isCompact ? 10 : 12;
+  const imgH = isCompact ? 140 : 180;
   const priceSize = isCompact ? 17 : 21;
   const titleSize = isCompact ? 13 : 13.5;
   const pad = isCompact ? "10px 11px 11px" : "12px 14px 14px";
@@ -142,13 +147,14 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
         style={{
           background: "#fff",
           border: listing.isFeatured
-            ? `1px solid ${isCompact ? "var(--brand)" : "var(--brand)"}`
+            ? "2px solid var(--brand)"
             : "1px solid var(--border)",
           borderRadius: radius,
           overflow: "hidden",
           height: "100%",
           display: "flex",
           flexDirection: "column",
+          transition: "transform .18s ease, box-shadow .18s ease, border-color .18s",
         }}
       >
         <div style={{ position: "relative", height: imgH, background: "#f5f5f3", flexShrink: 0, overflow: "hidden" }}>
@@ -171,9 +177,12 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
           />
           <div style={{ position: "absolute", top: isCompact ? 6 : 10, left: isCompact ? 6 : 10, display: "flex", flexDirection: "column", gap: 3 }}>
             {listing.isFeatured && (
-              <span style={{ background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, padding: isCompact ? "2px 6px" : "3px 9px", borderRadius: isCompact ? 3 : 100, letterSpacing: 0.3 }}>
-                ÖNE ÇIKAN
+              <span style={{ background: "var(--brand)", color: "#fff", fontSize: 9, fontWeight: 700, padding: isCompact ? "3px 8px" : "4px 10px", borderRadius: 100, letterSpacing: 0.3 }}>
+                ⭐ ÖNE ÇIKAN
               </span>
+            )}
+            {!listing.isFeatured && isNew && (
+              <span className="listing-badge-new">YENİ</span>
             )}
             {cond && (
               <span style={{ background: cond.bg, color: cond.color, fontSize: 9, fontWeight: 600, padding: isCompact ? "2px 6px" : "3px 9px", borderRadius: isCompact ? 3 : 100 }}>
@@ -181,6 +190,7 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
               </span>
             )}
           </div>
+          <span className="listing-cat-chip">{listing.category.name}</span>
           {listing.images.length > 1 && (
             <div style={{ position: "absolute", bottom: 6, right: 6, background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 10, padding: "2px 6px", borderRadius: 3 }}>
               {listing.images.length}
@@ -188,7 +198,7 @@ export default function ListingCard({ listing, variant = "compact" }: { listing:
           )}
         </div>
         <div style={{ padding: pad, display: "flex", flexDirection: "column", flex: 1 }}>
-          <div style={{ fontSize: priceSize, fontWeight: 700, color: "#111", marginBottom: 3, letterSpacing: isCompact ? 0 : -0.5, fontFamily: isCompact ? "inherit" : "Bricolage Grotesque, sans-serif" }}>
+          <div style={{ fontSize: priceSize, fontWeight: 800, color: "#111", marginBottom: 3, letterSpacing: isCompact ? -0.3 : -0.5, fontFamily: "'Bricolage Grotesque', sans-serif" }}>
             {"\u20BA"}{formatted}
           </div>
           <div style={{ fontSize: titleSize, color: "#333", lineHeight: 1.35, marginBottom: badges.length ? 6 : 0 }} className="line-clamp-2">{listing.title}</div>
