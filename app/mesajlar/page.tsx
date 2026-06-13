@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { notifyMessagesUpdated } from "@/lib/messages-ui";
+import { loginPath } from "@/lib/auth-url";
 
 interface Message { id: string; content: string; senderId: string; createdAt: string; sender: { name: string; avatar: string | null }; }
 interface Conversation {
@@ -33,7 +34,14 @@ function MesajlarContent() {
   }
 
   useEffect(() => {
-    fetch("/api/auth/me").then((r) => r.json()).then((d) => { if (!d.user) router.push("/giris"); else setMe(d.user); });
+    fetch("/api/auth/me").then((r) => r.json()).then((d) => {
+      if (!d.user) {
+        const qs = typeof window !== "undefined" ? window.location.search : "";
+        router.replace(loginPath(`/mesajlar${qs}`));
+        return;
+      }
+      setMe(d.user);
+    });
     loadConversations();
   }, [router]);
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { loginPath } from "@/lib/auth-url";
 
 interface Listing {
   id: string; title: string; price: number; city: string;
@@ -18,7 +19,7 @@ export default function IlanlarimPage() {
 
   useEffect(() => {
     fetch("/api/auth/me").then(r => r.json()).then(d => {
-      if (!d.user) { router.push("/giris"); return; }
+      if (!d.user) { router.replace(loginPath("/ilanlarim")); return; }
       setUser(d.user);
       fetch(`/api/listings?limit=50&userId=${d.user.id}`)
         .then(r => r.json())

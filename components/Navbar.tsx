@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 import { useRouter, usePathname } from "next/navigation";
 import { getCategoryStyle } from "@/lib/categoryStyles";
 import { UnreadBadge } from "@/lib/messages-ui";
+import { loginPath } from "@/lib/auth-url";
 
 interface User { id: string; name: string; email: string; role: string; }
 interface Category { id: string; name: string; icon: string; slug: string; }
@@ -417,7 +418,7 @@ export default function Navbar() {
                 <Link href="/giris" className="d-only" style={{ height: 38, padding: "0 14px", display: "inline-flex", alignItems: "center", borderRadius: 9, border: "0.5px solid #E8E8E5", background: "transparent", fontSize: 13.5, color: "#333", textDecoration: "none", fontWeight: 500 }}>
                   Giriş yap
                 </Link>
-                <Link href="/ilan-ver" style={{ height: 38, padding: "0 16px", display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, background: "var(--brand)", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none" }}>
+                <Link href={loginPath("/ilan-ver")} style={{ height: 38, padding: "0 16px", display: "inline-flex", alignItems: "center", gap: 5, borderRadius: 9, background: "var(--brand)", color: "#fff", fontSize: 13.5, fontWeight: 600, textDecoration: "none" }}>
                   <span style={{ fontSize: 16 }}>+</span> İlan ver
                 </Link>
               </>
@@ -489,7 +490,7 @@ export default function Navbar() {
                   <Link href="/giris" onClick={() => setMobileOpen(false)} style={{ flex: 1, textAlign: "center", padding: "12px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, color: "#333", textDecoration: "none", fontWeight: 500 }}>Giriş yap</Link>
                   <Link href="/kayit" onClick={() => setMobileOpen(false)} style={{ flex: 1, textAlign: "center", padding: "12px", border: "0.5px solid #E8E8E5", borderRadius: 10, fontSize: 14, color: "#333", textDecoration: "none", fontWeight: 500 }}>Kayıt ol</Link>
                 </div>
-                <Link href="/ilan-ver" onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "var(--brand)", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                <Link href={loginPath("/ilan-ver")} onClick={() => setMobileOpen(false)} style={{ textAlign: "center", padding: "13px", background: "var(--brand)", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
                   + İlan ver
                 </Link>
               </div>

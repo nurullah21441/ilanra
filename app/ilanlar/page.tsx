@@ -146,21 +146,21 @@ function IlanlarContent() {
 
         {/* GRID */}
         {loading ? (
-          <div className="listing-grid" style={{ gap: 14 }}>
+          <div className="listing-grid" style={{ gap: 10 }}>
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} style={{ borderRadius: 14, overflow: "hidden", border: "0.5px solid #e8e8e5" }}>
-                <div className="skeleton" style={{ height: 165 }} />
-                <div style={{ padding: "12px" }}>
-                  <div className="skeleton" style={{ height: 20, marginBottom: 8, borderRadius: 6 }} />
-                  <div className="skeleton" style={{ height: 14, width: "70%", borderRadius: 6 }} />
+              <div key={i} style={{ borderRadius: 4, overflow: "hidden", border: "1px solid #e8e8e5" }}>
+                <div className="skeleton" style={{ height: 128, borderRadius: 0 }} />
+                <div style={{ padding: "10px 11px" }}>
+                  <div className="skeleton" style={{ height: 16, marginBottom: 6, borderRadius: 3 }} />
+                  <div className="skeleton" style={{ height: 12, width: "70%", borderRadius: 3 }} />
                 </div>
               </div>
             ))}
           </div>
         ) : listings.length > 0 ? (
           <>
-            <div className="listing-grid" style={{ gap: 14 }}>
-              {listings.map(l => <ListingCard key={l.id} listing={l} />)}
+            <div className="listing-grid" style={{ gap: 10 }}>
+              {listings.map(l => <ListingCard key={l.id} listing={l} variant="compact" />)}
             </div>
 
             {/* PAGİNASYON */}

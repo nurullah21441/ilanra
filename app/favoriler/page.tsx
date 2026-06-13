@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ListingCard from "@/components/ListingCard";
+import { loginPath } from "@/lib/auth-url";
 
 export default function FavorilerPage() {
   const [favorites, setFavorites] = useState<{listing: {id:string;title:string;price:number;city:string;isFeatured:boolean;createdAt:string;images:{url:string}[];category:{name:string;slug:string}}}[]>([]);
@@ -10,8 +11,13 @@ export default function FavorilerPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/auth/me").then((r) => r.json()).then((d) => { if (!d.user) router.push("/giris"); });
-    fetch("/api/favorites").then((r) => r.json()).then((d) => setFavorites(d.favorites || [])).finally(() => setLoading(false));
+    fetch("/api/auth/me").then((r) => r.json()).then((d) => {
+      if (!d.user) { router.replace(loginPath("/favoriler")); return; }
+    });
+    fetch("/api/favorites").then((r) => {
+      if (r.status === 401) { router.replace(loginPath("/favoriler")); return null; }
+      return r.json();
+    }).then((d) => { if (d) setFavorites(d.favorites || []); }).finally(() => setLoading(false));
   }, [router]);
 
   return (

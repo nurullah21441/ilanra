@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import IlanGallery from "@/components/IlanGallery";
 import { getCurrentUser } from "@/lib/auth";
+import { loginPath } from "@/lib/auth-url";
 
 export default async function IlanDetayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +28,8 @@ export default async function IlanDetayPage({ params }: { params: Promise<{ id: 
     NEW: "Sıfır", LIKE_NEW: "Sıfır Gibi", USED: "İkinci El", DEFECTIVE: "Hasarlı",
   };
   const formatted = new Intl.NumberFormat("tr-TR").format(listing.price);
+
+  const messagePath = `/mesajlar?listingId=${listing.id}&receiverId=${listing.user.id}`;
 
   return (
     <>
@@ -97,7 +100,9 @@ export default async function IlanDetayPage({ params }: { params: Promise<{ id: 
                 Telefon ile ara
               </a>
               {!isOwner && (
-                <Link href={`/mesajlar?listingId=${listing.id}&receiverId=${listing.user.id}`} style={{
+                <Link
+                  href={currentUser ? messagePath : loginPath(messagePath)}
+                  style={{
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   padding: "13px", background: "#fff", color: "#333",
                   borderRadius: 11, fontWeight: 500, fontSize: 15, textDecoration: "none",

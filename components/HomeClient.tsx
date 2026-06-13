@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import ListingCard from "@/components/ListingCard";
 import Navbar from "@/components/Navbar";
@@ -72,9 +72,9 @@ export default function HomeClient({ featuredListings, listings, totalListings }
                   Öne çıkanlar
                 </h2>
               </div>
-              <div className="listing-grid">
+              <div className="listing-grid listing-grid-vitrin">
                 {featuredListings.map(l => (
-                  <ListingCard key={l.id} listing={l} />
+                  <ListingCard key={l.id} listing={l} variant="vitrin" />
                 ))}
               </div>
             </section>
@@ -93,7 +93,7 @@ export default function HomeClient({ featuredListings, listings, totalListings }
               )}
               <div className="listing-grid">
                 {regularListings.map(l => (
-                  <ListingCard key={l.id} listing={l} />
+                  <ListingCard key={l.id} listing={l} variant="compact" />
                 ))}
               </div>
             </section>

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ListingCard from "@/components/ListingCard";
+import { loginPath } from "@/lib/auth-url";
 
 interface User { id: string; name: string; email: string; phone: string; role: string; }
 interface Listing { id: string; title: string; price: number; city: string; isFeatured: boolean; createdAt: string; status: string; images: { url: string }[]; category: { name: string; slug: string }; }
@@ -20,7 +21,7 @@ export default function ProfilPage() {
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => r.json()).then((d) => {
-      if (!d.user) { router.push("/giris"); return; }
+      if (!d.user) { router.replace(loginPath("/profil")); return; }
       setUser(d.user);
     });
   }, [router]);
