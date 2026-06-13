@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ilanra.com - Türkiye'nin yeni ilan platformu</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #333; background: #f2f2f2; }
+  a { text-decoration: none; color: inherit; }
+
+  /* TOP BAR */
+  .topbar { background: #FFE000; height: 52px; display: flex; align-items: center; padding: 0 12px; gap: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .logo { font-size: 20px; font-weight: 700; color: #111; white-space: nowrap; letter-spacing: -0.5px; flex-shrink: 0; }
+  .logo span { color: #c00; }
+  .search-wrap { flex: 1; max-width: 620px; display: flex; height: 36px; }
+  .search-cat { border: 1.5px solid #aaa; border-right: none; background: #fff; padding: 0 10px; font-size: 12px; color: #333; border-radius: 4px 0 0 4px; cursor: pointer; white-space: nowrap; }
+  .search-input { flex: 1; border: 1.5px solid #aaa; border-right: none; padding: 0 12px; font-size: 13px; color: #111; background: #fff; outline: none; }
+  .search-input:focus { border-color: #888; }
+  .search-btn { background: #e00; border: 1.5px solid #c00; color: #fff; padding: 0 18px; border-radius: 0 4px 4px 0; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .search-btn:hover { background: #c00; }
+  .topbar-right { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+  .topbar-link { font-size: 12px; color: #111; padding: 5px 8px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+  .topbar-link:hover { background: rgba(0,0,0,0.08); }
+  .btn-ilan { background: #111; color: #FFE000; border: none; padding: 7px 14px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn-ilan:hover { background: #333; }
+
+  /* CATEGORY NAV */
+  .cat-nav { background: #fff; border-bottom: 2px solid #eee; display: flex; align-items: stretch; padding: 0 12px; overflow-x: auto; scrollbar-width: none; }
+  .cat-nav::-webkit-scrollbar { display: none; }
+  .cat-nav a { font-size: 13px; color: #333; padding: 10px 13px; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -2px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .cat-nav a:hover { color: #c00; border-bottom-color: #c00; }
+  .cat-nav a.active { color: #c00; border-bottom-color: #c00; font-weight: 600; }
+
+  /* BREADCRUMB */
+  .breadcrumb { background: #fff; padding: 7px 12px; border-bottom: 1px solid #eee; font-size: 11px; color: #888; display: flex; align-items: center; gap: 4px; }
+  .breadcrumb a { color: #c00; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 1140px; margin: 0 auto; padding: 12px; display: flex; gap: 12px; align-items: flex-start; }
+
+  /* SIDEBAR */
+  .sidebar { width: 210px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+  .filter-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; }
+  .filter-header { background: #f7f7f7; border-bottom: 1px solid #e8e8e8; padding: 9px 12px; font-size: 12px; font-weight: 700; color: #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .filter-header .collapse-icon { color: #999; font-size: 11px; }
+  .filter-body { padding: 10px 12px; }
+  .filter-body label { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #444; margin-bottom: 7px; cursor: pointer; line-height: 1.3; }
+  .filter-body label:last-child { margin-bottom: 0; }
+  .filter-body input[type=checkbox] { width: 13px; height: 13px; accent-color: #c00; cursor: pointer; flex-shrink: 0; }
+  .filter-body input[type=text], .filter-body select { width: 100%; height: 30px; border: 1px solid #ccc; border-radius: 3px; padding: 0 8px; font-size: 12px; color: #333; background: #fff; }
+  .filter-body input[type=text]:focus, .filter-body select:focus { border-color: #999; outline: none; }
+  .filter-body .range-row { display: flex; gap: 5px; }
+  .filter-body .range-row input { width: 0; flex: 1; }
+  .filter-body .range-sep { line-height: 30px; color: #999; font-size: 12px; }
+  .filter-body .show-more { font-size: 11px; color: #c00; cursor: pointer; margin-top: 5px; }
+  .filter-body .show-more:hover { text-decoration: underline; }
+
+  .btn-filtrele { width: 100%; padding: 9px; background: #c00; color: #fff; border: none; border-radius: 3px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-filtrele:hover { background: #a00; }
+  .btn-temizle { width: 100%; padding: 7px; background: #fff; color: #666; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; cursor: pointer; margin-top: 5px; }
+  .btn-temizle:hover { background: #f5f5f5; }
+
+  /* LISTINGS AREA */
+  .listings { flex: 1; min-width: 0; }
+
+  /* TOP FILTERS / SORT */
+  .listings-top { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
+  .results-info { font-size: 12px; color: #555; }
+  .results-info strong { color: #111; }
+  .sort-wrap { display: flex; align-items: center; gap: 6px; }
+  .sort-wrap label { font-size: 12px; color: #666; }
+  .sort-wrap select { height: 28px; padding: 0 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 12px; color: #333; }
+  .view-toggle { display: flex; gap: 3px; }
+  .view-btn { width: 28px; height: 28px; border: 1px solid #ccc; border-radius: 3px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #666; }
+  .view-btn.active { background: #f0f0f0; border-color: #999; color: #333; }
+
+  /* ACTIVE FILTERS */
+  .active-filters { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .af-tag { background: #fff; border: 1px solid #ccc; border-radius: 20px; padding: 3px 10px; font-size: 11px; color: #444; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .af-tag .x { color: #999; font-size: 13px; }
+  .af-tag:hover .x { color: #c00; }
+
+  /* LIST ITEM */
+  .list-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; margin-bottom: 6px; overflow: hidden; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; position: relative; }
+  .list-item:hover { border-color: #c00; box-shadow: 0 1px 6px rgba(200,0,0,0.1); }
+  .list-item.featured { border-color: #f0a000; }
+  .list-item.featured::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #f0a000; }
+
+  .item-img { width: 165px; flex-shrink: 0; height: 124px; background: #f5f5f5; position: relative; overflow: hidden; }
+  .item-img .badge { position: absolute; top: 6px; left: 6px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 2px; z-index: 1; }
+  .badge-vitrin { background: #FFE000; color: #111; }
+  .badge-one { background: #f0a000; color: #fff; }
+  .badge-acil { background: #c00; color: #fff; }
+  .item-img-count { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.55); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 2px; }
+  .img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .img-placeholder svg { width: 48px; height: 48px; opacity: 0.25; }
+
+  .item-info { flex: 1; padding: 10px 13px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .item-title { font-size: 14px; font-weight: 600; color: #111; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-title:hover { color: #c00; }
+  .item-spec { font-size: 11px; color: #777; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
+  .item-tag { font-size: 10px; background: #f5f5f5; border: 1px solid #e0e0e0; color: #555; padding: 2px 7px; border-radius: 2px; }
+  .item-price { font-size: 19px; font-weight: 700; color: #c00; }
+  .item-price-sub { font-size: 11px; color: #999; margin-top: 1px; }
+  .item-meta { font-size: 11px; color: #aaa; display: flex; gap: 12px; align-items: center; margin-top: 5px; }
+  .item-meta span { display: flex; align-items: center; gap: 3px; }
+  .item-seller { font-size: 11px; color: #0066cc; margin-top: 3px; }
+  .item-seller:hover { text-decoration: underline; }
+
+  .item-right { width: 46px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 10px 6px 10px 0; gap: 10px; }
+  .fav-btn { width: 30px; height: 30px; border: 1px solid #e0e0e0; border-radius: 50%; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 16px; flex-shrink: 0; }
+  .fav-btn:hover { border-color: #c00; color: #c00; }
+  .fav-btn.active { border-color: #c00; color: #c00; }
+
+  /* SPONSORED */
+  .sponsored-label { font-size: 10px; color: #aaa; text-align: center; margin-top: auto; }
+
+  /* PAGINATION */
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 4px; margin-top: 16px; }
+  .page-btn { min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid #ddd; border-radius: 3px; background: #fff; font-size: 12px; color: #444; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .page-btn:hover { border-color: #999; background: #f5f5f5; }
+  .page-btn.active { background: #c00; color: #fff; border-color: #c00; font-weight: 700; }
+  .page-btn.disabled { color: #ccc; cursor: default; }
+  .page-btn.disabled:hover { background: #fff; border-color: #ddd; }
+
+  /* FOOTER */
+  footer { background: #222; color: #aaa; margin-top: 24px; }
+  .footer-top { display: flex; gap: 40px; padding: 28px 40px; flex-wrap: wrap; }
+  .footer-col h4 { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .footer-col a { display: block; font-size: 12px; color: #aaa; margin-bottom: 7px; cursor: pointer; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { border-top: 1px solid #333; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .footer-bottom .copy { font-size: 11px; color: #666; }
+  .footer-logo { font-size: 16px; font-weight: 700; color: #FFE000; }
+  .footer-logo span { color: #f88; }
+
+  /* ICON HELPERS */
+  .icon { display: inline-block; vertical-align: middle; }
+
+  /* TOOLTIP / HOVER CARD */
+  .item-img:hover .img-placeholder { opacity: 0.7; }
+
+  /* BANNER */
+  .banner { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #555; }
+  .banner strong { color: #111; }
+  .banner-icon { font-size: 20px; }
+
+  /* MOBILE RESPONSIVE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .item-img { width: 120px; height: 100px; }
+    .topbar-right { display: none; }
+    .footer-top { padding: 20px; }
+  }
+
+  /* SCROLL TO TOP */
+  #scrolltop { position: fixed; bottom: 20px; right: 20px; width: 38px; height: 38px; background: #FFE000; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s; z-index: 200; }
+  #scrolltop.visible { opacity: 1; }
+  #scrolltop:hover { background: #f0d000; }
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="search-wrap">
+    <select class="search-cat">
+      <option>Tüm Kategoriler</option>
+      <option selected>Vasıta</option>
+      <option>Emlak</option>
+      <option>Elektronik</option>
+      <option>Ev & Yaşam</option>
+      <option>Giyim & Aksesuar</option>
+      <option>Spor & Outdoor</option>
+      <option>Tarım & Hayvancılık</option>
+    </select>
+    <input class="search-input" type="text" placeholder="Aradığınız ilan, marka veya ürün..." id="searchInput" />
+    <button class="search-btn" onclick="handleSearch()">Ara</button>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-link" onclick="window.location.href='profil.html'">İlanlarım</span>
+<span class="topbar-link" onclick="window.location.href='mesajlar.html'">💬 Mesajlarım</span>
+<span class="topbar-link" onclick="window.location.href='profil.html'">▼ Hesabım</span>
+<button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+
+<!-- CATEGORY NAV -->
+<div class="cat-nav">
+  <a onclick="switchCat(this,'vasita')" class="active">🚗 Vasıta</a>
+  <a href="arama_sonuclari.html?kategori=emlak">🏠 Emlak</a>
+  <a href="arama_sonuclari.html?kategori=elektronik">📱 Elektronik</a>
+  <a href="arama_sonuclari.html?kategori=mobilya">🛋️ Mobilya</a>
+  <a href="arama_sonuclari.html?kategori=giyim">👗 Giyim</a>
+  <a href="arama_sonuclari.html?kategori=spor">⚽ Spor</a>
+  <a href="arama_sonuclari.html?kategori=anne-cocuk">👶 Anne & Çocuk</a>
+  <a href="arama_sonuclari.html?kategori=tarim">🌾 Tarım</a>
+  <a href="arama_sonuclari.html?kategori=is-makinesi">💼 İş Makineleri</a>
+  <a href="arama_sonuclari.html?kategori=yat">⛵ Yat & Tekne</a>
+  <a href="arama_sonuclari.html?kategori=hayvan">🐾 Hayvanlar</a>
+  <a href="anasayfa.html">Diğer ▾</a>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a>Anasayfa</a> › <a>Vasıta</a> › <a>Otomobil</a> › <span>Tüm Otomobiller</span>
+</div>
+
+<div class="container">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="filter-box">
+      <div class="filter-header">Kategori <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <label><input type="checkbox" checked /> Otomobil</label>
+        <label><input type="checkbox" /> Arazi & SUV</label>
+        <label><input type="checkbox" /> Minibüs & Panelvan</label>
+        <label><input type="checkbox" /> Motosiklet</label>
+        <label><input type="checkbox" /> Kamyon</label>
+        <label><input type="checkbox" /> Karavan</label>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Marka <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <input type="text" placeholder="Marka ara..." style="margin-bottom:8px;" />
+        <label><input type="checkbox" checked id="cb-bmw" onchange="updateFilters()" /> BMW</label>
+        <label><input type="checkbox" id="cb-mercedes" onchange="updateFilters()" /> Mercedes</label>
+        <label><input type="checkbox" id="cb-toyota" onchange="updateFilters()" /> Toyota</label>
+        <label><input type="checkbox" id="cb-vw" onchange="updateFilters()" /> Volkswagen</label>
+        <label><input type="checkbox" id="cb-hyundai" onchange="updateFilters()" /> Hyundai</label>
+        <label><input type="checkbox" id="cb-ford" onchange="updateFilters()" /> Ford</label>
+        <label><input type="checkbox" id="cb-renault" onchange="updateFilters()" /> Renault</label>
+        <span class="show-more">+ 42 marka daha göster</span>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Fiyat (TL) <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <div class="range-row">
+          <input type="text" placeholder="Min" id="priceMin" />
+          <span class="range-sep">—</span>
+          <input type="text" placeholder="Max" id="priceMax" />
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Yıl <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <div class="range-row">
+          <input type="text" placeholder="2010" id="yearMin" />
+          <span class="range-sep">—</span>
+          <input type="text" placeholder="2024" id="yearMax" />
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Km <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <div class="range-row">
+          <input type="text" placeholder="Min" />
+          <span class="range-sep">—</span>
+          <input type="text" placeholder="Max" />
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Yakıt Tipi <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <label><input type="checkbox" onchange="updateFilters()" /> Benzin</label>
+        <label><input type="checkbox" checked onchange="updateFilters()" /> Dizel</label>
+        <label><input type="checkbox" onchange="updateFilters()" /> LPG & Benzin</label>
+        <label><input type="checkbox" onchange="updateFilters()" /> Hibrit</label>
+        <label><input type="checkbox" onchange="updateFilters()" /> Elektrik</label>
+        <label><input type="checkbox" onchange="updateFilters()" /> Diğer</label>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Şanzıman <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <label><input type="checkbox" checked onchange="updateFilters()" /> Otomatik</label>
+        <label><input type="checkbox" onchange="updateFilters()" /> Düz / Manuel</label>
+        <label><input type="checkbox" onchange="updateFilters()" /> Yarı Otomatik</label>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Kasa Tipi <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <label><input type="checkbox" /> Sedan</label>
+        <label><input type="checkbox" /> Hatchback</label>
+        <label><input type="checkbox" /> Station Wagon</label>
+        <label><input type="checkbox" /> Coupe</label>
+        <label><input type="checkbox" /> Cabrio</label>
+        <label><input type="checkbox" /> MPV</label>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">Renk <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <label><input type="checkbox" /> Beyaz</label>
+        <label><input type="checkbox" /> Siyah</label>
+        <label><input type="checkbox" /> Gri</label>
+        <label><input type="checkbox" /> Kırmızı</label>
+        <label><input type="checkbox" /> Mavi</label>
+        <span class="show-more">+ Diğer renkler</span>
+      </div>
+    </div>
+
+    <div class="filter-box">
+      <div class="filter-header">İl / İlçe <span class="collapse-icon">▾</span></div>
+      <div class="filter-body">
+        <select>
+          <option>Tüm Türkiye</option>
+          <option>İstanbul</option>
+          <option>Ankara</option>
+          <option>İzmir</option>
+          <option selected>Adana</option>
+          <option>Bursa</option>
+          <option>Antalya</option>
+          <option>Konya</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-filtrele" onclick="applyFilters()">Filtrele</button>
+    <button class="btn-temizle" onclick="clearFilters()">Filtreleri Temizle</button>
+  </div>
+
+  <!-- LISTINGS -->
+  <div class="listings">
+
+    <!-- ACTIVE FILTERS -->
+    <div class="active-filters" id="activeFilters">
+      <span style="font-size:11px;color:#666;">Aktif filtreler:</span>
+      <div class="af-tag" onclick="removeTag(this)">BMW <span class="x">×</span></div>
+      <div class="af-tag" onclick="removeTag(this)">Otomatik <span class="x">×</span></div>
+      <div class="af-tag" onclick="removeTag(this)">Dizel <span class="x">×</span></div>
+    </div>
+
+    <!-- LISTINGS TOP -->
+    <div class="listings-top">
+      <div class="results-info"><strong id="resultCount">1.847</strong> ilan bulundu</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="sort-wrap">
+          <label>Sırala:</label>
+          <select onchange="sortListings(this.value)">
+            <option value="new">En yeni ilanlar</option>
+            <option value="cheap">En düşük fiyat</option>
+            <option value="exp">En yüksek fiyat</option>
+            <option value="km">En az km</option>
+          </select>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" title="Liste görünümü">≡</button>
+          <button class="view-btn" title="Galeri görünümü">⊞</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IAN LISTESI -->
+    <div id="listings-list">
+
+      <!-- FEATURED -->
+      <div class="list-item featured" onclick="openDetail(0)">
+        <div class="item-img" style="background:#dde8f5;">
+          <div class="badge badge-vitrin">VİTRİN</div>
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M10 20 L20 8 L60 8 L70 20" fill="#bbb"/>
+              <rect x="22" y="10" width="36" height="10" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 12</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge</div>
+            <div class="item-spec">2022 • Otomatik • Dizel • 38.500 km</div>
+            <div class="item-tags">
+              <span class="item-tag">M Sport</span>
+              <span class="item-tag">Sunroof</span>
+              <span class="item-tag">Hayalet Gösterge</span>
+              <span class="item-tag">Isıtmalı Koltuk</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">3.850.000 TL</div>
+            <div class="item-price-sub">Takas: Kapalı</div>
+            <div class="item-meta">
+              <span>📍 İstanbul / Kadıköy</span>
+              <span>🕐 Bugün 11:32</span>
+            </div>
+            <div class="item-seller">Mert Otomotiv (Galeri) ✓</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn active" onclick="toggleFav(event,this)">♥</button>
+          <div class="sponsored-label">Öne<br>Çıkan</div>
+        </div>
+      </div>
+
+      <div class="list-item" onclick="openDetail(1)">
+        <div class="item-img" style="background:#e5f5e8;">
+          <div class="badge badge-one">ACİL</div>
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M12 20 L22 9 L58 9 L68 20" fill="#bbb"/>
+              <rect x="24" y="11" width="32" height="9" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 8</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2020 Toyota Corolla 1.8 Hybrid Premium CVT</div>
+            <div class="item-spec">2020 • CVT (Otomatik) • Hibrit • 62.000 km</div>
+            <div class="item-tags">
+              <span class="item-tag">Hibrit</span>
+              <span class="item-tag">LED Far</span>
+              <span class="item-tag">Geri Görüş Kamerası</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">1.490.000 TL</div>
+            <div class="item-price-sub">Takas: Açık</div>
+            <div class="item-meta">
+              <span>📍 Ankara / Çankaya</span>
+              <span>🕐 Bugün 09:15</span>
+            </div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+        </div>
+      </div>
+
+      <div class="list-item" onclick="openDetail(2)">
+        <div class="item-img" style="background:#f0edf8;">
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M8 20 L18 7 L62 7 L72 20" fill="#bbb"/>
+              <rect x="20" y="9" width="40" height="11" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 19</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2023 Mercedes-Benz C200 AMG Line – Sıfır Kilometre</div>
+            <div class="item-spec">2023 • 9G-TRONIC (Otomatik) • Benzin • 0 km</div>
+            <div class="item-tags">
+              <span class="item-tag">AMG Line</span>
+              <span class="item-tag">Panoramik</span>
+              <span class="item-tag">MBUX</span>
+              <span class="item-tag">Sürücü Destek Paketi</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">5.200.000 TL</div>
+            <div class="item-price-sub">Kredi ile: 47.800 TL/ay'dan</div>
+            <div class="item-meta">
+              <span>📍 İzmir / Karşıyaka</span>
+              <span>🕐 Dün 17:40</span>
+            </div>
+            <div class="item-seller">Başaran Otomotiv Yetkili Bayi</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+        </div>
+      </div>
+
+      <div class="list-item" onclick="openDetail(3)">
+        <div class="item-img" style="background:#fdf5e0;">
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M10 20 L20 10 L60 10 L70 20" fill="#bbb"/>
+              <rect x="22" y="12" width="36" height="8" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 6</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2019 Volkswagen Passat 1.6 TDI BlueMotion Comfortline</div>
+            <div class="item-spec">2019 • DSG (Otomatik) • Dizel • 105.000 km</div>
+            <div class="item-tags">
+              <span class="item-tag">Cruise Control</span>
+              <span class="item-tag">Park Sensörü</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">1.280.000 TL</div>
+            <div class="item-price-sub">Takas: Açık</div>
+            <div class="item-meta">
+              <span>📍 Bursa / Nilüfer</span>
+              <span>🕐 Dün 14:22</span>
+            </div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+        </div>
+      </div>
+
+      <div class="list-item featured" onclick="openDetail(4)">
+        <div class="item-img" style="background:#e0f4f0;">
+          <div class="badge badge-vitrin">VİTRİN</div>
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="18" width="70" height="22" rx="5" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M10 18 L22 6 L58 6 L70 18" fill="#bbb"/>
+              <rect x="24" y="8" width="32" height="10" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 14</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2024 Hyundai Tucson 1.6 T-GDI Hybrid N-Line 4WD</div>
+            <div class="item-spec">2024 • 6-İleri Otomatik • Hibrit • 8.200 km</div>
+            <div class="item-tags">
+              <span class="item-tag">N-Line</span>
+              <span class="item-tag">4WD</span>
+              <span class="item-tag">360° Kamera</span>
+              <span class="item-tag">HUD</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">2.750.000 TL</div>
+            <div class="item-price-sub">Takas: Açık</div>
+            <div class="item-meta">
+              <span>📍 Adana / Seyhan</span>
+              <span>🕐 28.05.2026</span>
+            </div>
+            <div class="item-seller">Güven Otomotiv (Galeri) ✓</div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+          <div class="sponsored-label">Öne<br>Çıkan</div>
+        </div>
+      </div>
+
+      <div class="list-item" onclick="openDetail(5)">
+        <div class="item-img" style="background:#fde8e8;">
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M14 20 L24 10 L56 10 L66 20" fill="#bbb"/>
+              <rect x="26" y="12" width="28" height="8" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 9</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2021 Ford Focus 1.5 EcoBoost Titanium Hatchback</div>
+            <div class="item-spec">2021 • 7-İleri Otomatik • Benzin • 47.000 km</div>
+            <div class="item-tags">
+              <span class="item-tag">SYNC 4</span>
+              <span class="item-tag">B&O Ses Sistemi</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">1.095.000 TL</div>
+            <div class="item-price-sub">Takas: Kapalı</div>
+            <div class="item-meta">
+              <span>📍 Antalya / Muratpaşa</span>
+              <span>🕐 27.05.2026</span>
+            </div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+        </div>
+      </div>
+
+      <div class="list-item" onclick="openDetail(6)">
+        <div class="item-img" style="background:#e8eef8;">
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M10 20 L20 8 L60 8 L70 20" fill="#bbb"/>
+              <rect x="22" y="10" width="36" height="10" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 5</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2022 Renault Megane 1.3 TCe Joy Sedan</div>
+            <div class="item-spec">2022 • Otomatik • Benzin • 55.000 km</div>
+            <div class="item-tags">
+              <span class="item-tag">Klima</span>
+              <span class="item-tag">Bluetooth</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">895.000 TL</div>
+            <div class="item-price-sub">Takas: Açık</div>
+            <div class="item-meta">
+              <span>📍 Konya / Selçuklu</span>
+              <span>🕐 26.05.2026</span>
+            </div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+        </div>
+      </div>
+
+      <div class="list-item" onclick="openDetail(7)">
+        <div class="item-img" style="background:#f5f0e8;">
+          <div class="img-placeholder">
+            <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="20" width="70" height="20" rx="4" fill="#aaa"/>
+              <ellipse cx="20" cy="40" rx="7" ry="7" fill="#888"/>
+              <ellipse cx="60" cy="40" rx="7" ry="7" fill="#888"/>
+              <path d="M8 20 L18 7 L62 7 L72 20" fill="#bbb"/>
+              <rect x="20" y="9" width="40" height="11" rx="2" fill="#ccc"/>
+            </svg>
+          </div>
+          <div class="item-img-count">📷 11</div>
+        </div>
+        <div class="item-info">
+          <div>
+            <div class="item-title">2018 BMW X5 xDrive30d M Sport – Full Paket</div>
+            <div class="item-spec">2018 • 8-İleri Steptronic • Dizel • 130.000 km</div>
+            <div class="item-tags">
+              <span class="item-tag">M Sport</span>
+              <span class="item-tag">Harman Kardon</span>
+              <span class="item-tag">Panoramik</span>
+            </div>
+          </div>
+          <div>
+            <div class="item-price">2.100.000 TL</div>
+            <div class="item-price-sub">Takas: Açık</div>
+            <div class="item-meta">
+              <span>📍 İstanbul / Beşiktaş</span>
+              <span>🕐 25.05.2026</span>
+            </div>
+          </div>
+        </div>
+        <div class="item-right">
+          <button class="fav-btn" onclick="toggleFav(event,this)">♡</button>
+        </div>
+      </div>
+
+    </div><!-- /listings-list -->
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <button class="page-btn disabled">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" onclick="goPage(this,2)">2</button>
+      <button class="page-btn" onclick="goPage(this,3)">3</button>
+      <button class="page-btn" onclick="goPage(this,4)">4</button>
+      <button class="page-btn" onclick="goPage(this,5)">5</button>
+      <button class="page-btn">...</button>
+      <button class="page-btn" onclick="goPage(this,185)">185</button>
+      <button class="page-btn" onclick="goPage(this,2)">›</button>
+    </div>
+
+  </div><!-- /listings -->
+</div><!-- /container -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-col">
+      <h4>ilanra.com</h4>
+      <a>Hakkımızda</a>
+      <a>Kariyer</a>
+      <a>Basın</a>
+      <a>Reklam Ver</a>
+      <a>İletişim</a>
+    </div>
+    <div class="footer-col">
+      <h4>Yardım</h4>
+      <a>İlan Nasıl Verilir?</a>
+      <a>Güvenli Alışveriş</a>
+      <a>Sıkça Sorulan Sorular</a>
+      <a>İlan Kuralları</a>
+      <a>Dolandırıcılığa Dikkat</a>
+    </div>
+    <div class="footer-col">
+      <h4>Hesabım</h4>
+      <a>Giriş Yap</a>
+      <a>Üye Ol</a>
+      <a>İlanlarım</a>
+      <a>Favorilerim</a>
+      <a>Mesajlarım</a>
+    </div>
+    <div class="footer-col">
+      <h4>Kategoriler</h4>
+      <a>Vasıta</a>
+      <a>Emlak</a>
+      <a>Elektronik</a>
+      <a>Ev & Yaşam</a>
+      <a>Giyim & Aksesuar</a>
+    </div>
+    <div class="footer-col">
+      <h4>Mobil Uygulama</h4>
+      <a>📱 App Store</a>
+      <a>🤖 Google Play</a>
+      <a>🪟 App Gallery</a>
+      <br>
+      <h4 style="margin-top:8px;">Sosyal Medya</h4>
+      <a>Facebook</a>
+      <a>Twitter / X</a>
+      <a>Instagram</a>
+      <a>YouTube</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-logo">ilanra<span>.com</span></div>
+    <div class="copy">© 2026 ilanra.com Tüm hakları saklıdır. | Gizlilik Politikası | Kullanım Koşulları | Çerez Politikası</div>
+  </div>
+</footer>
+
+<button id="scrolltop" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
+
+<script>
+  // Scroll to top button
+  window.addEventListener('scroll', () => {
+    document.getElementById('scrolltop').classList.toggle('visible', window.scrollY > 300);
+  });
+
+  // Category switch
+  function switchCat(el, cat) {
+    document.querySelectorAll('.cat-nav a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    const cats = {
+      vasita: '1.847', emlak: '3.241', elektronik: '5.128',
+      mobilya: '892', giyim: '2.344', spor: '441',
+      anne: '763', tarim: '321', is: '189', yat: '94', havvan: '1.102', diger: '4.820'
+    };
+    document.getElementById('resultCount').textContent = (cats[cat] || '—');
+  }
+
+  // Toggle favorite
+  function toggleFav(e, btn) {
+    e.stopPropagation();
+    const active = btn.classList.toggle('active');
+    btn.textContent = active ? '♥' : '♡';
+  }
+
+  // Remove active filter tag
+  function removeTag(el) {
+    el.remove();
+  }
+
+  // Update filter tags
+  function updateFilters() {}
+
+  // Apply filters
+  function applyFilters() {
+    alert('Filtreler uygulandı!');
+  }
+
+  // Clear filters
+  function clearFilters() {
+    document.querySelectorAll('.sidebar input[type=checkbox]').forEach(cb => cb.checked = false);
+    document.getElementById('activeFilters').innerHTML = '<span style="font-size:11px;color:#888;">Aktif filtre yok</span>';
+  }
+
+  // Pagination
+  function goPage(btn, n) {
+    document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // Sort
+  function sortListings(val) {
+    console.log('Sort by:', val);
+  }
+
+  // Search
+  function handleSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) alert('Arama: ' + q);
+  }
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSearch();
+  });
+
+  // Open detail (placeholder)
+  function openDetail(id) {
+  window.location.href = 'ilan_detay.html?id=' + id;
+}
+</script>
+</body>
+</html>
+

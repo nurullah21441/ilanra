@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ödeme – ilanra.com</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #333; background: #f2f2f2; }
+  .topbar { background: #FFE000; height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .logo { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.5px; }
+  .logo span { color: #c00; }
+  .secure-badge { margin-left: auto; font-size: 12px; color: #0a0; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+
+  .breadcrumb { background: #fff; padding: 7px 16px; border-bottom: 1px solid #eee; font-size: 11px; color: #888; display: flex; gap: 4px; }
+  .breadcrumb a { color: #c00; cursor: pointer; }
+
+  .container { max-width: 900px; margin: 20px auto; padding: 0 16px; display: flex; gap: 16px; align-items: flex-start; }
+
+  .left-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .right-col { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+
+  /* STEPS */
+  .steps { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; display: flex; align-items: center; }
+  .step { display: flex; align-items: center; gap: 7px; }
+  .snum { width: 26px; height: 26px; border-radius: 50%; background: #eee; color: #999; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step.done .snum { background: #0a0; color: #fff; }
+  .step.active .snum { background: #c00; color: #fff; }
+  .slabel { font-size: 12px; color: #aaa; }
+  .step.active .slabel { color: #c00; font-weight: 600; }
+  .step.done .slabel { color: #0a0; }
+  .sline { flex: 1; height: 1px; background: #ddd; margin: 0 8px; }
+  .sline.done { background: #0a0; }
+
+  /* CARD */
+  .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  .card-head { background: #f7f7f7; border-bottom: 1px solid #eee; padding: 11px 16px; font-size: 13px; font-weight: 700; color: #333; }
+  .card-body { padding: 18px 16px; }
+
+  /* PAKET SEÇİM */
+  .pkg-list { display: flex; flex-direction: column; gap: 8px; }
+  .pkg-row { border: 2px solid #e0e0e0; border-radius: 6px; padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.15s; }
+  .pkg-row:hover { border-color: #888; }
+  .pkg-row.selected { border-color: #c00; background: #fff5f5; }
+  .pkg-radio { width: 18px; height: 18px; border: 2px solid #ccc; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .pkg-row.selected .pkg-radio { border-color: #c00; background: #c00; }
+  .pkg-row.selected .pkg-radio::after { content: ''; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
+  .pkg-icon2 { font-size: 24px; flex-shrink: 0; }
+  .pkg-info { flex: 1; }
+  .pkg-name2 { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 2px; }
+  .pkg-desc2 { font-size: 12px; color: #666; }
+  .pkg-price2 { text-align: right; }
+  .pkg-price2 .price { font-size: 16px; font-weight: 700; color: #c00; }
+  .pkg-price2 .period { font-size: 11px; color: #888; }
+  .popular-badge { background: #c00; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+  /* ÖDEME */
+  .pay-methods { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .pay-method { border: 2px solid #e0e0e0; border-radius: 4px; padding: 8px 14px; cursor: pointer; font-size: 12px; font-weight: 500; color: #555; display: flex; align-items: center; gap: 6px; }
+  .pay-method.active { border-color: #c00; color: #c00; background: #fff5f5; }
+  .pay-method:hover { border-color: #888; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
+  .form-group input, .form-group select { width: 100%; height: 38px; border: 1px solid #ccc; border-radius: 4px; padding: 0 12px; font-size: 13px; color: #111; background: #fff; outline: none; font-family: inherit; }
+  .form-group input:focus { border-color: #888; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  .card-icons { display: flex; gap: 6px; margin-bottom: 14px; }
+  .card-icon { height: 28px; padding: 0 8px; border: 1px solid #eee; border-radius: 3px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #555; }
+
+  /* SUMMARY */
+  .summary-item { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+  .summary-item:last-child { border-bottom: none; }
+  .summary-item .label { color: #666; }
+  .summary-item .value { font-weight: 600; color: #111; }
+  .summary-total { display: flex; justify-content: space-between; padding: 11px 0 0; margin-top: 4px; border-top: 2px solid #eee; }
+  .summary-total .label { font-size: 14px; font-weight: 700; color: #111; }
+  .summary-total .value { font-size: 18px; font-weight: 700; color: #c00; }
+
+  .btn-pay { width: 100%; height: 46px; background: #c00; color: #fff; border: none; border-radius: 4px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-pay:hover { background: #a00; }
+
+  .security-row { display: flex; align-items: center; gap: 6px; justify-content: center; font-size: 11px; color: #888; margin-top: 8px; }
+
+  .ilan-preview { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .ilan-preview .ip-img { width: 44px; height: 34px; background: #ddd; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .ilan-preview .ip-title { font-size: 12px; font-weight: 600; color: #111; }
+  .ilan-preview .ip-price { font-size: 11px; color: #c00; font-weight: 600; }
+
+  /* SUCCESS */
+  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; }
+  .success-overlay.show { display: flex; }
+  .success-box { background: #fff; border-radius: 10px; padding: 32px; max-width: 400px; width: 90%; text-align: center; }
+  .success-icon { font-size: 56px; margin-bottom: 14px; }
+  .success-box h2 { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 8px; }
+  .success-box p { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 20px; }
+  .btn-success { background: #c00; color: #fff; border: none; padding: 11px 28px; border-radius: 4px; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+  footer { background: #222; color: #aaa; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+  .footer-logo { font-size: 15px; font-weight: 700; color: #FFE000; }
+  .footer-logo span { color: #f88; }
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="secure-badge">🔒 Güvenli Ödeme</div>
+</div>
+<div class="breadcrumb">
+  <a>Anasayfa</a> › <a>İlan Ver</a> › <span>Paket & Ödeme</span>
+</div>
+
+<div class="container">
+  <div class="left-col">
+
+    <!-- STEPS -->
+    <div class="steps">
+      <div class="step done"><div class="snum">✓</div><div class="slabel">Kategori</div></div>
+      <div class="sline done"></div>
+      <div class="step done"><div class="snum">✓</div><div class="slabel">İlan Bilgileri</div></div>
+      <div class="sline done"></div>
+      <div class="step active"><div class="snum">3</div><div class="slabel">Paket & Ödeme</div></div>
+      <div class="sline"></div>
+      <div class="step"><div class="snum">4</div><div class="slabel">Yayınla</div></div>
+    </div>
+
+    <!-- İLAN PREVİEW -->
+    <div class="card">
+      <div class="card-head">📋 İlanınız</div>
+      <div class="card-body">
+        <div class="ilan-preview">
+          <div class="ip-img">🚗</div>
+          <div>
+            <div class="ip-title">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge</div>
+            <div class="ip-price">3.850.000 TL</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#0a0;font-weight:600;">✓ İlan bilgileri kaydedildi. Paket seçerek yayınlayabilirsiniz.</div>
+      </div>
+    </div>
+
+    <!-- PAKET SEÇ -->
+    <div class="card">
+      <div class="card-head">🎯 Paket Seçin</div>
+      <div class="card-body">
+        <div class="pkg-list">
+          <div class="pkg-row" onclick="selectPkg(this, 0, 'Standart', 0)">
+            <div class="pkg-radio"></div>
+            <div class="pkg-icon2">📋</div>
+            <div class="pkg-info">
+              <div class="pkg-name2">Standart İlan</div>
+              <div class="pkg-desc2">30 gün yayında · Normal listeleme · Temel görünürlük</div>
+            </div>
+            <div class="pkg-price2"><div class="price">Ücretsiz</div><div class="period"> </div></div>
+          </div>
+          <div class="pkg-row selected" onclick="selectPkg(this, 1, 'Vitrin', 149)">
+            <div class="pkg-radio"><span></span></div>
+            <div class="pkg-icon2">⭐</div>
+            <div class="pkg-info">
+              <div class="pkg-name2">Vitrin <span class="popular-badge">POPÜLER</span></div>
+              <div class="pkg-desc2">15 gün · Liste başına sabitlenir · 5x görüntülenme garantisi</div>
+            </div>
+            <div class="pkg-price2"><div class="price">149 TL</div><div class="period">15 gün</div></div>
+          </div>
+          <div class="pkg-row" onclick="selectPkg(this, 2, 'Süper Vitrin', 299)">
+            <div class="pkg-radio"></div>
+            <div class="pkg-icon2">🚀</div>
+            <div class="pkg-info">
+              <div class="pkg-name2">Süper Vitrin</div>
+              <div class="pkg-desc2">30 gün · Arama sonucu en üste çık · 10x görüntülenme · E-posta bildirimi</div>
+            </div>
+            <div class="pkg-price2"><div class="price">299 TL</div><div class="period">30 gün</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÖDEME YÖNTEMİ -->
+    <div class="card" id="paymentSection">
+      <div class="card-head">💳 Ödeme Bilgileri</div>
+      <div class="card-body">
+        <div class="pay-methods">
+          <div class="pay-method active" onclick="switchPay(this,'card')">💳 Kredi / Banka Kartı</div>
+          <div class="pay-method" onclick="switchPay(this,'eft')">🏦 EFT / Havale</div>
+          <div class="pay-method" onclick="switchPay(this,'wallet')">👛 Dijital Cüzdan</div>
+        </div>
+
+        <div id="cardForm">
+          <div class="card-icons">
+            <div class="card-icon">VISA</div>
+            <div class="card-icon">MC</div>
+            <div class="card-icon">TROY</div>
+            <div class="card-icon">AMEX</div>
+          </div>
+
+          <div class="form-group">
+            <label>Kart Numarası</label>
+            <input type="text" id="cardNum" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="formatCard(this)" />
+          </div>
+          <div class="form-group">
+            <label>Kart Üzerindeki Ad Soyad</label>
+            <input type="text" placeholder="AD SOYAD" style="text-transform:uppercase;" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Son Kullanma Tarihi</label>
+              <input type="text" placeholder="AA / YY" maxlength="7" oninput="formatExp(this)" />
+            </div>
+            <div class="form-group">
+              <label>CVV / CVC</label>
+              <input type="text" placeholder="•••" maxlength="4" />
+            </div>
+          </div>
+          <div style="background:#f0fff0;border:1px solid #c0e0c0;border-radius:4px;padding:10px 12px;font-size:12px;color:#444;margin-bottom:4px;">
+            🔒 Kart bilgileriniz 256-bit SSL ile korunmaktadır. ilanra.com kart bilgilerinizi saklamaz.
+          </div>
+        </div>
+
+        <div id="eftForm" style="display:none">
+          <div style="background:#f8f8f8;border:1px solid #eee;border-radius:4px;padding:14px;font-size:13px;color:#444;line-height:1.8;">
+            <strong>Banka Hesap Bilgileri:</strong><br>
+            Banka: Ziraat Bankası<br>
+            IBAN: TR12 0001 2009 8765 4321 0000 01<br>
+            Hesap Adı: İlanra Elektronik Ticaret A.Ş.<br>
+            Açıklama: <strong>AK-2026-88421</strong>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:8px;">Havale açıklamasına mutlaka referans kodunuzu yazın. Ödeme onayı 1-2 iş günü içinde yapılır.</div>
+        </div>
+
+        <div id="walletForm" style="display:none">
+          <div class="pkg-list" style="gap:6px;">
+            <div class="pkg-row" style="padding:10px 12px;" onclick="selectWallet(this)"><div class="pkg-radio"></div><div style="font-size:20px;">🟡</div><div class="pkg-info"><div class="pkg-name2" style="font-size:13px;">ilanra Cüzdan</div><div class="pkg-desc2">Bakiye: 45,00 TL</div></div></div>
+            <div class="pkg-row" style="padding:10px 12px;" onclick="selectWallet(this)"><div class="pkg-radio"></div><div style="font-size:20px;">🔵</div><div class="pkg-info"><div class="pkg-name2" style="font-size:13px;">PayPal</div><div class="pkg-desc2">ahmet@email.com</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COL -->
+  <div class="right-col">
+    <div class="card">
+      <div class="card-head">🧾 Sipariş Özeti</div>
+      <div class="card-body">
+        <div class="summary-item"><span class="label">İlan paketi</span><span class="value" id="summaryPkg">Vitrin (15 gün)</span></div>
+        <div class="summary-item"><span class="label">Ara toplam</span><span class="value" id="summaryBase">149,00 TL</span></div>
+        <div class="summary-item"><span class="label">KDV (%20)</span><span class="value" id="summaryVat">29,80 TL</span></div>
+        <div class="summary-item"><span class="label">İndirim</span><span class="value" style="color:#0a0">-0,00 TL</span></div>
+        <div class="summary-total">
+          <span class="label">Toplam</span>
+          <span class="value" id="summaryTotal">178,80 TL</span>
+        </div>
+
+        <div class="form-group" style="margin-top:14px;">
+          <label>İndirim Kodu</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="couponInput" placeholder="Kupon kodunuz" style="flex:1;" />
+            <button style="height:38px;padding:0 12px;background:#fff;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;" onclick="applyCoupon()">Uygula</button>
+          </div>
+        </div>
+
+        <button class="btn-pay" id="payBtn" onclick="doPay()">
+          🔒 Güvenli Öde — <span id="btnTotal">178,80 TL</span>
+        </button>
+        <div class="security-row">
+          <span>🔒 SSL Korumalı</span>
+          <span>·</span>
+          <span>PCI DSS Uyumlu</span>
+          <span>·</span>
+          <span>3D Secure</span>
+        </div>
+
+        <div style="margin-top:12px;font-size:11px;color:#aaa;text-align:center;line-height:1.6;">
+          Ödeme yaparak <a style="color:#c00;">Kullanım Koşulları</a>'nı kabul etmiş sayılırsınız.
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fffbe6;border:1px solid #f0d060;border-radius:6px;padding:12px 14px;">
+      <div style="font-size:12px;font-weight:700;color:#a07000;margin-bottom:6px;">💡 Vitrin Avantajları</div>
+      <ul style="font-size:11px;color:#7a5a00;padding-left:14px;line-height:1.8;">
+        <li>Liste başında gösterim</li>
+        <li>5x daha fazla görüntülenme</li>
+        <li>Sarı çerçeve ile öne çıkma</li>
+        <li>15 gün boyunca geçerli</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-icon">🎉</div>
+    <h2>Ödeme Başarılı!</h2>
+    <p>İlanınız vitrin paketi ile yayına alındı.<br>15 gün boyunca liste başında görüneceksiniz.</p>
+    <button class="btn-success" onclick="window.location.href='profil.html'">İlanlarıma Git →</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555;">© 2026 ilanra.com | Güvenli Ödeme</div>
+</footer>
+
+<script>
+  const prices = [0, 149, 299];
+  const names = ['Standart (30 gün)', 'Vitrin (15 gün)', 'Süper Vitrin (30 gün)'];
+  let selectedPkg = 1;
+
+  function selectPkg(el, idx, name, price) {
+    document.querySelectorAll('.pkg-row').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPkg = idx;
+    const base = price;
+    const vat = base * 0.2;
+    const total = base + vat;
+    document.getElementById('summaryPkg').textContent = names[idx];
+    document.getElementById('summaryBase').textContent = base.toFixed(2) + ' TL';
+    document.getElementById('summaryVat').textContent = vat.toFixed(2) + ' TL';
+    document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' TL';
+    document.getElementById('btnTotal').textContent = total.toFixed(2) + ' TL';
+    document.getElementById('paymentSection').style.display = price === 0 ? 'none' : 'block';
+  }
+
+  function switchPay(el, type) {
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('cardForm').style.display = type === 'card' ? 'block' : 'none';
+    document.getElementById('eftForm').style.display = type === 'eft' ? 'block' : 'none';
+    document.getElementById('walletForm').style.display = type === 'wallet' ? 'block' : 'none';
+  }
+
+  function selectWallet(el) {
+    document.querySelectorAll('#walletForm .pkg-row').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function formatCard(el) {
+    let v = el.value.replace(/\D/g, '').substring(0, 16);
+    el.value = v.replace(/(.{4})/g, '$1 ').trim();
+  }
+
+  function formatExp(el) {
+    let v = el.value.replace(/\D/g, '').substring(0, 4);
+    if (v.length >= 3) v = v.substring(0,2) + ' / ' + v.substring(2);
+    el.value = v;
+  }
+
+  function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim().toUpperCase();
+    if (code === 'SHB10') {
+      alert('✓ %10 indirim uygulandı!');
+    } else if (code) {
+      alert('Geçersiz kupon kodu.');
+    }
+  }
+
+  function doPay() {
+    const btn = document.getElementById('payBtn');
+    btn.textContent = '⏳ Ödeme işleniyor...';
+    btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById('successOverlay').classList.add('show');
+    }, 1800);
+  }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İlan Yazdır – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .no-print{background:#333;padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .no-print .logo{font-size:18px;font-weight:700;color:#FFE000;letter-spacing:-.5px}
+  .no-print .logo span{color:#f88}
+  .no-print p{color:#ccc;font-size:12px}
+  .print-actions{margin-left:auto;display:flex;gap:8px}
+  .btn-print{background:#c00;color:#fff;border:none;padding:8px 20px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer}
+  .btn-print:hover{background:#a00}
+  .btn-back{background:#555;color:#fff;border:none;padding:8px 16px;border-radius:4px;font-size:13px;cursor:pointer}
+  .btn-back:hover{background:#444}
+
+  .print-page{max-width:800px;margin:20px auto;background:#fff;border:1px solid #e0e0e0;border-radius:4px;overflow:hidden}
+
+  .print-header{border-bottom:3px solid #c00;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+  .ph-logo{font-size:22px;font-weight:700;color:#111;letter-spacing:-.5px}.ph-logo span{color:#c00}
+  .ph-info{text-align:right;font-size:11px;color:#888;line-height:1.6}
+  .ph-info strong{color:#111}
+
+  .print-body{padding:20px}
+
+  .ilan-title-block{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #eee}
+  .ilan-main-title{font-size:20px;font-weight:700;color:#111;margin-bottom:6px}
+  .ilan-price-block{display:flex;align-items:baseline;gap:12px}
+  .ilan-price{font-size:26px;font-weight:700;color:#c00}
+  .ilan-price-note{font-size:12px;color:#888}
+  .ilan-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px}
+  .bv{background:#FFE000;color:#111}.ba{background:#f0a000;color:#fff}.bs{background:#e0f0e0;color:#0a0;border:1px solid #c0e0c0}
+
+  .main-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px}
+
+  .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px}
+  .photo-box{height:140px;background:#f0f0f0;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:48px;border:1px solid #e0e0e0}
+  .photo-box.main{grid-column:span 2;height:200px;font-size:72px}
+
+  .spec-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  .spec-table th{background:#f7f7f7;font-size:11px;font-weight:600;color:#555;text-align:left;padding:6px 10px;border:1px solid #e0e0e0}
+  .spec-table td{font-size:12px;padding:6px 10px;border:1px solid #e0e0e0}
+  .spec-table tr:nth-child(even) td{background:#fafafa}
+
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:16px}
+  .feat-item{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 6px;border:1px solid #eee;border-radius:2px}
+  .fi-check{color:#0a0;font-weight:700}
+  .fi-cross{color:#ddd;font-weight:700}
+
+  .desc-section{margin-bottom:16px;padding:12px;background:#fafafa;border:1px solid #eee;border-radius:3px}
+  .desc-section h4{font-size:12px;font-weight:700;color:#333;margin-bottom:6px}
+  .desc-section p{font-size:12px;color:#555;line-height:1.7}
+
+  .seller-section{display:flex;justify-content:space-between;align-items:flex-start;padding:12px;border:1px solid #eee;border-radius:3px;margin-bottom:16px}
+  .ss-left h4{font-size:13px;font-weight:700;color:#111;margin-bottom:4px}
+  .ss-left p{font-size:11px;color:#666;line-height:1.6}
+  .ss-qr{width:80px;height:80px;background:#f0f0f0;border:1px solid #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:32px}
+
+  .print-footer{border-top:1px solid #eee;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;background:#fafafa}
+  .pf-left{font-size:11px;color:#888;line-height:1.5}
+  .pf-logo{font-size:14px;font-weight:700;color:#111}.pf-logo span{color:#c00}
+  .pf-url{font-size:11px;color:#c00}
+
+  @media print{
+    .no-print{display:none!important}
+    body{background:#fff}
+    .print-page{margin:0;border:none;box-shadow:none}
+  }
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+
+<div class="no-print">
+  <div class="logo">ilanra<span>.com</span></div>
+  <p>İlanı yazdırın veya PDF olarak kaydedin</p>
+  <div class="print-actions">
+    <button class="btn-back" onclick="window.location.href='ilan_detay.html'">← İlana Dön</button>
+    <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Kaydet</button>
+  </div>
+</div>
+
+<div class="print-page">
+  <div class="print-header">
+    <div class="ph-logo">ilanra<span>.com</span></div>
+    <div class="ph-info">
+      <div><strong>İlan No:</strong> 1087234561</div>
+      <div><strong>Yayın Tarihi:</strong> 15 Mayıs 2026</div>
+      <div><strong>Yazdırma:</strong> 30 Mayıs 2026</div>
+      <div>ilanra.com/ilan/1087234561</div>
+    </div>
+  </div>
+
+  <div class="print-body">
+
+    <div class="ilan-title-block">
+      <div class="ilan-main-title">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge, Isıtmalı Koltuk, Sunroof</div>
+      <div class="ilan-price-block">
+        <div class="ilan-price">3.850.000 TL</div>
+        <div class="ilan-price-note">KDV Dahil • Takas Kapalı</div>
+      </div>
+      <div class="ilan-badges">
+        <span class="badge bv">VİTRİN</span>
+        <span class="badge bs">✓ Hasar Kaydı Yok</span>
+        <span class="badge bs">✓ Boyasız</span>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div>
+        <div class="photo-grid">
+          <div class="photo-box main">🚗</div>
+          <div class="photo-box">🔩</div>
+          <div class="photo-box">🎛️</div>
+        </div>
+      </div>
+
+      <div>
+        <table class="spec-table">
+          <tr><th colspan="2">Araç Teknik Özellikleri</th></tr>
+          <tr><td>Marka</td><td><strong>BMW</strong></td></tr>
+          <tr><td>Model</td><td><strong>5 Serisi 520d</strong></td></tr>
+          <tr><td>Paket</td><td><strong>M Sport</strong></td></tr>
+          <tr><td>Yıl</td><td><strong>2022</strong></td></tr>
+          <tr><td>Kilometre</td><td><strong>38.500 km</strong></td></tr>
+          <tr><td>Yakıt</td><td><strong>Dizel</strong></td></tr>
+          <tr><td>Şanzıman</td><td><strong>Otomatik (8-ileri)</strong></td></tr>
+          <tr><td>Motor</td><td><strong>1.995 cc / 190 HP</strong></td></tr>
+          <tr><td>Kasa</td><td><strong>Sedan</strong></td></tr>
+          <tr><td>Renk</td><td><strong>Mineralgrau Metalik</strong></td></tr>
+          <tr><td>Çekiş</td><td><strong>Arkadan İtiş</strong></td></tr>
+          <tr><td>Hasar Kaydı</td><td><strong style="color:#0a0">Yok ✓</strong></td></tr>
+          <tr><td>Garanti</td><td><strong>Var (Servis Garantili)</strong></td></tr>
+          <tr><td>Konum</td><td><strong>İstanbul / Kadıköy</strong></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #eee">Donanım & Özellikler</div>
+      <div class="feat-grid">
+        <div class="feat-item"><span class="fi-check">✓</span> M Sport Paketi</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Hayalet Gösterge</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Panoramik Cam Tavan</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Isıtmalı Koltuklar</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Harman Kardon Ses</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Lazer Far</div>
+        <div class="feat-item"><span class="fi-check">✓</span> 360° Kamera</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Apple CarPlay</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Adaptif Cruise Control</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Kablosuz Şarj</div>
+        <div class="feat-item"><span class="fi-check">✓</span> Deri Döşeme</div>
+        <div class="feat-item"><span class="fi-cross">✗</span> Masaj Fonksiyonu</div>
+      </div>
+    </div>
+
+    <div class="desc-section">
+      <h4>İlan Açıklaması</h4>
+      <p>2022 model BMW 520d M Sport paketli aracımız satışa sunulmuştur. Araç tam servis bakımlı olup herhangi bir hasar ya da kaza kaydı bulunmamaktadır. Hayalet gösterge, Harman Kardon ses sistemi, elektrikli panoramik cam tavan, ısıtmalı/soğutmalı koltuklar ve 360° kamera sistemi dahil olmak üzere tüm M Sport donanımlarına sahiptir. Araç yetkili BMW servisi tarafından düzenli olarak bakıma alınmış olup tüm bakım kayıtları mevcuttur. Ekspertiz raporu talep üzerine paylaşılabilir.</p>
+    </div>
+
+    <div class="seller-section">
+      <div class="ss-left">
+        <h4>Satıcı: Mert Otomotiv ✓ Onaylı Galeri</h4>
+        <p>📍 İstanbul / Kadıköy<br>📞 0532 XXX XX XX<br>⭐ 4.8 / 5 (126 değerlendirme)<br>🕐 Çalışma: 09:00 – 19:00</p>
+      </div>
+      <div class="ss-qr">📲</div>
+    </div>
+
+  </div>
+
+  <div class="print-footer">
+    <div class="pf-left">
+      Bu ilan ilanra.com üzerinde yayınlanmaktadır.<br>
+      Bilgiler satıcı tarafından girilmiştir, doğruluğu satıcının sorumluluğundadır.
+    </div>
+    <div style="text-align:right">
+      <div class="pf-logo">ilanra<span>.com</span></div>
+      <div class="pf-url">ilanra.com/ilan/1087234561</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+

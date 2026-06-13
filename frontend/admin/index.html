@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;background:#0f1117;color:#e0e0e0;display:flex;min-height:100vh}
+
+  /* SIDEBAR */
+  .sidebar{width:220px;background:#161b27;border-right:1px solid #1e2535;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;bottom:0;left:0;z-index:100}
+  .sb-logo{padding:20px 16px;border-bottom:1px solid #1e2535}
+  .sb-logo .logo-text{font-size:18px;font-weight:700;color:#FFE000;letter-spacing:-.5px}
+  .sb-logo .logo-text span{color:#E24B4A}
+  .sb-logo .admin-badge{font-size:10px;background:#E24B4A;color:#fff;padding:2px 7px;border-radius:3px;margin-left:6px;font-weight:700}
+  .sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+  .sb-section{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.8px;padding:14px 16px 5px;font-weight:700}
+  .sb-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:#888;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+  .sb-item:hover{color:#e0e0e0;background:rgba(255,255,255,.04)}
+  .sb-item.active{color:#FFE000;background:rgba(255,224,0,.05);border-left-color:#FFE000}
+  .sb-item .si-icon{font-size:17px;width:20px;text-align:center;flex-shrink:0}
+  .sb-item .si-label{font-size:13px;font-weight:500}
+  .sb-item .si-badge{margin-left:auto;background:#E24B4A;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px}
+  .sb-footer{padding:12px 16px;border-top:1px solid #1e2535;font-size:11px;color:#555}
+  .sb-footer .version{color:#333}
+
+  /* MAIN */
+  .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+  /* TOPBAR */
+  .topbar{background:#161b27;border-bottom:1px solid #1e2535;padding:0 24px;height:56px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:90}
+  .page-title{font-size:16px;font-weight:700;color:#e0e0e0}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .tb-search{height:34px;background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:0 12px;color:#ccc;font-size:12px;outline:none;width:200px}
+  .tb-search:focus{border-color:#555}
+  .tb-btn{width:34px;height:34px;background:#1e2535;border:1px solid #2a3347;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#888;font-size:16px;position:relative}
+  .tb-btn:hover{color:#ccc}
+  .notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#E24B4A;border-radius:50%;border:1px solid #161b27}
+  .admin-av{width:34px;height:34px;border-radius:8px;background:#E24B4A;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;cursor:pointer}
+
+  /* CONTENT */
+  .content{padding:24px;flex:1}
+
+  /* STAT CARDS */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+  .stat-card{background:#161b27;border:1px solid #1e2535;border-radius:10px;padding:18px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s}
+  .stat-card:hover{border-color:#2a3347}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .stat-card.yellow::before{background:#FFE000}
+  .stat-card.red::before{background:#E24B4A}
+  .stat-card.green::before{background:#1D9E75}
+  .stat-card.blue::before{background:#378ADD}
+  .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sc-label{font-size:12px;color:#666;font-weight:500}
+  .sc-icon{font-size:22px;opacity:.8}
+  .sc-num{font-size:28px;font-weight:700;color:#e0e0e0;margin-bottom:4px}
+  .sc-change{font-size:11px;color:#1D9E75}
+  .sc-change.down{color:#E24B4A}
+
+  /* TABLES */
+  .table-card{background:#161b27;border:1px solid #1e2535;border-radius:10px;overflow:hidden;margin-bottom:20px}
+  .tc-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2535}
+  .tc-title{font-size:14px;font-weight:700;color:#e0e0e0}
+  .tc-actions{display:flex;gap:8px;align-items:center}
+  .tc-search{height:30px;background:#0f1117;border:1px solid #1e2535;border-radius:5px;padding:0 10px;color:#ccc;font-size:12px;outline:none;width:180px}
+  .tc-btn{height:30px;padding:0 12px;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;border:none}
+  .tc-btn.primary{background:#E24B4A;color:#fff}
+  .tc-btn.secondary{background:#1e2535;color:#888;border:1px solid #2a3347}
+  .tc-btn:hover{opacity:.85}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 16px;text-align:left;border-bottom:1px solid #1e2535;background:#111520}
+  td{padding:12px 16px;border-bottom:1px solid #111520;font-size:12px;color:#ccc;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  .avatar-cell{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+
+  /* BADGES */
+  .badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .b-green{background:rgba(29,158,117,.15);color:#1D9E75;border:1px solid rgba(29,158,117,.3)}
+  .b-red{background:rgba(226,75,74,.15);color:#E24B4A;border:1px solid rgba(226,75,74,.3)}
+  .b-yellow{background:rgba(255,224,0,.1);color:#FFE000;border:1px solid rgba(255,224,0,.2)}
+  .b-blue{background:rgba(55,138,221,.15);color:#378ADD;border:1px solid rgba(55,138,221,.3)}
+  .b-gray{background:rgba(255,255,255,.07);color:#888;border:1px solid rgba(255,255,255,.1)}
+
+  /* ACTION BUTTONS */
+  .action-btn{width:28px;height:28px;border-radius:5px;border:1px solid #2a3347;background:#1e2535;color:#888;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;transition:all .15s}
+  .action-btn:hover{border-color:#555;color:#ccc}
+  .action-btn.danger:hover{border-color:#E24B4A;color:#E24B4A;background:rgba(226,75,74,.1)}
+  .action-btn.success:hover{border-color:#1D9E75;color:#1D9E75;background:rgba(29,158,117,.1)}
+
+  /* CHARTS */
+  .charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px}
+  .chart-card{background:#161b27;border:1px solid #1e2535;border-radius:10px;padding:18px}
+  .chart-title{font-size:13px;font-weight:700;color:#e0e0e0;margin-bottom:16px}
+  .mini-chart{height:120px;display:flex;align-items:flex-end;gap:5px;padding-bottom:20px;position:relative}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+  .bar{width:100%;border-radius:3px 3px 0 0;transition:opacity .15s;min-height:4px}
+  .bar:hover{opacity:.8}
+  .bar-lbl{font-size:9px;color:#444}
+  .donut-wrap{display:flex;flex-direction:column;gap:10px;justify-content:center}
+  .donut-item{display:flex;align-items:center;gap:8px;font-size:12px}
+  .donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .donut-label{flex:1;color:#888}
+  .donut-val{font-weight:700;color:#e0e0e0}
+
+  /* TABS */
+  .tab-row{display:flex;gap:0;border-bottom:1px solid #1e2535;margin-bottom:0;padding:0 18px}
+  .tab{padding:12px 16px;font-size:12px;font-weight:500;color:#666;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:#FFE000;border-bottom-color:#FFE000}
+  .tab:hover{color:#aaa}
+
+  /* FILTERS */
+  .filter-row{display:flex;gap:8px;padding:12px 18px;border-bottom:1px solid #1e2535;flex-wrap:wrap}
+  .filter-select{height:30px;background:#0f1117;border:1px solid #1e2535;border-radius:5px;padding:0 8px;color:#888;font-size:12px;outline:none;cursor:pointer}
+  .filter-select:focus{border-color:#555}
+
+  /* PAGINATION */
+  .pagination{display:flex;justify-content:center;align-items:center;gap:5px;padding:14px}
+  .page-btn{width:30px;height:30px;border:1px solid #1e2535;border-radius:5px;background:#0f1117;color:#666;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .page-btn:hover{border-color:#555;color:#aaa}
+  .page-btn.active{background:#E24B4A;color:#fff;border-color:#E24B4A;font-weight:700}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:#161b27;border:1px solid #1e2535;border-radius:12px;padding:24px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto}
+  .modal h3{font-size:15px;font-weight:700;color:#e0e0e0;margin-bottom:16px}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:11px;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+  .form-group input,.form-group select,.form-group textarea{width:100%;height:36px;background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:0 10px;color:#ccc;font-size:13px;outline:none;font-family:inherit}
+  .form-group textarea{height:80px;padding:8px 10px;resize:vertical}
+  .form-group input:focus,.form-group select:focus{border-color:#555}
+  .modal-actions{display:flex;gap:8px;margin-top:16px}
+  .modal-btn{flex:1;padding:10px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;border:none}
+  .modal-btn.cancel{background:#1e2535;color:#888}
+  .modal-btn.confirm{background:#E24B4A;color:#fff}
+  .modal-btn.success{background:#1D9E75;color:#fff}
+
+  /* ALERT */
+  .alert{position:fixed;top:20px;right:20px;z-index:999;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;animation:slideIn .3s;display:none}
+  .alert.show{display:block}
+  .alert.success{background:#1D9E75;color:#fff}
+  .alert.error{background:#E24B4A;color:#fff}
+  .alert.info{background:#378ADD;color:#fff}
+  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-track{background:#0f1117}
+  ::-webkit-scrollbar-thumb{background:#2a3347;border-radius:3px}
+
+  /* SECTIONS */
+  .section{display:none}
+  .section.active{display:block}
+
+  .empty-state{text-align:center;padding:48px;color:#444}
+  .empty-state .es-icon{font-size:48px;margin-bottom:12px;opacity:.5}
+  .empty-state p{font-size:13px}
+
+  .loading{text-align:center;padding:32px;color:#555;font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- ALERT -->
+<div class="alert" id="alert"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="logo-text">ilan<span>ra</span><span class="admin-badge">ADMIN</span></div>
+    <div style="font-size:11px;color:#444;margin-top:4px">Yönetim Paneli</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Genel</div>
+    <div class="sb-item active" onclick="goTo('dashboard',this)"><div class="si-icon">📊</div><div class="si-label">Dashboard</div></div>
+    <div class="sb-item" onclick="goTo('istatistik',this)"><div class="si-icon">📈</div><div class="si-label">İstatistikler</div></div>
+
+    <div class="sb-section">Yönetim</div>
+    <div class="sb-item" onclick="goTo('kullanicilar',this)"><div class="si-icon">👥</div><div class="si-label">Kullanıcılar</div></div>
+    <div class="sb-item" onclick="goTo('ilanlar',this)"><div class="si-icon">📋</div><div class="si-label">İlanlar</div></div>
+    <div class="sb-item" onclick="goTo('mesajlar',this)"><div class="si-icon">💬</div><div class="si-label">Mesajlar</div></div>
+    <div class="sb-item" onclick="goTo('teklifler',this)"><div class="si-icon">🤝</div><div class="si-label">Teklifler</div></div>
+
+    <div class="sb-section">İçerik</div>
+    <div class="sb-item" onclick="goTo('kategoriler',this)"><div class="si-icon">🗂️</div><div class="si-label">Kategoriler</div></div>
+    <div class="sb-item" onclick="goTo('sikayetler',this)"><div class="si-icon">🚩</div><div class="si-label">Şikayetler</div><div class="si-badge" id="sikayet-badge">0</div></div>
+
+    <div class="sb-section">Sistem</div>
+    <div class="sb-item" onclick="goTo('ayarlar',this)"><div class="si-icon">⚙️</div><div class="si-label">Ayarlar</div></div>
+    <div class="sb-item" onclick="goTo('loglar',this)"><div class="si-icon">📜</div><div class="si-label">Sistem Logları</div></div>
+  </div>
+  <div class="sb-footer">
+    <div>ilanra.com Admin v1.0</div>
+    <div class="version">Node.js + PostgreSQL</div>
+    <div style="margin-top:8px;cursor:pointer;color:#E24B4A" onclick="adminCikis()">🚪 Çıkış Yap</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-right">
+      <input class="tb-search" type="text" placeholder="Kullanıcı, ilan ara..." id="globalSearch" onkeydown="if(event.key==='Enter')globalAra(this.value)" />
+      <div class="tb-btn" title="Bildirimler">🔔<div class="notif-dot"></div></div>
+      <div class="tb-btn" title="Yenile" onclick="sayfaYenile()">🔄</div>
+      <div class="admin-av" title="Admin">AD</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ====== DASHBOARD ====== -->
+    <div class="section active" id="sec-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card yellow"><div class="sc-top"><div class="sc-label">Toplam Kullanıcı</div><div class="sc-icon">👥</div></div><div class="sc-num" id="s-kullanici">—</div><div class="sc-change" id="s-bugun-k">Yükleniyor...</div></div>
+        <div class="stat-card red"><div class="sc-top"><div class="sc-label">Toplam İlan</div><div class="sc-icon">📋</div></div><div class="sc-num" id="s-ilan">—</div><div class="sc-change" id="s-bugun-i">Yükleniyor...</div></div>
+        <div class="stat-card green"><div class="sc-top"><div class="sc-label">Aktif İlan</div><div class="sc-icon">✅</div></div><div class="sc-num" id="s-aktif">—</div><div class="sc-change" id="s-satilan">Yükleniyor...</div></div>
+        <div class="stat-card blue"><div class="sc-top"><div class="sc-label">Toplam Mesaj</div><div class="sc-icon">💬</div></div><div class="sc-num" id="s-mesaj">—</div><div class="sc-change" id="s-teklif">Yükleniyor...</div></div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📈 Son 7 Gün — İlan & Kullanıcı</div>
+          <div class="mini-chart" id="miniChart"><div class="loading">Yükleniyor...</div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🗂️ Kategori Dağılımı</div>
+          <div class="donut-wrap" id="kategoriDonut"><div class="loading">Yükleniyor...</div></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="table-card">
+          <div class="tc-header"><div class="tc-title">🕐 Son İlanlar</div><button class="tc-btn secondary" onclick="goTo('ilanlar',null)">Tümü →</button></div>
+          <table><thead><tr><th>Başlık</th><th>Fiyat</th><th>Durum</th></tr></thead>
+          <tbody id="sonIlanlar"><tr><td colspan="3" class="loading">Yükleniyor...</td></tr></tbody></table>
+        </div>
+        <div class="table-card">
+          <div class="tc-header"><div class="tc-title">👤 Son Kayıtlar</div><button class="tc-btn secondary" onclick="goTo('kullanicilar',null)">Tümü →</button></div>
+          <table><thead><tr><th>Kullanıcı</th><th>Rol</th><th>Tarih</th></tr></thead>
+          <tbody id="sonKullanicilar"><tr><td colspan="3" class="loading">Yükleniyor...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== KULLANICILAR ====== -->
+    <div class="section" id="sec-kullanicilar">
+      <div class="table-card">
+        <div class="tc-header">
+          <div class="tc-title">👥 Kullanıcılar</div>
+          <div class="tc-actions">
+            <input class="tc-search" type="text" placeholder="Ad, e-posta ara..." id="kullaniciAra" onkeydown="if(event.key==='Enter')kullanicilariYukle()" />
+            <select class="filter-select" id="kullaniciRol" onchange="kullanicilariYukle()">
+              <option value="">Tüm Roller</option>
+              <option value="kullanici">Kullanıcı</option>
+              <option value="galeri">Galeri</option>
+              <option value="admin">Admin</option>
+            </select>
+            <select class="filter-select" id="kullaniciAktif" onchange="kullanicilariYukle()">
+              <option value="">Tüm Durum</option>
+              <option value="true">Aktif</option>
+              <option value="false">Banlı</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Kullanıcı</th><th>E-posta</th><th>Rol</th><th>İlan</th><th>Kayıt</th><th>Durum</th><th>İşlem</th></tr></thead>
+          <tbody id="kullaniciTablosu"><tr><td colspan="7" class="loading">Yükleniyor...</td></tr></tbody>
+        </table>
+        <div class="pagination" id="kullaniciPagination"></div>
+      </div>
+    </div>
+
+    <!-- ====== İLANLAR ====== -->
+    <div class="section" id="sec-ilanlar">
+      <div class="table-card">
+        <div class="tc-header">
+          <div class="tc-title">📋 İlanlar</div>
+          <div class="tc-actions">
+            <input class="tc-search" type="text" placeholder="Başlık, kullanıcı ara..." id="ilanAra" onkeydown="if(event.key==='Enter')ilanlariYukle()" />
+            <select class="filter-select" id="ilanDurum" onchange="ilanlariYukle()">
+              <option value="">Tüm Durum</option>
+              <option value="aktif">Aktif</option>
+              <option value="pasif">Pasif</option>
+              <option value="beklemede">Beklemede</option>
+              <option value="satildi">Satıldı</option>
+            </select>
+          </div>
+        </div>
+        <div class="tab-row">
+          <div class="tab active" onclick="ilanTab(this,'')">Tümü</div>
+          <div class="tab" onclick="ilanTab(this,'aktif')">Aktif</div>
+          <div class="tab" onclick="ilanTab(this,'pasif')">Pasif</div>
+          <div class="tab" onclick="ilanTab(this,'beklemede')">Beklemede</div>
+        </div>
+        <table>
+          <thead><tr><th>İlan</th><th>Satıcı</th><th>Fiyat</th><th>Görüntü</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead>
+          <tbody id="ilanTablosu"><tr><td colspan="7" class="loading">Yükleniyor...</td></tr></tbody>
+        </table>
+        <div class="pagination" id="ilanPagination"></div>
+      </div>
+    </div>
+
+    <!-- ====== MESAJLAR ====== -->
+    <div class="section" id="sec-mesajlar">
+      <div class="table-card">
+        <div class="tc-header"><div class="tc-title">💬 Mesajlar</div></div>
+        <div class="empty-state"><div class="es-icon">💬</div><p>Mesaj yönetimi yakında eklenecek</p></div>
+      </div>
+    </div>
+
+    <!-- ====== TEKLİFLER ====== -->
+    <div class="section" id="sec-teklifler">
+      <div class="table-card">
+        <div class="tc-header"><div class="tc-title">🤝 Teklifler</div></div>
+        <div class="empty-state"><div class="es-icon">🤝</div><p>Teklif yönetimi yakında eklenecek</p></div>
+      </div>
+    </div>
+
+    <!-- ====== KATEGORİLER ====== -->
+    <div class="section" id="sec-kategoriler">
+      <div class="table-card">
+        <div class="tc-header">
+          <div class="tc-title">🗂️ Kategoriler</div>
+          <button class="tc-btn primary" onclick="openKategoriModal()">+ Kategori Ekle</button>
+        </div>
+        <table>
+          <thead><tr><th>Ad</th><th>Slug</th><th>Üst Kategori</th><th>Durum</th><th>İşlem</th></tr></thead>
+          <tbody id="kategoriTablosu"><tr><td colspan="5" class="loading">Yükleniyor...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== ŞİKAYETLER ====== -->
+    <div class="section" id="sec-sikayetler">
+      <div class="table-card">
+        <div class="tc-header"><div class="tc-title">🚩 Şikayetler</div></div>
+        <div class="empty-state"><div class="es-icon">🚩</div><p>Henüz şikayet yok</p></div>
+      </div>
+    </div>
+
+    <!-- ====== AYARLAR ====== -->
+    <div class="section" id="sec-ayarlar">
+      <div class="table-card" style="max-width:600px">
+        <div class="tc-header"><div class="tc-title">⚙️ Site Ayarları</div></div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px" id="ayarlarForm">
+          <div class="loading">Yükleniyor...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== İSTATİSTİKLER ====== -->
+    <div class="section" id="sec-istatistik">
+      <div class="table-card">
+        <div class="tc-header"><div class="tc-title">📈 Detaylı İstatistikler</div></div>
+        <div style="padding:20px" id="istatistikIcerik"><div class="loading">Yükleniyor...</div></div>
+      </div>
+    </div>
+
+    <!-- ====== LOGLAR ====== -->
+    <div class="section" id="sec-loglar">
+      <div class="table-card">
+        <div class="tc-header"><div class="tc-title">📜 Sistem Logları</div></div>
+        <div class="empty-state"><div class="es-icon">📜</div><p>Log yönetimi yakında eklenecek</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL — Kullanıcı İşlem -->
+<div class="modal-overlay" id="userModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h3 id="userModalTitle">Kullanıcı İşlemi</h3>
+    <div id="userModalBody"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="document.getElementById('userModal').classList.remove('open')">İptal</button>
+      <button class="modal-btn confirm" id="userModalBtn" onclick="userModalIslem()">Uygula</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL — İlan İşlem -->
+<div class="modal-overlay" id="ilanModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h3 id="ilanModalTitle">İlan İşlemi</h3>
+    <div id="ilanModalBody"></div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="document.getElementById('ilanModal').classList.remove('open')">İptal</button>
+      <button class="modal-btn confirm" id="ilanModalBtn">Uygula</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3001/api';
+let token = localStorage.getItem('ilanra_token');
+let aktifSayfa = 'dashboard';
+let kullaniciSayfa = 1;
+let ilanSayfa = 1;
+let secilenKullanici = null;
+let secilenIlan = null;
+
+// GİRİŞ KONTROLÜ
+if (!token) {
+  const admin = localStorage.getItem('ilanra_admin');
+  if (!admin) {
+    const sifre = prompt('Admin şifresini girin:');
+    if (sifre === 'admin123') {
+      localStorage.setItem('ilanra_admin', '1');
+      // Demo mod — gerçek projede JWT ile
+    } else {
+      alert('Yetkisiz erişim!');
+      window.location.href = '../giris.html';
+    }
+  }
+}
+
+// API İSTEK
+async function api(method, endpoint, body = null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (token) opts.headers['Authorization'] = `Bearer ${token}`;
+  if (body) opts.body = JSON.stringify(body);
+
+  try {
+    const r = await fetch(`${API}${endpoint}`, opts);
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.hata || 'Hata');
+    return data;
+  } catch (e) {
+    // Demo modda örnek veri dön
+    return null;
+  }
+}
+
+// ALERT
+function bildirim(mesaj, tip = 'success') {
+  const a = document.getElementById('alert');
+  a.textContent = mesaj;
+  a.className = `alert show ${tip}`;
+  setTimeout(() => a.classList.remove('show'), 3000);
+}
+
+// SAYFA GEÇİŞ
+function goTo(sayfa, el) {
+  aktifSayfa = sayfa;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${sayfa}`).classList.add('active');
+  if (el) el.classList.add('active');
+
+  const basliklar = {
+    dashboard: 'Dashboard', kullanicilar: 'Kullanıcılar', ilanlar: 'İlanlar',
+    mesajlar: 'Mesajlar', teklifler: 'Teklifler', kategoriler: 'Kategoriler',
+    sikayetler: 'Şikayetler', ayarlar: 'Ayarlar', istatistik: 'İstatistikler', loglar: 'Sistem Logları'
+  };
+  document.getElementById('pageTitle').textContent = basliklar[sayfa] || sayfa;
+
+  const yukleyiciler = {
+    dashboard: dashboardYukle,
+    kullanicilar: kullanicilariYukle,
+    ilanlar: ilanlariYukle,
+    kategoriler: kategorileriYukle,
+    ayarlar: ayarlariYukle,
+    istatistik: istatistikYukle
+  };
+  if (yukleyiciler[sayfa]) yukleyiciler[sayfa]();
+}
+
+// ====== DASHBOARD ======
+async function dashboardYukle() {
+  const data = await api('GET', '/admin/dashboard');
+
+  if (data) {
+    document.getElementById('s-kullanici').textContent = data.ozet.toplam_kullanici.toLocaleString('tr');
+    document.getElementById('s-ilan').textContent = data.ozet.toplam_ilan.toLocaleString('tr');
+    document.getElementById('s-aktif').textContent = data.ozet.aktif_ilan.toLocaleString('tr');
+    document.getElementById('s-mesaj').textContent = data.ozet.toplam_mesaj.toLocaleString('tr');
+    document.getElementById('s-bugun-k').textContent = `↑ Bugün +${data.ozet.bugun_kullanici} yeni`;
+    document.getElementById('s-bugun-i').textContent = `↑ Bugün +${data.ozet.bugun_ilan} yeni`;
+    document.getElementById('s-satilan').textContent = `${data.ozet.satilan_ilan} satıldı`;
+    document.getElementById('s-teklif').textContent = `${data.ozet.toplam_teklif} teklif`;
+
+    // Grafik
+    miniGrafikCiz(data.grafik.hafta_ilan);
+
+    // Kategori
+    const renkler = ['#E24B4A','#378ADD','#1D9E75','#FFE000','#9F77DD','#F0A000'];
+    const katDiv = document.getElementById('kategoriDonut');
+    katDiv.innerHTML = data.kategori_dagilim.slice(0,6).map((k,i) =>
+      `<div class="donut-item"><div class="donut-dot" style="background:${renkler[i]}"></div><div class="donut-label">${k.ad}</div><div class="donut-val">${k.sayi}</div></div>`
+    ).join('');
+
+    // Son ilanlar
+    document.getElementById('sonIlanlar').innerHTML = data.son_ilanlar.map(i =>
+      `<tr><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.baslik}</td>
+       <td>${i.fiyat ? i.fiyat.toLocaleString('tr')+'₺' : '—'}</td>
+       <td>${durumBadge(i.durum)}</td></tr>`
+    ).join('');
+
+    // Son kullanıcılar
+    document.getElementById('sonKullanicilar').innerHTML = data.son_kullanicilar.map(u =>
+      `<tr><td>${u.ad} ${u.soyad}</td><td>${rolBadge(u.rol)}</td><td>${tarihFormat(u.olusturuldu)}</td></tr>`
+    ).join('');
+  } else {
+    // Demo veri
+    demoVeriGoster();
+  }
+}
+
+function demoVeriGoster() {
+  document.getElementById('s-kullanici').textContent = '1.284';
+  document.getElementById('s-ilan').textContent = '8.421';
+  document.getElementById('s-aktif').textContent = '6.103';
+  document.getElementById('s-mesaj').textContent = '24.891';
+  document.getElementById('s-bugun-k').textContent = '↑ Bugün +12 yeni';
+  document.getElementById('s-bugun-i').textContent = '↑ Bugün +48 yeni';
+  document.getElementById('s-satilan').textContent = '2.318 satıldı';
+  document.getElementById('s-teklif').textContent = '1.247 teklif';
+
+  const demo = [20,35,28,45,60,42,78];
+  miniGrafikCiz(demo.map((s,i) => ({sayi:s})));
+
+  document.getElementById('kategoriDonut').innerHTML = [
+    ['Vasıta','#E24B4A',3241],['Emlak','#378ADD',1847],
+    ['Elektronik','#1D9E75',2103],['Giyim','#FFE000',892],
+    ['Mobilya','#9F77DD',441],['Diğer','#F0A000',897]
+  ].map(([ad,renk,sayi]) =>
+    `<div class="donut-item"><div class="donut-dot" style="background:${renk}"></div><div class="donut-label">${ad}</div><div class="donut-val">${sayi}</div></div>`
+  ).join('');
+
+  document.getElementById('sonIlanlar').innerHTML = [
+    ['2022 BMW 520d M Sport','3.850.000₺','aktif'],
+    ['3+1 Satılık Daire Kadıköy','4.200.000₺','aktif'],
+    ['iPhone 16 Pro Max','85.000₺','aktif'],
+    ['MacBook Pro M3','128.000₺','satildi'],
+    ['2020 Toyota Corolla','1.490.000₺','aktif'],
+  ].map(([b,f,d]) => `<tr><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b}</td><td>${f}</td><td>${durumBadge(d)}</td></tr>`).join('');
+
+  document.getElementById('sonKullanicilar').innerHTML = [
+    ['Ahmet Koçak','kullanici'],['Mert Otomotiv','galeri'],
+    ['Fatma Kaya','kullanici'],['Ali Yılmaz','kullanici'],
+  ].map(([ad,rol]) => `<tr><td>${ad}</td><td>${rolBadge(rol)}</td><td>Az önce</td></tr>`).join('');
+}
+
+function miniGrafikCiz(data) {
+  const chart = document.getElementById('miniChart');
+  chart.innerHTML = '';
+  const max = Math.max(...data.map(d => parseInt(d.sayi || d) || 0));
+  const gunler = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  data.forEach((d, i) => {
+    const val = parseInt(d.sayi || d) || 0;
+    const h = max > 0 ? Math.max((val / max) * 90, 4) : 4;
+    const g = document.createElement('div');
+    g.className = 'bar-wrap';
+    g.title = `${val} ilan`;
+    g.innerHTML = `<div class="bar" style="height:${h}px;background:${i===data.length-1?'#E24B4A':'#2a3347'}"></div><div class="bar-lbl">${gunler[i] || ''}</div>`;
+    chart.appendChild(g);
+  });
+}
+
+// ====== KULLANICILAR ======
+async function kullanicilariYukle() {
+  const ara = document.getElementById('kullaniciAra')?.value || '';
+  const rol = document.getElementById('kullaniciRol')?.value || '';
+  const aktif = document.getElementById('kullaniciAktif')?.value || '';
+
+  const params = new URLSearchParams({ sayfa: kullaniciSayfa, limit: 15 });
+  if (ara) params.set('ara', ara);
+  if (rol) params.set('rol', rol);
+  if (aktif) params.set('aktif', aktif);
+
+  const tbody = document.getElementById('kullaniciTablosu');
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Yükleniyor...</td></tr>';
+
+  const data = await api('GET', `/admin/kullanicilar?${params}`);
+
+  if (data && data.kullanicilar) {
+    tbody.innerHTML = data.kullanicilar.map(u => `
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar-cell" style="background:${rolRenk(u.rol)}">${u.ad[0]}${u.soyad[0]}</div>
+          <div><div style="color:#ccc;font-weight:600">${u.ad} ${u.soyad}</div><div style="color:#555;font-size:11px">#${u.id.slice(0,8)}</div></div>
+        </div></td>
+        <td>${u.email}</td>
+        <td>${rolBadge(u.rol)}</td>
+        <td>${u.ilan_sayisi}</td>
+        <td>${tarihFormat(u.olusturuldu)}</td>
+        <td>${u.aktif ? '<span class="badge b-green">Aktif</span>' : '<span class="badge b-red">Banlı</span>'}</td>
+        <td>
+          <button class="action-btn" title="Detay" onclick="kullaniciDetay('${u.id}')">👁</button>
+          <button class="action-btn" title="Rol Değiştir" onclick="rolDegistir('${u.id}','${u.ad} ${u.soyad}','${u.rol}')">🎭</button>
+          <button class="action-btn ${u.aktif ? 'danger' : 'success'}" title="${u.aktif ? 'Banla' : 'Banı Kaldır'}" onclick="kullaniciBanla('${u.id}','${u.ad} ${u.soyad}',${u.aktif})">${u.aktif ? '🚫' : '✅'}</button>
+        </td>
+      </tr>
+    `).join('');
+    paginationOlustur('kullaniciPagination', data.sayfa, data.toplam_sayfa, (s) => { kullaniciSayfa = s; kullanicilariYukle(); });
+  } else {
+    // Demo
+    tbody.innerHTML = [
+      ['Ahmet Koçak','ahmet@email.com','kullanici',5,true],
+      ['Mert Otomotiv','mert@galeri.com','galeri',48,true],
+      ['Fatma Kaya','fatma@email.com','kullanici',2,true],
+      ['Admin','admin@ilanra.com','admin',0,true],
+      ['Banlı Kullanıcı','banned@email.com','kullanici',0,false],
+    ].map(([ad,email,rol,ilan,aktif]) => `
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar-cell" style="background:${rolRenk(rol)}">${ad[0]}K</div>
+          <div><div style="color:#ccc;font-weight:600">${ad}</div></div>
+        </div></td>
+        <td>${email}</td>
+        <td>${rolBadge(rol)}</td>
+        <td>${ilan}</td>
+        <td>Az önce</td>
+        <td>${aktif ? '<span class="badge b-green">Aktif</span>' : '<span class="badge b-red">Banlı</span>'}</td>
+        <td>
+          <button class="action-btn">👁</button>
+          <button class="action-btn">🎭</button>
+          <button class="action-btn danger">🚫</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+function kullaniciDetay(id) { bildirim('Kullanıcı detayı: ' + id.slice(0,8), 'info'); }
+
+function kullaniciBanla(id, ad, aktif) {
+  secilenKullanici = { id, aktif };
+  document.getElementById('userModalTitle').textContent = aktif ? '🚫 Kullanıcıyı Banla' : '✅ Banı Kaldır';
+  document.getElementById('userModalBody').innerHTML = `
+    <p style="color:#888;margin-bottom:12px">${ad} kullanıcısını ${aktif ? 'banlamak' : 'banını kaldırmak'} istediğinizden emin misiniz?</p>
+    ${aktif ? '<div class="form-group"><label>Ban Sebebi</label><textarea id="banSebep" placeholder="Neden?"></textarea></div>' : ''}
+  `;
+  const btn = document.getElementById('userModalBtn');
+  btn.textContent = aktif ? '🚫 Banla' : '✅ Banı Kaldır';
+  btn.className = `modal-btn ${aktif ? 'confirm' : 'success'}`;
+  document.getElementById('userModal').classList.add('open');
+}
+
+async function userModalIslem() {
+  if (!secilenKullanici) return;
+  const sebep = document.getElementById('banSebep')?.value || '';
+  const data = await api('PUT', `/admin/kullanicilar/${secilenKullanici.id}/ban`,
+    { ban: secilenKullanici.aktif, sebep });
+  bildirim(secilenKullanici.aktif ? 'Kullanıcı banlandı' : 'Ban kaldırıldı');
+  document.getElementById('userModal').classList.remove('open');
+  kullanicilariYukle();
+}
+
+function rolDegistir(id, ad, mevcutRol) {
+  const yeniRol = prompt(`${ad} için yeni rol seçin:\nkullanici | galeri | admin\nMevcut: ${mevcutRol}`);
+  if (yeniRol && ['kullanici','galeri','admin'].includes(yeniRol)) {
+    api('PUT', `/admin/kullanicilar/${id}/rol`, { rol: yeniRol })
+      .then(() => { bildirim('Rol güncellendi'); kullanicilariYukle(); });
+  }
+}
+
+// ====== İLANLAR ======
+function ilanTab(el, durum) {
+  document.querySelectorAll('.tab-row .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ilanDurum').value = durum;
+  ilanSayfa = 1;
+  ilanlariYukle();
+}
+
+async function ilanlariYukle() {
+  const ara = document.getElementById('ilanAra')?.value || '';
+  const durum = document.getElementById('ilanDurum')?.value || '';
+  const params = new URLSearchParams({ sayfa: ilanSayfa, limit: 15 });
+  if (ara) params.set('ara', ara);
+  if (durum) params.set('durum', durum);
+
+  const tbody = document.getElementById('ilanTablosu');
+  tbody.innerHTML = '<tr><td colspan="7" class="loading">Yükleniyor...</td></tr>';
+
+  const data = await api('GET', `/admin/ilanlar?${params}`);
+
+  if (data && data.ilanlar) {
+    tbody.innerHTML = data.ilanlar.map(i => `
+      <tr>
+        <td style="max-width:180px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ccc;font-weight:500">${i.baslik}</div><div style="font-size:10px;color:#555">${i.kategori || '—'}</div></td>
+        <td><div style="color:#ccc">${i.ad} ${i.soyad}</div><div style="font-size:10px;color:#555">${i.email}</div></td>
+        <td>${i.fiyat ? parseInt(i.fiyat).toLocaleString('tr')+'₺' : '—'}</td>
+        <td>${i.goruntulenme}</td>
+        <td>${tarihFormat(i.olusturuldu)}</td>
+        <td>${durumBadge(i.durum)}</td>
+        <td>
+          <button class="action-btn" title="Gör" onclick="window.open('../ilan_detay.html')">👁</button>
+          <button class="action-btn success" title="Aktif" onclick="ilanDurumDegistir('${i.id}','aktif')">✅</button>
+          <button class="action-btn" title="Pasif" onclick="ilanDurumDegistir('${i.id}','pasif')">⏸</button>
+          <button class="action-btn danger" title="Sil" onclick="ilanDurumDegistir('${i.id}','silindi')">🗑</button>
+        </td>
+      </tr>
+    `).join('');
+    paginationOlustur('ilanPagination', data.sayfa, data.toplam_sayfa, (s) => { ilanSayfa = s; ilanlariYukle(); });
+  } else {
+    tbody.innerHTML = [
+      ['2022 BMW 520d M Sport','Mert Otomotiv','3.850.000','1.284','aktif'],
+      ['3+1 Satılık Daire','Ahmet K.','4.200.000','892','aktif'],
+      ['iPhone 16 Pro Max','Fatma K.','85.000','445','aktif'],
+      ['MacBook Pro M3','Ali Y.','128.000','321','satildi'],
+      ['PlayStation 5','Can M.','28.500','224','pasif'],
+    ].map(([b,s,f,g,d]) => `
+      <tr>
+        <td style="max-width:180px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ccc;font-weight:500">${b}</div></td>
+        <td><div style="color:#ccc">${s}</div></td>
+        <td>${parseInt(f).toLocaleString('tr')}₺</td>
+        <td>${g}</td>
+        <td>Az önce</td>
+        <td>${durumBadge(d)}</td>
+        <td>
+          <button class="action-btn">👁</button>
+          <button class="action-btn success">✅</button>
+          <button class="action-btn">⏸</button>
+          <button class="action-btn danger">🗑</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function ilanDurumDegistir(id, durum) {
+  const mesajlar = { aktif: 'aktif yapılsın', pasif: 'pasife alınsın', silindi: 'silinsin' };
+  if (!confirm(`Bu ilan ${mesajlar[durum]} mı?`)) return;
+  await api('PUT', `/admin/ilanlar/${id}/durum`, { durum });
+  bildirim('İlan durumu güncellendi');
+  ilanlariYukle();
+}
+
+// ====== KATEGORİLER ======
+async function kategorileriYukle() {
+  const data = await api('GET', '/kategoriler');
+  const tbody = document.getElementById('kategoriTablosu');
+  if (data && data.kategoriler) {
+    tbody.innerHTML = data.kategoriler.map(k => `
+      <tr>
+        <td>${k.ikon || ''} ${k.ad}</td>
+        <td><code style="background:#0f1117;padding:2px 6px;border-radius:3px;color:#888;font-size:11px">${k.slug}</code></td>
+        <td>${k.ust_id ? '↳ Alt kategori' : '<span class="badge b-blue">Ana</span>'}</td>
+        <td>${k.aktif ? '<span class="badge b-green">Aktif</span>' : '<span class="badge b-gray">Pasif</span>'}</td>
+        <td><button class="action-btn">✏️</button><button class="action-btn danger">🗑</button></td>
+      </tr>
+    `).join('');
+  } else {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#555;padding:24px">Kategoriler API bağlantısı gerekiyor</td></tr>';
+  }
+}
+
+// ====== AYARLAR ======
+async function ayarlariYukle() {
+  const data = await api('GET', '/admin/ayarlar');
+  const ay = data?.ayarlar || {
+    site_adi: 'ilanra.com',
+    iletisim_email: 'destek@ilanra.com',
+    max_fotograf: 20,
+    ilan_suresi_gun: 30,
+    kayit_aktif: true,
+    ilan_onay_gerekli: false
+  };
+
+  document.getElementById('ayarlarForm').innerHTML = Object.entries(ay).map(([k, v]) => `
+    <div class="form-group">
+      <label>${k.replace(/_/g,' ').toUpperCase()}</label>
+      ${typeof v === 'boolean'
+        ? `<select style="width:100%;height:36px;background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:0 10px;color:#ccc;font-size:13px;outline:none">
+            <option ${v?'selected':''}>true</option>
+            <option ${!v?'selected':''}>false</option>
+           </select>`
+        : `<input type="text" value="${v}" style="width:100%;height:36px;background:#0f1117;border:1px solid #1e2535;border-radius:6px;padding:0 10px;color:#ccc;font-size:13px;outline:none" />`
+      }
+    </div>
+  `).join('') + `<button onclick="bildirim('Ayarlar kaydedildi')" style="padding:10px 24px;background:#1D9E75;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">💾 Kaydet</button>`;
+}
+
+// ====== İSTATİSTİK ======
+async function istatistikYukle() {
+  const data = await api('GET', '/admin/istatistik');
+  const div = document.getElementById('istatistikIcerik');
+
+  const sehirler = data?.sehir_dagilim || [
+    {ad:'İstanbul',sayi:3241},{ad:'Ankara',sayi:1847},{ad:'İzmir',sayi:1203},
+    {ad:'Adana',sayi:892},{ad:'Bursa',sayi:741},{ad:'Antalya',sayi:614}
+  ];
+
+  div.innerHTML = `
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:#ccc;margin-bottom:12px">📍 Şehir Dağılımı</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${sehirler.map((s,i) => {
+          const max = sehirler[0].sayi;
+          const pct = Math.round((s.sayi / max) * 100);
+          return `<div style="display:flex;align-items:center;gap:10px">
+            <div style="width:80px;font-size:12px;color:#888;text-align:right">${s.ad}</div>
+            <div style="flex:1;height:20px;background:#1e2535;border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:#E24B4A;border-radius:3px;transition:width .5s"></div>
+            </div>
+            <div style="width:40px;font-size:12px;color:#666;text-align:right">${s.sayi}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ====== YARDIMCILAR ======
+function durumBadge(d) {
+  const m = {aktif:'b-green',pasif:'b-gray',satildi:'b-blue',beklemede:'b-yellow',silindi:'b-red'};
+  const l = {aktif:'Aktif',pasif:'Pasif',satildi:'Satıldı',beklemede:'Beklemede',silindi:'Silindi'};
+  return `<span class="badge ${m[d]||'b-gray'}">${l[d]||d}</span>`;
+}
+
+function rolBadge(r) {
+  const m = {admin:'b-red',galeri:'b-blue',kullanici:'b-gray'};
+  const l = {admin:'Admin',galeri:'Galeri',kullanici:'Kullanıcı'};
+  return `<span class="badge ${m[r]||'b-gray'}">${l[r]||r}</span>`;
+}
+
+function rolRenk(r) {
+  return {admin:'#E24B4A',galeri:'#378ADD',kullanici:'#1D9E75'}[r] || '#555';
+}
+
+function tarihFormat(t) {
+  if (!t) return '—';
+  const d = new Date(t);
+  const fark = Math.floor((new Date() - d) / 1000);
+  if (fark < 60) return 'Az önce';
+  if (fark < 3600) return `${Math.floor(fark/60)}dk`;
+  if (fark < 86400) return `${Math.floor(fark/3600)}sa`;
+  return d.toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+
+function paginationOlustur(id, aktif, toplam, callback) {
+  const div = document.getElementById(id);
+  if (toplam <= 1) { div.innerHTML = ''; return; }
+  let html = `<button class="page-btn" ${aktif<=1?'disabled':''} onclick="(${callback})(${aktif-1})">‹</button>`;
+  for (let i = 1; i <= Math.min(toplam, 7); i++) {
+    html += `<button class="page-btn ${i===aktif?'active':''}" onclick="(${callback})(${i})">${i}</button>`;
+  }
+  if (toplam > 7) html += `<button class="page-btn">... ${toplam}</button>`;
+  html += `<button class="page-btn" ${aktif>=toplam?'disabled':''} onclick="(${callback})(${aktif+1})">›</button>`;
+  div.innerHTML = html;
+}
+
+function sayfaYenile() {
+  goTo(aktifSayfa, null);
+  bildirim('Sayfa yenilendi', 'info');
+}
+
+function globalAra(q) { bildirim('Aranıyor: ' + q, 'info'); }
+function openKategoriModal() { bildirim('Kategori ekleme yakında', 'info'); }
+function adminCikis() { localStorage.removeItem('ilanra_admin'); window.location.href = '../giris.html'; }
+
+// Sayfa yükle
+dashboardYukle();
+</script>
+</body>
+</html>

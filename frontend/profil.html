@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profilim – ilanra.com</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #333; background: #f2f2f2; }
+  a { text-decoration: none; color: inherit; cursor: pointer; }
+  .topbar { background: #FFE000; height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.5px; cursor:pointer; }
+  .logo span { color: #c00; }
+  .topbar-right { margin-left: auto; display: flex; gap: 8px; font-size: 12px; align-items: center; }
+  .topbar-link { padding: 5px 8px; border-radius: 3px; cursor: pointer; }
+  .topbar-link:hover { background: rgba(0,0,0,0.08); }
+  .btn-ilan { background: #111; color: #FFE000; border: none; padding: 7px 14px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .container { max-width: 1100px; margin: 16px auto; padding: 0 16px; display: flex; gap: 16px; align-items: flex-start; }
+  .left-nav { width: 220px; flex-shrink: 0; }
+  .profile-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 10px; }
+  .profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: #FFE000; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #111; margin: 0 auto 10px; position: relative; }
+  .profile-avatar .edit-av { position: absolute; bottom: 0; right: 0; width: 22px; height: 22px; background: #c00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; border: 2px solid #fff; }
+  .profile-name { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 3px; }
+  .profile-email { font-size: 11px; color: #aaa; margin-bottom: 10px; }
+  .profile-badge { display: inline-block; background: #e0f0e0; color: #0a0; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .btn-edit-profile { width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px; background: #fff; font-size: 12px; cursor: pointer; color: #555; }
+  .nav-menu { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; font-size: 13px; color: #444; cursor: pointer; border-bottom: 1px solid #f5f5f5; transition: background 0.1s; }
+  .nav-item:last-child { border-bottom: none; }
+  .nav-item:hover { background: #fafafa; color: #c00; }
+  .nav-item.active { background: #fff5f5; color: #c00; font-weight: 600; border-left: 3px solid #c00; }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-item .nav-count { margin-left: auto; background: #c00; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+  .main-content { flex: 1; min-width: 0; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px; text-align: center; }
+  .stat-card .stat-num { font-size: 24px; font-weight: 700; color: #c00; }
+  .stat-card .stat-lbl { font-size: 11px; color: #888; margin-top: 3px; }
+  .stat-card .stat-icon { font-size: 20px; margin-bottom: 4px; }
+  .section { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 12px; overflow: hidden; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #eee; background: #fafafa; }
+  .section-head h3 { font-size: 14px; font-weight: 700; color: #111; }
+  .section-head a { font-size: 12px; color: #c00; cursor:pointer; }
+  .my-listing { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; align-items: center; }
+  .my-listing:last-child { border-bottom: none; }
+  .my-listing .ml-img { width: 80px; height: 60px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+  .my-listing .ml-info { flex: 1; min-width: 0; }
+  .my-listing .ml-title { font-size: 13px; font-weight: 600; color: #111; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor:pointer; }
+  .my-listing .ml-title:hover { color: #c00; }
+  .my-listing .ml-price { font-size: 15px; font-weight: 700; color: #c00; }
+  .my-listing .ml-meta { font-size: 11px; color: #aaa; margin-top: 3px; display: flex; gap: 10px; flex-wrap:wrap; }
+  .my-listing .ml-status { display: flex; align-items: center; gap: 6px; flex-shrink:0; }
+  .status-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
+  .status-active { background: #e0f0e0; color: #0a0; }
+  .status-vitrin { background: #FFF9C4; color: #a07000; }
+  .status-expired { background: #f5f5f5; color: #888; }
+  .my-listing .ml-actions { display: flex; gap: 5px; flex-shrink: 0; }
+  .ml-btn { height: 28px; padding: 0 10px; border: 1px solid #ddd; border-radius: 3px; background: #fff; font-size: 11px; cursor: pointer; color: #555; white-space: nowrap; }
+  .ml-btn:hover { background: #f5f5f5; }
+  .ml-btn.danger { color: #c00; border-color: #f0c0c0; }
+  .ml-btn.danger:hover { background: #fff0f0; }
+  .ml-btn.primary { background: #c00; color: #fff; border-color: #c00; }
+  .fav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px 16px; }
+  .fav-card { border: 1px solid #e8e8e8; border-radius: 4px; overflow: hidden; cursor: pointer; }
+  .fav-card:hover { border-color: #c00; }
+  .fav-card .fc-img { height: 80px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+  .fav-card .fc-body { padding: 8px; }
+  .fav-card .fc-title { font-size: 11px; font-weight: 600; color: #111; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fav-card .fc-price { font-size: 13px; font-weight: 700; color: #c00; }
+  .review-item { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; }
+  .review-item:last-child { border-bottom: none; }
+  .review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .review-av { width: 30px; height: 30px; border-radius: 50%; background: #FFE000; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #111; flex-shrink: 0; }
+  .review-name { font-size: 12px; font-weight: 600; color: #111; }
+  .review-stars { color: #f0a000; font-size: 13px; }
+  .review-date { font-size: 10px; color: #aaa; margin-left: auto; }
+  .review-text { font-size: 12px; color: #555; line-height: 1.5; }
+  .setting-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; gap: 12px; }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { flex: 1; }
+  .setting-label .sl-title { font-size: 13px; color: #111; font-weight: 500; }
+  .setting-label .sl-sub { font-size: 11px; color: #888; margin-top: 2px; }
+  .toggle { width: 38px; height: 22px; background: #ddd; border-radius: 11px; position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+  .toggle.on { background: #0a0; }
+  .toggle::after { content: ''; width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle.on::after { transform: translateX(16px); }
+  .content-tabs { display: flex; border-bottom: 1px solid #eee; background: #fafafa; overflow-x: auto; }
+  .ctab { padding: 10px 16px; font-size: 12px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .ctab.active { color: #c00; border-bottom-color: #c00; }
+  .empty-state { padding: 32px; text-align: center; color: #888; }
+  .empty-state .ei { font-size: 40px; margin-bottom: 10px; }
+  footer { background: #222; color: #aaa; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .footer-logo { font-size: 15px; font-weight: 700; color: #FFE000; }
+  .footer-logo span { color: #f88; }
+</style>
+<script src="js/api.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo" onclick="window.location.href='anasayfa.html'">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="mesajlar.html" class="topbar-link">💬 Mesajlarım</a>
+    <a href="bildirimler.html" class="topbar-link">🔔 Bildirimler</a>
+    <span class="topbar-link" onclick="cikisYap()" style="color:#c00">🚪 Çıkış</span>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LEFT NAV -->
+  <div class="left-nav">
+    <div class="profile-card">
+      <div class="profile-avatar" id="profilAvatar">
+        ?
+        <div class="edit-av">✏️</div>
+      </div>
+      <div class="profile-name" id="profilAd">Yükleniyor...</div>
+      <div class="profile-email" id="profilEmail"></div>
+      <div class="profile-badge">✓ Üye</div>
+      <button class="btn-edit-profile" onclick="showTab('ayarlar', event)">Profili Düzenle</button>
+    </div>
+
+    <div class="nav-menu">
+      <div class="nav-item active" id="nav-ilanlar" onclick="showTab('ilanlar', event)">
+        <span class="nav-icon">📋</span> İlanlarım
+        <span class="nav-count" id="ilanSayisi">0</span>
+      </div>
+      <div class="nav-item" id="nav-favoriler" onclick="showTab('favoriler', event)">
+        <span class="nav-icon">❤️</span> Favorilerim
+      </div>
+      <div class="nav-item" onclick="window.location.href='mesajlar.html'">
+        <span class="nav-icon">💬</span> Mesajlarım
+      </div>
+      <div class="nav-item" id="nav-yorumlar" onclick="showTab('yorumlar', event)">
+        <span class="nav-icon">⭐</span> Değerlendirmeler
+      </div>
+      <div class="nav-item" id="nav-ayarlar" onclick="showTab('ayarlar', event)">
+        <span class="nav-icon">⚙️</span> Hesap Ayarları
+      </div>
+      <div class="nav-item" onclick="window.location.href='bildirimler.html'">
+        <span class="nav-icon">🔔</span> Bildirimler
+      </div>
+      <div class="nav-item" style="color:#c00;" onclick="cikisYap()">
+        <span class="nav-icon">🚪</span> Çıkış Yap
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="statIlan">0</div><div class="stat-lbl">Aktif İlan</div></div>
+      <div class="stat-card"><div class="stat-icon">👁</div><div class="stat-num" id="statGoruntulenme">0</div><div class="stat-lbl">Görüntülenme</div></div>
+      <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-num" id="statFavori">0</div><div class="stat-lbl">Favoriye Alınma</div></div>
+      <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-num" id="statMesaj">0</div><div class="stat-lbl">Toplam Mesaj</div></div>
+    </div>
+
+    <!-- İLANLARIM -->
+    <div class="section" id="tab-ilanlar">
+      <div class="section-head">
+        <h3>📋 İlanlarım</h3>
+        <a onclick="window.location.href='ilan_ver.html'">+ Yeni İlan Ver</a>
+      </div>
+      <div class="content-tabs">
+        <div class="ctab active" onclick="ctabSec(this,'aktif')">Aktif</div>
+        <div class="ctab" onclick="ctabSec(this,'pasif')">Pasif</div>
+        <div class="ctab" onclick="ctabSec(this,'hepsi')">Tümü</div>
+      </div>
+      <div id="ilanListesi">
+        <div class="empty-state"><div class="ei">⏳</div><p>Yükleniyor...</p></div>
+      </div>
+    </div>
+
+    <!-- FAVORİLER -->
+    <div class="section" id="tab-favoriler" style="display:none">
+      <div class="section-head"><h3>❤️ Favorilerim</h3></div>
+      <div id="favoriListesi">
+        <div class="empty-state"><div class="ei">⏳</div><p>Yükleniyor...</p></div>
+      </div>
+    </div>
+
+    <!-- YORUMLAR -->
+    <div class="section" id="tab-yorumlar" style="display:none">
+      <div class="section-head"><h3>⭐ Değerlendirmeler</h3></div>
+      <div class="review-item">
+        <div class="review-header"><div class="review-av">MÖ</div><div><div class="review-name">Mert Öztürk</div><div class="review-stars">★★★★★</div></div><div class="review-date">15 May 2026</div></div>
+        <div class="review-text">Çok güvenilir bir satıcı. Araç ilanda göründüğü gibiydi. Tavsiye ederim!</div>
+      </div>
+    </div>
+
+    <!-- AYARLAR -->
+    <div class="section" id="tab-ayarlar" style="display:none">
+      <div class="section-head"><h3>⚙️ Hesap Ayarları</h3></div>
+      <div class="setting-row">
+        <div class="setting-label"><div class="sl-title">Ad Soyad</div><div class="sl-sub" id="ayarAdSoyad">—</div></div>
+        <button class="ml-btn">Değiştir</button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><div class="sl-title">E-posta</div><div class="sl-sub" id="ayarEmail">—</div></div>
+        <button class="ml-btn">Değiştir</button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><div class="sl-title">Şifre</div><div class="sl-sub">••••••••</div></div>
+        <button class="ml-btn" onclick="window.location.href='sifre_sifirla.html'">Değiştir</button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label"><div class="sl-title">E-posta Bildirimleri</div><div class="sl-sub">Yeni mesaj bildirimleri</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="setting-row" style="border-top:1px solid #eee;margin-top:4px;">
+        <div class="setting-label"><div class="sl-title" style="color:#c00;">Hesabı Sil</div><div class="sl-sub">Bu işlem geri alınamaz</div></div>
+        <button class="ml-btn danger" onclick="hesapSil()">Hesabı Sil</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555;">© 2026 ilanra.com</div>
+</footer>
+
+<script>
+  const TOKEN = localStorage.getItem('ilanra_token');
+  const KULLANICI = JSON.parse(localStorage.getItem('ilanra_kullanici') || '{}');
+  const API = 'http://localhost:3001/api';
+
+  // Giriş kontrolü
+  if (!TOKEN) {
+    window.location.href = 'giris.html';
+  }
+
+  // Profil bilgilerini göster
+  if (KULLANICI.ad) {
+    const initials = KULLANICI.ad[0] + (KULLANICI.soyad ? KULLANICI.soyad[0] : '');
+    document.getElementById('profilAvatar').innerHTML = initials + '<div class="edit-av">✏️</div>';
+    document.getElementById('profilAd').textContent = KULLANICI.ad + ' ' + (KULLANICI.soyad || '');
+    document.getElementById('profilEmail').textContent = KULLANICI.email || '';
+    document.getElementById('ayarAdSoyad').textContent = KULLANICI.ad + ' ' + (KULLANICI.soyad || '');
+    document.getElementById('ayarEmail').textContent = KULLANICI.email || '';
+  }
+
+  // Tab geçişi
+  function showTab(tab, event) {
+    ['ilanlar','favoriler','yorumlar','ayarlar'].forEach(t => {
+      document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    });
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    if (event && event.currentTarget) {
+      event.currentTarget.classList.add('active');
+    }
+    // İlgili sekmenin verisini yükle
+    if (tab === 'ilanlar') ilanlarYukle('aktif');
+    if (tab === 'favoriler') favorilerYukle();
+  }
+
+  // Ctab seçimi
+  function ctabSec(el, durum) {
+    document.querySelectorAll('.ctab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    ilanlarYukle(durum);
+  }
+
+  // İLANLARI YÜKLE
+  async function ilanlarYukle(durum = 'aktif') {
+    const liste = document.getElementById('ilanListesi');
+    liste.innerHTML = '<div class="empty-state"><div class="ei">⏳</div><p>Yükleniyor...</p></div>';
+
+    try {
+      const url = durum === 'hepsi'
+        ? `${API}/ilanlar/benim?limit=50`
+        : `${API}/ilanlar/benim?durum=${durum}&limit=50`;
+
+      const yanit = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      const data = await yanit.json();
+
+      if (!data.ilanlar || data.ilanlar.length === 0) {
+        liste.innerHTML = `
+          <div class="empty-state">
+            <div class="ei">📋</div>
+            <p>Henüz hiç ilanınız yok.</p>
+            <button onclick="window.location.href='ilan_ver.html'"
+              style="margin-top:12px;padding:8px 20px;background:#c00;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px">
+              + İlk İlanımı Ver
+            </button>
+          </div>`;
+        document.getElementById('ilanSayisi').textContent = '0';
+        document.getElementById('statIlan').textContent = '0';
+        return;
+      }
+
+      // Stats
+      document.getElementById('ilanSayisi').textContent = data.ilanlar.length;
+      document.getElementById('statIlan').textContent = data.ilanlar.filter(i => i.durum === 'aktif').length;
+
+      let toplamGoruntulenme = 0, toplamFavori = 0, toplamMesaj = 0;
+      data.ilanlar.forEach(i => {
+        toplamGoruntulenme += i.goruntulenme || 0;
+        toplamFavori += i.favori_sayisi || 0;
+        toplamMesaj += i.mesaj_sayisi || 0;
+      });
+      document.getElementById('statGoruntulenme').textContent = toplamGoruntulenme.toLocaleString('tr-TR');
+      document.getElementById('statFavori').textContent = toplamFavori;
+      document.getElementById('statMesaj').textContent = toplamMesaj;
+
+      // İlanları listele
+      liste.innerHTML = data.ilanlar.map(i => `
+        <div class="my-listing">
+          <div class="ml-img" style="background:#e0eaf5;">
+            ${i.kapak_foto ? `<img src="${i.kapak_foto}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />` : '🚗'}
+          </div>
+          <div class="ml-info">
+            <div class="ml-title" onclick="window.location.href='ilan_detay.html?id=${i.id}'">${i.baslik}</div>
+            <div class="ml-price">${parseInt(i.fiyat || 0).toLocaleString('tr-TR')} TL</div>
+            <div class="ml-meta">
+              <span>👁 ${i.goruntulenme || 0}</span>
+              <span>❤️ ${i.favori_sayisi || 0}</span>
+              <span>💬 ${i.mesaj_sayisi || 0}</span>
+              <span>📅 ${new Date(i.olusturuldu).toLocaleDateString('tr-TR')}</span>
+            </div>
+          </div>
+          <div class="ml-status">
+            <span class="status-badge ${i.durum === 'aktif' ? 'status-active' : 'status-expired'}">${i.durum.toUpperCase()}</span>
+          </div>
+          <div class="ml-actions">
+            <button class="ml-btn" onclick="window.location.href='ilan_detay.html?id=${i.id}'">Görüntüle</button>
+            <button class="ml-btn danger" onclick="ilanSil('${i.id}', this)">Sil</button>
+          </div>
+        </div>
+      `).join('');
+
+    } catch (err) {
+      console.error(err);
+      liste.innerHTML = '<div class="empty-state"><div class="ei">❌</div><p>İlanlar yüklenemedi. Backend çalışıyor mu?</p></div>';
+    }
+  }
+
+  // İLAN SİL
+  async function ilanSil(id, btn) {
+    if (!confirm('Bu ilanı silmek istediğinizden emin misiniz?')) return;
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    try {
+      const yanit = await fetch(`${API}/ilanlar/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      if (yanit.ok) {
+        alert('✅ İlan silindi!');
+        ilanlarYukle('hepsi');
+      } else {
+        alert('İlan silinemedi!');
+        btn.textContent = 'Sil';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      alert('Sunucuya bağlanılamadı!');
+      btn.textContent = 'Sil';
+      btn.disabled = false;
+    }
+  }
+
+  // FAVORİLERİ YÜKLE
+  async function favorilerYukle() {
+    const liste = document.getElementById('favoriListesi');
+    liste.innerHTML = '<div class="empty-state"><div class="ei">⏳</div><p>Yükleniyor...</p></div>';
+    try {
+      const yanit = await fetch(`${API}/favoriler`, {
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      const data = await yanit.json();
+      if (!data.favoriler || data.favoriler.length === 0) {
+        liste.innerHTML = '<div class="empty-state"><div class="ei">❤️</div><p>Henüz favori ilanınız yok.</p></div>';
+        return;
+      }
+      liste.innerHTML = '<div class="fav-grid">' + data.favoriler.map(f => `
+        <div class="fav-card" onclick="window.location.href='ilan_detay.html?id=${f.id}'">
+          <div class="fc-img">${f.kapak_foto ? `<img src="${f.kapak_foto}" style="width:100%;height:100%;object-fit:cover;" />` : '🚗'}</div>
+          <div class="fc-body">
+            <div class="fc-title">${f.baslik}</div>
+            <div class="fc-price">${parseInt(f.fiyat || 0).toLocaleString('tr-TR')} TL</div>
+          </div>
+        </div>
+      `).join('') + '</div>';
+    } catch (err) {
+      liste.innerHTML = '<div class="empty-state"><div class="ei">❌</div><p>Favoriler yüklenemedi.</p></div>';
+    }
+  }
+
+  // ÇIKIŞ
+  function cikisYap() {
+    if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+      localStorage.removeItem('ilanra_token');
+      localStorage.removeItem('ilanra_kullanici');
+      window.location.href = 'giris.html';
+    }
+  }
+
+  // HESAP SİL
+  async function hesapSil() {
+    if (!confirm('Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) return;
+    try {
+      await fetch(`${API}/auth/hesap`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      localStorage.clear();
+      alert('Hesabınız silindi.');
+      window.location.href = 'giris.html';
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }
+
+  // Sayfa yüklenince ilanları çek
+  ilanlarYukle('aktif');
+</script>
+</body>
+</html>

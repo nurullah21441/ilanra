@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sayfa Bulunamadı – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .search-wrap{flex:1;max-width:500px;display:flex;height:36px;margin:0 auto}
+  .search-input{flex:1;border:1.5px solid #aaa;border-right:none;padding:0 12px;font-size:13px;background:#fff;outline:none;border-radius:4px 0 0 4px}
+  .search-btn{background:#e00;border:none;color:#fff;padding:0 18px;border-radius:0 4px 4px 0;font-size:13px;font-weight:600;cursor:pointer}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+
+  .main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+  .error-box{text-align:center;max-width:600px}
+  .error-num{font-size:120px;font-weight:900;color:#FFE000;line-height:1;text-shadow:4px 4px 0 #e00;margin-bottom:8px;animation:bounce 2s infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .error-emoji{font-size:64px;margin-bottom:16px}
+  .error-title{font-size:24px;font-weight:700;color:#111;margin-bottom:8px}
+  .error-desc{font-size:14px;color:#666;line-height:1.7;margin-bottom:28px}
+  .error-search{display:flex;max-width:400px;margin:0 auto 24px;height:42px}
+  .error-search input{flex:1;border:1.5px solid #ccc;border-right:none;padding:0 14px;font-size:13px;border-radius:4px 0 0 4px;outline:none;background:#fff}
+  .error-search input:focus{border-color:#888}
+  .error-search button{background:#c00;border:none;color:#fff;padding:0 20px;border-radius:0 4px 4px 0;font-size:13px;font-weight:600;cursor:pointer}
+  .quick-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+  .ql{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px 18px;cursor:pointer;transition:all .15s;text-align:center;min-width:120px}
+  .ql:hover{border-color:#c00;transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+  .ql .ql-icon{font-size:24px;margin-bottom:6px}
+  .ql .ql-name{font-size:12px;font-weight:600;color:#111}
+  .btn-home{display:inline-block;background:#c00;color:#fff;padding:11px 28px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;border:none}
+  .btn-home:hover{background:#a00}
+  .error-code{font-size:11px;color:#bbb;margin-top:20px}
+
+  {background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between}
+  .-logo{font-size:15px;font-weight:700;color:#FFE000}.-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="Ne arıyorsunuz?" />
+    <button class="search-btn">Ara</button>
+  </div>
+  <div class="topbar-right">
+    <a href="anasayfa.html" class="topbar-link">Ana Sayfa</a>
+    <a href="giris.html" class="topbar-link">Giriş Yap</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="error-box">
+    <div class="error-num">404</div>
+    <div class="error-emoji">🔍</div>
+    <div class="error-title">Aradığınız sayfa bulunamadı!</div>
+    <div class="error-desc">
+      Bu ilan kaldırılmış, süresi dolmuş veya hiç var olmamış olabilir.<br>
+      Ama merak etmeyin — milyonlarca başka ilan sizi bekliyor!
+    </div>
+
+    <div class="error-search">
+      <input type="text" placeholder="Başka bir şey arayın..." id="errSearch" onkeydown="if(event.key==='Enter')goSearch()" />
+      <button onclick="goSearch()">Ara</button>
+    </div>
+
+    <div style="font-size:13px;color:#888;margin-bottom:14px">veya popüler kategorilere göz atın:</div>
+
+    <div class="quick-links">
+      <div class="ql" onclick="window.location.href='ilanra_liste.html'"><div class="ql-icon">🚗</div><div class="ql-name">Vasıta</div></div>
+      <div class="ql" onclick="window.location.href='anasayfa.html'"><div class="ql-icon">🏠</div><div class="ql-name">Emlak</div></div>
+      <div class="ql" onclick="window.location.href='anasayfa.html'"><div class="ql-icon">📱</div><div class="ql-name">Elektronik</div></div>
+      <div class="ql" onclick="window.location.href='anasayfa.html'"><div class="ql-icon">👗</div><div class="ql-name">Giyim</div></div>
+      <div class="ql" onclick="window.location.href='anasayfa.html'"><div class="ql-icon">🛋️</div><div class="ql-name">Mobilya</div></div>
+    </div>
+
+    <button class="btn-home" onclick="window.location.href='anasayfa.html'">🏠 Ana Sayfaya Dön</button>
+    <div class="error-code">Hata kodu: 404 NOT_FOUND | ilanra.com</div>
+  </div>
+</div>
+
+<>
+  <div class="-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</>
+<script>
+  function goSearch(){const q=document.getElementById('errSearch').value.trim();if(q)window.location.href='arama_sonuclari.html'}
+</script>
+</body>
+</html>
+

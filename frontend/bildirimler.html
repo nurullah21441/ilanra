@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bildirimler – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:720px;margin:16px auto;padding:0 16px}
+  .notif-header{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .notif-header h2{font-size:16px;font-weight:700;color:#111}
+  .notif-header-right{display:flex;gap:10px;align-items:center}
+  .mark-all{font-size:12px;color:#c00;cursor:pointer}.mark-all:hover{text-decoration:underline}
+  .notif-tabs{display:flex;gap:0;border-bottom:2px solid #eee;background:#fff;border-radius:6px 6px 0 0;border:1px solid #e0e0e0;border-bottom:none;overflow:hidden;margin-bottom:0}
+  .ntab{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:500;color:#888;cursor:pointer;border-bottom:2px solid transparent}
+  .ntab.active{color:#c00;border-bottom-color:#c00;font-weight:700}
+  .ntab:hover{color:#c00}
+  .notif-list{background:#fff;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 6px 6px;overflow:hidden}
+  .notif-item{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s;position:relative;align-items:flex-start}
+  .notif-item:last-child{border-bottom:none}
+  .notif-item:hover{background:#fafafa}
+  .notif-item.unread{background:#fffbf0}
+  .notif-item.unread::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#FFE000}
+  .notif-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .ni-msg{background:#e0f0ff}.ni-fav{background:#fff0f0}.ni-ilan{background:#f0fff0}.ni-sys{background:#f5f5f5}.ni-price{background:#fff8e0}
+  .notif-body{flex:1;min-width:0}
+  .notif-title{font-size:13px;font-weight:600;color:#111;margin-bottom:3px}
+  .notif-item.unread .notif-title{font-weight:700}
+  .notif-desc{font-size:12px;color:#666;line-height:1.4;margin-bottom:4px}
+  .notif-time{font-size:11px;color:#bbb}
+  .notif-actions{display:flex;gap:6px;margin-top:6px}
+  .n-btn{height:26px;padding:0 10px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#555}
+  .n-btn:hover{background:#f5f5f5}
+  .n-btn.primary{background:#c00;color:#fff;border-color:#c00}
+  .n-btn.primary:hover{background:#a00}
+  .notif-right{flex-shrink:0;text-align:right}
+  .unread-dot{width:8px;height:8px;border-radius:50%;background:#c00;margin-top:4px;margin-left:auto}
+  .del-btn{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 4px}.del-btn:hover{color:#c00}
+  .empty{padding:40px;text-align:center;color:#aaa}
+  .empty .e-icon{font-size:48px;margin-bottom:10px}
+  {background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .-logo{font-size:15px;font-weight:700;color:#FFE000}.-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="mesajlar.html" class="topbar-link">💬 Mesajlar</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb"><a>Anasayfa</a> › <a>Hesabım</a> › <span>Bildirimler</span></div>
+<div class="container">
+  <div class="notif-header">
+    <h2>🔔 Bildirimler <span style="background:#c00;color:#fff;font-size:11px;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">5</span></h2>
+    <div class="notif-header-right">
+      <span class="mark-all" onclick="markAll()">Tümünü okundu işaretle</span>
+      <button style="height:30px;padding:0 10px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#555">Filtrele ▾</button>
+    </div>
+  </div>
+  <div class="notif-tabs">
+    <div class="ntab active" onclick="filterTab(this,'all')">Tümü <span style="background:#c00;color:#fff;font-size:10px;padding:1px 5px;border-radius:8px">5</span></div>
+    <div class="ntab" onclick="filterTab(this,'msg')">Mesajlar <span style="background:#c00;color:#fff;font-size:10px;padding:1px 5px;border-radius:8px">2</span></div>
+    <div class="ntab" onclick="filterTab(this,'ilan')">İlanlar</div>
+    <div class="ntab" onclick="filterTab(this,'fav')">Favoriler</div>
+    <div class="ntab" onclick="filterTab(this,'sys')">Sistem</div>
+  </div>
+  <div class="notif-list" id="notifList">
+
+    <div class="notif-item unread" data-type="msg">
+      <div class="notif-icon ni-msg">💬</div>
+      <div class="notif-body">
+        <div class="notif-title">Mert Otomotiv'den yeni mesaj</div>
+        <div class="notif-desc">«Test sürüşü için yarın uygun musunuz? Öğleden sonra gelebilirim.»</div>
+        <div class="notif-time">10 dakika önce</div>
+        <div class="notif-actions">
+          <button class="n-btn primary" onclick="window.location.href='mesajlar.html'">Yanıtla</button>
+          <button class="n-btn">İlanı Gör</button>
+        </div>
+      </div>
+      <div class="notif-right"><div class="unread-dot"></div><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item unread" data-type="fav">
+      <div class="notif-icon ni-fav">❤️</div>
+      <div class="notif-body">
+        <div class="notif-title">İlanınız 12 kişi tarafından favorilendi</div>
+        <div class="notif-desc">«2022 BMW 520d M Sport» ilanınız bugün 12 kişi tarafından favorilere eklendi.</div>
+        <div class="notif-time">1 saat önce</div>
+        <div class="notif-actions"><button class="n-btn primary" onclick="window.location.href='ilan_detay.html'">İlanı Gör</button></div>
+      </div>
+      <div class="notif-right"><div class="unread-dot"></div><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item unread" data-type="msg">
+      <div class="notif-icon ni-msg">💬</div>
+      <div class="notif-body">
+        <div class="notif-title">Fatma Kaya'dan yeni mesaj</div>
+        <div class="notif-desc">«Hâlâ satılık mı? Fiyat pazarlığa açık mı?»</div>
+        <div class="notif-time">3 saat önce</div>
+        <div class="notif-actions">
+          <button class="n-btn primary" onclick="window.location.href='mesajlar.html'">Yanıtla</button>
+        </div>
+      </div>
+      <div class="notif-right"><div class="unread-dot"></div><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item unread" data-type="price">
+      <div class="notif-icon ni-price">📉</div>
+      <div class="notif-body">
+        <div class="notif-title">Favorilendiğiniz ilan fiyatı düştü!</div>
+        <div class="notif-desc">«2023 Mercedes C200 AMG» ilanının fiyatı 5.200.000 TL'den 4.950.000 TL'ye düştü.</div>
+        <div class="notif-time">Bugün 08:14</div>
+        <div class="notif-actions"><button class="n-btn primary" onclick="window.location.href='ilan_detay.html'">İlanı Gör</button><button class="n-btn">Favorilerden Çıkar</button></div>
+      </div>
+      <div class="notif-right"><div class="unread-dot"></div><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item unread" data-type="ilan">
+      <div class="notif-icon ni-ilan">📋</div>
+      <div class="notif-body">
+        <div class="notif-title">İlanınızın süresi 5 gün içinde dolacak</div>
+        <div class="notif-desc">«iPhone 14 Pro 256GB» ilanınız 5 gün sonra sona erecek. Yenilemek için tıklayın.</div>
+        <div class="notif-time">Dün 18:00</div>
+        <div class="notif-actions"><button class="n-btn primary" onclick="window.location.href='odeme.html'">İlanı Yenile (29 TL)</button><button class="n-btn">Kapat</button></div>
+      </div>
+      <div class="notif-right"><div class="unread-dot"></div><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item" data-type="sys">
+      <div class="notif-icon ni-sys">⚙️</div>
+      <div class="notif-body">
+        <div class="notif-title">Hesabınız doğrulandı</div>
+        <div class="notif-desc">Telefon numaranız başarıyla doğrulandı. Artık daha güvenilir bir satıcı olarak görünüyorsunuz.</div>
+        <div class="notif-time">3 gün önce</div>
+      </div>
+      <div class="notif-right"><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item" data-type="sys">
+      <div class="notif-icon ni-sys">🎉</div>
+      <div class="notif-body">
+        <div class="notif-title">Vitrin paketiniz aktifleştirildi</div>
+        <div class="notif-desc">«2022 BMW 520d M Sport» ilanınız 15 gün boyunca vitrin listesinde gösterilecek.</div>
+        <div class="notif-time">5 gün önce</div>
+      </div>
+      <div class="notif-right"><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+    <div class="notif-item" data-type="ilan">
+      <div class="notif-icon ni-ilan">👁</div>
+      <div class="notif-body">
+        <div class="notif-title">İlanınız 1.000 görüntülenmeye ulaştı!</div>
+        <div class="notif-desc">«2022 BMW 520d M Sport» ilanınız 1.000 görüntülenmeyi geçti. Tebrikler!</div>
+        <div class="notif-time">1 hafta önce</div>
+      </div>
+      <div class="notif-right"><button class="del-btn" onclick="delNotif(event,this)">×</button></div>
+    </div>
+
+  </div>
+</div>
+<>
+  <div class="-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</>
+<script>
+  function markAll(){document.querySelectorAll('.notif-item.unread').forEach(el=>{el.classList.remove('unread');const d=el.querySelector('.unread-dot');if(d)d.remove()});document.querySelectorAll('.ntab span[style]').forEach(s=>s.remove())}
+  function delNotif(e,btn){e.stopPropagation();btn.closest('.notif-item').style.transition='opacity .2s';btn.closest('.notif-item').style.opacity='0';setTimeout(()=>btn.closest('.notif-item').remove(),200)}
+  function filterTab(el,type){document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.notif-item').forEach(item=>{item.style.display=(type==='all'||item.dataset.type===type)?'flex':'none'})}
+</script>
+</body>
+</html>
+

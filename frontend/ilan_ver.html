@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İlan Ver – ilanra.com</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; background: #f2f2f2; color: #333; }
+  .topbar { background: #FFE000; height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.5px; cursor:pointer; }
+  .logo span { color: #c00; }
+  .topbar-right { margin-left: auto; display: flex; gap: 8px; font-size: 12px; align-items: center; }
+  .topbar-link { padding: 5px 8px; cursor: pointer; border-radius: 3px; }
+  .topbar-link:hover { background: rgba(0,0,0,0.08); }
+  .breadcrumb { background: #fff; padding: 8px 16px; border-bottom: 1px solid #eee; font-size: 11px; color: #888; display: flex; gap: 4px; align-items: center; }
+  .breadcrumb a { color: #c00; cursor: pointer; }
+  .container { max-width: 900px; margin: 20px auto; padding: 0 16px; display: flex; gap: 16px; align-items: flex-start; }
+  .steps-bar { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 0; }
+  .step { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: #eee; color: #999; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step.active .step-num { background: #c00; color: #fff; }
+  .step.done .step-num { background: #0a0; color: #fff; }
+  .step-label { font-size: 12px; color: #aaa; font-weight: 500; }
+  .step.active .step-label { color: #c00; }
+  .step.done .step-label { color: #0a0; }
+  .step-line { flex: 1; height: 1px; background: #ddd; margin: 0 6px; }
+  .step-line.done { background: #0a0; }
+  .left-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .right-col { width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+  .form-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  .form-card-header { background: #f7f7f7; border-bottom: 1px solid #eee; padding: 11px 16px; font-size: 13px; font-weight: 700; color: #333; display: flex; align-items: center; gap: 8px; }
+  .form-card-body { padding: 18px 16px; }
+  .form-group { margin-bottom: 15px; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
+  .form-group label .req { color: #c00; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 8px 12px; font-size: 13px; color: #111; background: #fff; outline: none; font-family: inherit; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #888; }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+  .photo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .photo-slot { aspect-ratio: 4/3; border: 2px dashed #ccc; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #aaa; font-size: 11px; text-align: center; gap: 4px; background: #fafafa; transition: border-color 0.2s; position: relative; overflow: hidden; }
+  .photo-slot:hover { border-color: #c00; color: #c00; }
+  .photo-slot.main-slot { border-color: #f0a000; background: #fffbe6; }
+  .photo-slot.main-slot::before { content: 'Kapak'; position: absolute; top: 4px; left: 4px; font-size: 9px; background: #f0a000; color: #fff; padding: 1px 5px; border-radius: 2px; font-weight: 700; }
+  .photo-slot .upload-icon { font-size: 22px; }
+  .photo-note { font-size: 11px; color: #888; margin-top: 8px; }
+  .price-wrap { position: relative; }
+  .price-wrap input { padding-right: 40px; }
+  .price-currency { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #888; font-weight: 600; pointer-events: none; }
+  .check-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; }
+  .check-row input { width: 14px; height: 14px; accent-color: #c00; cursor: pointer; }
+  .check-row label { font-size: 12px; color: #555; cursor: pointer; }
+  .check-group { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .loc-row { display: flex; gap: 8px; }
+  .loc-row select { flex: 1; }
+  .pkg-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pkg-card { border: 2px solid #e0e0e0; border-radius: 6px; padding: 12px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+  .pkg-card:hover { border-color: #888; }
+  .pkg-card.selected { border-color: #c00; background: #fff5f5; }
+  .pkg-card .pkg-icon { font-size: 24px; margin-bottom: 6px; }
+  .pkg-card .pkg-name { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 4px; }
+  .pkg-card .pkg-price { font-size: 12px; color: #c00; font-weight: 600; }
+  .pkg-card .pkg-free { font-size: 12px; color: #0a0; font-weight: 600; }
+  .pkg-card .pkg-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
+  .btn-submit-main { width: 100%; height: 44px; background: #c00; color: #fff; border: none; border-radius: 4px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .btn-submit-main:hover { background: #a00; }
+  .btn-prev { width: 100%; height: 40px; background: #fff; color: #555; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; cursor: pointer; margin-bottom: 8px; }
+  .btn-prev:hover { background: #f5f5f5; }
+  .preview-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+  .preview-card .prev-img { height: 130px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .preview-card .prev-body { padding: 10px 12px; }
+  .preview-card .prev-title { font-size: 13px; font-weight: 600; color: #111; margin-bottom: 4px; }
+  .preview-card .prev-price { font-size: 17px; font-weight: 700; color: #c00; }
+  .preview-card .prev-meta { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .tips-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px; }
+  .tips-box h4 { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 10px; }
+  .tip-item { display: flex; gap: 8px; font-size: 12px; color: #555; margin-bottom: 8px; line-height: 1.4; }
+  .tip-item .tip-icon { font-size: 16px; flex-shrink: 0; }
+  .char-count { font-size: 11px; color: #aaa; text-align: right; margin-top: 3px; }
+  footer { background: #222; color: #aaa; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 30px; }
+  .footer-logo { font-size: 15px; font-weight: 700; color: #FFE000; }
+  .footer-logo span { color: #f88; }
+</style>
+<script src="js/api.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo" onclick="window.location.href='anasayfa.html'">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <span class="topbar-link" id="hosgeldin">Merhaba, Kullanıcı</span>
+    <span class="topbar-link" onclick="window.location.href='profil.html'">İlanlarım</span>
+    <span class="topbar-link" onclick="window.location.href='mesajlar.html'">💬 Mesajlar</span>
+    <span class="topbar-link" onclick="cikisYap()" style="color:#c00">Çıkış</span>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a onclick="window.location.href='anasayfa.html'">Anasayfa</a> ›
+  <a onclick="window.location.href='profil.html'">Hesabım</a> ›
+  <span>İlan Ver</span>
+</div>
+
+<div class="container">
+  <div class="left-col">
+
+    <div class="steps-bar">
+      <div class="step done"><div class="step-num">✓</div><div class="step-label">Kategori</div></div>
+      <div class="step-line done"></div>
+      <div class="step active"><div class="step-num">2</div><div class="step-label">İlan Bilgileri</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">3</div><div class="step-label">Paket Seç</div></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-num">4</div><div class="step-label">Yayınla</div></div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-header">✓ Kategori — <span style="color:#0a0;font-weight:400;">Vasıta › Otomobil</span> <span style="margin-left:auto;font-size:11px;color:#0066cc;cursor:pointer;">Değiştir</span></div>
+    </div>
+
+    <!-- FOTOĞRAFLAR -->
+    <div class="form-card">
+      <div class="form-card-header">📷 Fotoğraflar <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:6px;">(en fazla 20 fotoğraf)</span></div>
+      <div class="form-card-body">
+        <div class="photo-grid" id="photoGrid">
+          <div class="photo-slot main-slot" onclick="addPhoto(this)">
+            <div class="upload-icon">+</div>
+            <div>Kapak Fotoğrafı</div>
+          </div>
+          <div class="photo-slot" onclick="addPhoto(this)"><div class="upload-icon">+</div><div>Fotoğraf Ekle</div></div>
+          <div class="photo-slot" onclick="addPhoto(this)"><div class="upload-icon">+</div><div>Fotoğraf Ekle</div></div>
+          <div class="photo-slot" onclick="addPhoto(this)"><div class="upload-icon">+</div><div>Fotoğraf Ekle</div></div>
+          <div class="photo-slot" onclick="addPhoto(this)"><div class="upload-icon">+</div><div>Fotoğraf Ekle</div></div>
+        </div>
+        <div class="photo-note">💡 İlk fotoğraf kapak resmi olarak kullanılır.</div>
+      </div>
+    </div>
+
+    <!-- ARAÇ BİLGİLERİ -->
+    <div class="form-card">
+      <div class="form-card-header">🚗 Araç Bilgileri</div>
+      <div class="form-card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Marka <span class="req">*</span></label>
+            <select id="markaSelect" onchange="updatePreview()">
+              <option value="">Seçiniz</option>
+              <option>BMW</option><option>Mercedes</option><option>Toyota</option>
+              <option>Volkswagen</option><option>Hyundai</option><option>Ford</option>
+              <option>Renault</option><option>Audi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Seri <span class="req">*</span></label>
+            <select id="seriSelect">
+              <option>5 Serisi</option><option>3 Serisi</option><option>7 Serisi</option><option>X5</option><option>X3</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Model <span class="req">*</span></label>
+            <select id="modelSelect"><option>520d</option><option>530d</option><option>520i</option></select>
+          </div>
+          <div class="form-group">
+            <label>Yıl <span class="req">*</span></label>
+            <select id="yearSel" onchange="updatePreview()">
+              <option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kilometre <span class="req">*</span></label>
+            <input type="number" id="kmInput" placeholder="örn: 45000" oninput="updatePreview()" />
+          </div>
+          <div class="form-group">
+            <label>Yakıt Tipi <span class="req">*</span></label>
+            <select id="yakitSelect"><option>Dizel</option><option>Benzin</option><option>LPG & Benzin</option><option>Hibrit</option><option>Elektrik</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Şanzıman <span class="req">*</span></label>
+            <select id="sanzimandSelect"><option>Otomatik</option><option>Manuel</option><option>Yarı Otomatik</option></select>
+          </div>
+          <div class="form-group">
+            <label>Kasa Tipi <span class="req">*</span></label>
+            <select id="kasaSelect"><option>Sedan</option><option>Hatchback</option><option>SUV</option><option>Station Wagon</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Renk</label>
+            <select id="renkSelect"><option>Gri</option><option>Beyaz</option><option>Siyah</option><option>Mavi</option><option>Kırmızı</option><option>Gümüş</option></select>
+          </div>
+          <div class="form-group">
+            <label>Motor Gücü (HP)</label>
+            <input type="number" id="motorInput" placeholder="örn: 190" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hasar Kaydı</label>
+            <select id="hasarSelect"><option value="false">Yok</option><option value="true">Var</option></select>
+          </div>
+          <div class="form-group">
+            <label>Kimden</label>
+            <select id="kimdenSelect"><option>Galeriden</option><option>Sahibinden</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAŞLIK & AÇIKLAMA -->
+    <div class="form-card">
+      <div class="form-card-header">📝 İlan Başlığı ve Açıklaması</div>
+      <div class="form-card-body">
+        <div class="form-group">
+          <label>İlan Başlığı <span class="req">*</span></label>
+          <input type="text" id="titleInput" placeholder="örn: 2022 BMW 520d M Sport – Temiz" maxlength="100" oninput="updateCharCount(this, 'titleCount'); updatePreview()" />
+          <div class="char-count"><span id="titleCount">0</span> / 100</div>
+        </div>
+        <div class="form-group">
+          <label>İlan Açıklaması <span class="req">*</span></label>
+          <textarea id="descInput" maxlength="4000" oninput="updateCharCount(this, 'descCount')" placeholder="Araç hakkında detaylı bilgi verin..."></textarea>
+          <div class="char-count"><span id="descCount">0</span> / 4000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FİYAT -->
+    <div class="form-card">
+      <div class="form-card-header">💰 Fiyat</div>
+      <div class="form-card-body">
+        <div class="form-row">
+          <div class="form-group" style="flex:2">
+            <label>Satış Fiyatı (TL) <span class="req">*</span></label>
+            <div class="price-wrap">
+              <input type="number" id="priceInput" placeholder="örn: 3850000" oninput="updatePreview()" />
+              <span class="price-currency">TL</span>
+            </div>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Para Birimi</label>
+            <select><option>TL</option><option>USD</option><option>EUR</option></select>
+          </div>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="takas" />
+          <label for="takas">Takas kabul ediyorum</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="pazarlik" checked />
+          <label for="pazarlik">Fiyat pazarlığa açık</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- DONANIM -->
+    <div class="form-card">
+      <div class="form-card-header">⚙️ Donanım & Özellikler</div>
+      <div class="form-card-body">
+        <div class="check-group">
+          <div class="check-row"><input type="checkbox" id="f1"/><label for="f1">Klima / Isıtma</label></div>
+          <div class="check-row"><input type="checkbox" id="f2"/><label for="f2">Geri Görüş Kamerası</label></div>
+          <div class="check-row"><input type="checkbox" id="f3"/><label for="f3">Park Sensörü</label></div>
+          <div class="check-row"><input type="checkbox" id="f4"/><label for="f4">Sunroof / Tavan</label></div>
+          <div class="check-row"><input type="checkbox" id="f5"/><label for="f5">Deri Döşeme</label></div>
+          <div class="check-row"><input type="checkbox" id="f6"/><label for="f6">Isıtmalı Koltuk</label></div>
+          <div class="check-row"><input type="checkbox" id="f7"/><label for="f7">Apple CarPlay</label></div>
+          <div class="check-row"><input type="checkbox" id="f8"/><label for="f8">Android Auto</label></div>
+          <div class="check-row"><input type="checkbox" id="f9"/><label for="f9">Cruise Control</label></div>
+          <div class="check-row"><input type="checkbox" id="f10"/><label for="f10">Şerit Takip</label></div>
+          <div class="check-row"><input type="checkbox" id="f11"/><label for="f11">Kablosuz Şarj</label></div>
+          <div class="check-row"><input type="checkbox" id="f12"/><label for="f12">LED / Lazer Far</label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KONUM -->
+    <div class="form-card">
+      <div class="form-card-header">📍 Konum</div>
+      <div class="form-card-body">
+        <div class="loc-row">
+          <select id="sehirSelect">
+            <option value="4">Adana</option>
+            <option value="1">İstanbul</option>
+            <option value="2">Ankara</option>
+            <option value="3">İzmir</option>
+            <option value="5">Bursa</option>
+            <option value="6">Antalya</option>
+          </select>
+          <select id="ilceSelect">
+            <option>Seyhan</option><option>Yüreğir</option><option>Çukurova</option><option>Sarıçam</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- İLETİŞİM -->
+    <div class="form-card">
+      <div class="form-card-header">📞 İletişim Tercihleri</div>
+      <div class="form-card-body">
+        <div class="check-row"><input type="checkbox" checked /><label>Telefon ile aranmak istiyorum</label></div>
+        <div class="check-row"><input type="checkbox" checked /><label>WhatsApp mesajı kabul ediyorum</label></div>
+        <div class="check-row"><input type="checkbox" checked /><label>Site üzerinden mesaj kabul ediyorum</label></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <button class="btn-prev" style="flex:1" onclick="history.back()">← Geri</button>
+      <button class="btn-submit-main" style="flex:2" onclick="goNext()">Devam Et: Paket Seç →</button>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COL -->
+  <div class="right-col">
+
+    <div class="preview-card">
+      <div class="prev-img">🚗</div>
+      <div class="prev-body">
+        <div class="prev-title" id="prevTitle">İlan başlığı...</div>
+        <div class="prev-price" id="prevPrice">0 TL</div>
+        <div class="prev-meta" id="prevMeta">0 km • Adana</div>
+        <div style="font-size:10px;color:#aaa;margin-top:6px;">İlan önizlemesi</div>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <h4>💡 Daha Hızlı Sat</h4>
+      <div class="tip-item"><span class="tip-icon">📷</span><span>En az 5 net fotoğraf ekle</span></div>
+      <div class="tip-item"><span class="tip-icon">📝</span><span>Detaylı açıklama yaz</span></div>
+      <div class="tip-item"><span class="tip-icon">💰</span><span>Rekabetçi fiyat koy</span></div>
+      <div class="tip-item"><span class="tip-icon">🔄</span><span>Takas seçeneği ekle</span></div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-header">🎯 Paket Seç</div>
+      <div class="form-card-body">
+        <div style="grid-template-columns:1fr;display:grid;gap:8px;">
+          <div class="pkg-card selected" onclick="selectPkg(this,'standart',0)">
+            <div class="pkg-icon">📋</div>
+            <div class="pkg-name">Standart</div>
+            <div class="pkg-free">Ücretsiz</div>
+            <div class="pkg-desc">30 gün yayında</div>
+          </div>
+          <div class="pkg-card" onclick="selectPkg(this,'vitrin',149)">
+            <div class="pkg-icon">⭐</div>
+            <div class="pkg-name">Vitrin</div>
+            <div class="pkg-price">149 TL / 15 gün</div>
+            <div class="pkg-desc">5x görüntülenme</div>
+          </div>
+          <div class="pkg-card" onclick="selectPkg(this,'super',299)">
+            <div class="pkg-icon">🚀</div>
+            <div class="pkg-name">Süper Vitrin</div>
+            <div class="pkg-price">299 TL / 30 gün</div>
+            <div class="pkg-desc">10x görüntülenme</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555;">© 2026 ilanra.com</div>
+</footer>
+
+<script>
+  let seciliPaket = 'standart';
+
+  // Önizleme güncelle
+  function updatePreview() {
+    const title = document.getElementById('titleInput').value || 'İlan başlığı...';
+    const price = parseInt(document.getElementById('priceInput').value) || 0;
+    const km = parseInt(document.getElementById('kmInput').value) || 0;
+    document.getElementById('prevTitle').textContent = title.substring(0, 50);
+    document.getElementById('prevPrice').textContent = price.toLocaleString('tr-TR') + ' TL';
+    document.getElementById('prevMeta').textContent = km.toLocaleString('tr-TR') + ' km • Adana';
+  }
+
+  function updateCharCount(el, spanId) {
+    document.getElementById(spanId).textContent = el.value.length;
+  }
+
+  // Fotoğraf ekle
+  function addPhoto(slot) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.onchange = function() {
+      if (input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          slot.style.backgroundImage = 'url(' + e.target.result + ')';
+          slot.style.backgroundSize = 'cover';
+          slot.style.backgroundPosition = 'center';
+          slot.innerHTML = '<div style="position:absolute;top:3px;right:3px;background:rgba(200,0,0,0.85);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;" onclick="removePhoto(event,this.parentElement)">×</div>';
+          slot._file = input.files[0];
+          slot.onclick = null;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    };
+    input.click();
+  }
+
+  function removePhoto(e, slot) {
+    e.stopPropagation();
+    slot.style.backgroundImage = '';
+    slot.innerHTML = '<div class="upload-icon">+</div><div>Fotoğraf Ekle</div>';
+    slot._file = null;
+    slot.onclick = function() { addPhoto(slot); };
+  }
+
+  function selectPkg(card, paket, fiyat) {
+    document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    seciliPaket = paket;
+  }
+
+  // İlan kaydet
+  async function goNext() {
+    const baslik = document.getElementById('titleInput').value.trim();
+    const aciklama = document.getElementById('descInput').value.trim();
+    const fiyat = document.getElementById('priceInput').value;
+    const token = localStorage.getItem('ilanra_token');
+
+    // Validasyon
+    if (!baslik) { alert('Lütfen ilan başlığı girin!'); document.getElementById('titleInput').focus(); return; }
+    if (!aciklama) { alert('Lütfen açıklama girin!'); document.getElementById('descInput').focus(); return; }
+    if (!fiyat) { alert('Lütfen fiyat girin!'); document.getElementById('priceInput').focus(); return; }
+
+    if (!token) {
+      alert('İlan vermek için önce giriş yapmalısınız!');
+      window.location.href = 'giris.html';
+      return;
+    }
+
+    const btn = document.querySelector('.btn-submit-main');
+    btn.textContent = '⏳ Kaydediliyor...';
+    btn.disabled = true;
+
+    try {
+      // İlanı oluştur
+      const yanit = await fetch('http://localhost:3001/api/ilanlar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          baslik: baslik,
+          aciklama: aciklama,
+          fiyat: parseFloat(fiyat),
+          kategori_id: 1,
+          sehir_id: parseInt(document.getElementById('sehirSelect').value) || 4,
+          takas: document.getElementById('takas').checked,
+          pazarlik: document.getElementById('pazarlik').checked
+        })
+      });
+
+      const data = await yanit.json();
+
+      if (!yanit.ok) {
+        alert('Hata: ' + (data.hata || 'İlan oluşturulamadı!'));
+        btn.textContent = 'Devam Et: Paket Seç →';
+        btn.disabled = false;
+        return;
+      }
+
+      const ilanId = data.ilan.id;
+
+      // Fotoğrafları yükle
+      const slots = document.querySelectorAll('.photo-slot');
+      const dosyalar = [];
+      slots.forEach(s => { if (s._file) dosyalar.push(s._file); });
+
+      if (dosyalar.length > 0) {
+        const formData = new FormData();
+        dosyalar.forEach(f => formData.append('fotograflar', f));
+
+        await fetch('http://localhost:3001/api/ilanlar/' + ilanId + '/fotograflar', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+      }
+alert('✅ İlanınız başarıyla oluşturuldu!');
+setTimeout(() => {
+  window.location.href = 'http://localhost:3001/profil.html';
+}, 500);
+
+    } catch (err) {
+      console.error(err);
+      alert('Sunucuya bağlanılamadı! Backend çalışıyor mu?');
+      btn.textContent = 'Devam Et: Paket Seç →';
+      btn.disabled = false;
+    }
+  }
+
+  // Kullanıcı adını göster
+  const kullanici = JSON.parse(localStorage.getItem('ilanra_kullanici') || '{}');
+  if (kullanici.ad) {
+    document.getElementById('hosgeldin').textContent = 'Merhaba, ' + kullanici.ad;
+  }
+
+  function cikisYap() {
+    localStorage.removeItem('ilanra_token');
+    localStorage.removeItem('ilanra_kullanici');
+    window.location.href = 'giris.html';
+  }
+</script>
+</body>
+</html>

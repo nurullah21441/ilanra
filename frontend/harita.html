@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harita Görünümü – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);flex-shrink:0;z-index:200}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px;flex-shrink:0}.logo span{color:#c00}
+  .search-wrap{flex:1;max-width:500px;display:flex;height:36px;margin:0 auto}
+  .search-cat{border:1.5px solid #aaa;border-right:none;background:#fff;padding:0 10px;font-size:12px;border-radius:4px 0 0 4px}
+  .search-input{flex:1;border:1.5px solid #aaa;border-right:none;padding:0 12px;font-size:13px;background:#fff;outline:none}
+  .search-btn{background:#e00;border:none;color:#fff;padding:0 18px;border-radius:0 4px 4px 0;font-size:13px;font-weight:600;cursor:pointer}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center;flex-shrink:0}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+
+  .toolbar{background:#fff;border-bottom:1px solid #eee;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;z-index:100}
+  .view-toggle{display:flex;gap:0;border:1px solid #ddd;border-radius:4px;overflow:hidden}
+  .view-btn{padding:6px 14px;font-size:12px;color:#555;cursor:pointer;background:#fff;border:none;border-right:1px solid #ddd}
+  .view-btn:last-child{border-right:none}
+  .view-btn.active{background:#c00;color:#fff}
+  .filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{background:#fff;border:1px solid #ddd;border-radius:20px;padding:4px 12px;font-size:11px;color:#555;cursor:pointer;white-space:nowrap}
+  .chip.active{background:#c00;color:#fff;border-color:#c00}
+  .chip:hover{border-color:#c00;color:#c00}
+  .chip.active:hover{color:#fff}
+  .result-count{font-size:12px;color:#666;margin-left:auto;white-space:nowrap}
+
+  .map-layout{flex:1;display:flex;overflow:hidden}
+
+  /* MAP */
+  .map-area{flex:1;position:relative;background:#e8eff8;overflow:hidden}
+  .map-bg{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 49px,#d0dcea 49px,#d0dcea 50px),repeating-linear-gradient(90deg,transparent,transparent 49px,#d0dcea 49px,#d0dcea 50px)}
+  .map-road-h{position:absolute;background:#fff;opacity:.7}
+  .map-road-v{position:absolute;background:#fff;opacity:.7}
+  .map-controls{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:10}
+  .map-ctrl-btn{width:36px;height:36px;background:#fff;border:1px solid #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#444;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .map-ctrl-btn:hover{background:#f5f5f5}
+  .map-locate{position:absolute;bottom:60px;right:14px;width:36px;height:36px;background:#fff;border:1px solid #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .map-legend{position:absolute;bottom:14px;left:14px;background:#fff;border:1px solid #ddd;border-radius:6px;padding:10px 14px;font-size:11px;color:#555;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  .legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .legend-item:last-child{margin-bottom:0}
+  .legend-dot{width:12px;height:12px;border-radius:50%}
+
+  /* PINS */
+  .pin{position:absolute;cursor:pointer;transform:translate(-50%,-100%);transition:transform .15s;z-index:5}
+  .pin:hover{transform:translate(-50%,-100%) scale(1.15);z-index:20}
+  .pin.active{transform:translate(-50%,-100%) scale(1.2);z-index:30}
+  .pin-bubble{background:#c00;color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+  .pin-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#c00;border-bottom:none}
+  .pin-bubble.vitrin{background:#f0a000}
+  .pin-bubble.vitrin::after{border-top-color:#f0a000}
+  .pin-bubble.cheap{background:#0a7d3a}
+  .pin-bubble.cheap::after{border-top-color:#0a7d3a}
+  .pin-cluster{background:#333;color:#fff;font-size:12px;font-weight:700;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);border:2px solid #fff}
+
+  /* POPUP */
+  .map-popup{position:absolute;background:#fff;border:1px solid #ddd;border-radius:8px;padding:0;width:240px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:50;display:none;overflow:hidden}
+  .map-popup.show{display:block}
+  .popup-img{height:120px;background:#e0eaf5;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative}
+  .popup-close{position:absolute;top:6px;right:6px;width:24px;height:24px;background:rgba(0,0,0,.4);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .popup-body{padding:10px 12px}
+  .popup-title{font-size:13px;font-weight:700;color:#111;margin-bottom:4px}
+  .popup-price{font-size:17px;font-weight:700;color:#c00;margin-bottom:6px}
+  .popup-meta{font-size:11px;color:#888;display:flex;gap:8px;margin-bottom:8px}
+  .popup-actions{display:flex;gap:6px}
+  .popup-btn{flex:1;height:30px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#555}
+  .popup-btn.primary{background:#c00;color:#fff;border-color:#c00}
+
+  /* SIDEBAR LIST */
+  .map-sidebar{width:320px;flex-shrink:0;background:#fff;border-left:1px solid #eee;display:flex;flex-direction:column;overflow:hidden}
+  .sidebar-head{padding:12px;border-bottom:1px solid #eee;background:#fafafa;flex-shrink:0}
+  .sidebar-head h4{font-size:13px;font-weight:700;color:#111;margin-bottom:4px}
+  .sidebar-head p{font-size:11px;color:#888}
+  .sidebar-list{flex:1;overflow-y:auto}
+  .slist-item{display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+  .slist-item:hover,.slist-item.active{background:#fff5f5}
+  .slist-item.active{border-left:3px solid #c00}
+  .slist-img{width:70px;height:52px;background:#f0f0f0;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+  .slist-info{flex:1;min-width:0}
+  .slist-title{font-size:12px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+  .slist-price{font-size:14px;font-weight:700;color:#c00;margin-bottom:2px}
+  .slist-meta{font-size:10px;color:#aaa}
+  .slist-fav{flex-shrink:0;color:#ddd;font-size:16px;cursor:pointer}.slist-fav:hover{color:#c00}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="search-wrap">
+    <select class="search-cat"><option>Tüm Kategoriler</option><option selected>Vasıta</option></select>
+    <input class="search-input" type="text" value="BMW" />
+    <button class="search-btn">Ara</button>
+  </div>
+  <div class="topbar-right">
+    <a href="arama_sonuclari.html" class="topbar-link">Liste Görünümü</a>
+    <a href="bildirimler.html" class="topbar-link">🔔</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="view-toggle">
+    <a href="ilanra_liste.html"><div class="view-btn">≡ Liste</div></a>
+    <a href="arama_sonuclari.html"><div class="view-btn">⊞ Galeri</div></a>
+    <div class="view-btn active">🗺 Harita</div>
+  </div>
+  <div class="filter-chips">
+    <div class="chip active">BMW</div>
+    <div class="chip active">Otomatik</div>
+    <div class="chip" onclick="this.classList.toggle('active')">Dizel</div>
+    <div class="chip" onclick="this.classList.toggle('active')">0–2M TL</div>
+    <div class="chip" onclick="this.classList.toggle('active')">2–4M TL</div>
+    <div class="chip" onclick="this.classList.toggle('active')">4M+ TL</div>
+    <div class="chip" onclick="this.classList.toggle('active')">İstanbul</div>
+    <div class="chip" onclick="this.classList.toggle('active')">Ankara</div>
+  </div>
+  <div class="result-count"><strong>2.841</strong> ilan haritada</div>
+</div>
+
+<div class="map-layout">
+  <div class="map-area" id="mapArea">
+    <div class="map-bg"></div>
+    <!-- Roads -->
+    <div class="map-road-h" style="top:30%;left:0;right:0;height:6px"></div>
+    <div class="map-road-h" style="top:55%;left:0;right:0;height:4px"></div>
+    <div class="map-road-h" style="top:72%;left:0;right:0;height:3px"></div>
+    <div class="map-road-v" style="left:25%;top:0;bottom:0;width:5px"></div>
+    <div class="map-road-v" style="left:52%;top:0;bottom:0;width:4px"></div>
+    <div class="map-road-v" style="left:75%;top:0;bottom:0;width:3px"></div>
+    <!-- City Labels -->
+    <div style="position:absolute;top:18%;left:18%;font-size:16px;font-weight:700;color:#aaa;letter-spacing:1px;text-transform:uppercase;opacity:.5">İSTANBUL</div>
+    <div style="position:absolute;top:38%;left:48%;font-size:14px;font-weight:700;color:#aaa;opacity:.5">ANKARA</div>
+    <div style="position:absolute;top:55%;left:22%;font-size:13px;font-weight:700;color:#aaa;opacity:.5">İZMİR</div>
+    <div style="position:absolute;top:65%;left:58%;font-size:12px;font-weight:700;color:#aaa;opacity:.5">ADANA</div>
+    <div style="position:absolute;top:60%;left:38%;font-size:12px;font-weight:700;color:#aaa;opacity:.5">KONYA</div>
+    <div style="position:absolute;top:70%;left:28%;font-size:11px;font-weight:700;color:#aaa;opacity:.5">ANTALYA</div>
+
+    <!-- PINS -->
+    <div class="pin" style="top:22%;left:20%" onclick="showPopup(event,0)">
+      <div class="pin-bubble vitrin">₺3.850.000</div>
+    </div>
+    <div class="pin" style="top:20%;left:22%" onclick="showPopup(event,1)">
+      <div class="pin-bubble">₺2.450.000</div>
+    </div>
+    <div class="pin" style="top:25%;left:17%" onclick="showPopup(event,2)">
+      <div class="pin-bubble">₺6.500.000</div>
+    </div>
+    <div class="pin" style="top:18%;left:24%" onclick="showPopup(event,3)">
+      <div class="pin-cluster">14</div>
+    </div>
+    <div class="pin" style="top:40%;left:50%" onclick="showPopup(event,4)">
+      <div class="pin-bubble">₺2.100.000</div>
+    </div>
+    <div class="pin" style="top:42%;left:52%" onclick="showPopup(event,5)">
+      <div class="pin-bubble cheap">₺1.150.000</div>
+    </div>
+    <div class="pin" style="top:38%;left:48%" onclick="showPopup(event,6)">
+      <div class="pin-cluster">8</div>
+    </div>
+    <div class="pin" style="top:57%;left:24%" onclick="showPopup(event,7)">
+      <div class="pin-bubble vitrin">₺7.200.000</div>
+    </div>
+    <div class="pin" style="top:66%;left:60%" onclick="showPopup(event,8)">
+      <div class="pin-bubble">₺1.480.000</div>
+    </div>
+    <div class="pin" style="top:62%;left:40%" onclick="showPopup(event,9)">
+      <div class="pin-cluster">5</div>
+    </div>
+    <div class="pin" style="top:71%;left:30%" onclick="showPopup(event,10)">
+      <div class="pin-bubble">₺4.800.000</div>
+    </div>
+
+    <!-- MAP POPUP -->
+    <div class="map-popup" id="mapPopup">
+      <div class="popup-img" id="popupImg">🚗
+        <button class="popup-close" onclick="closePopup()">×</button>
+      </div>
+      <div class="popup-body">
+        <div class="popup-title" id="popupTitle">2022 BMW 520d M Sport</div>
+        <div class="popup-price" id="popupPrice">3.850.000 TL</div>
+        <div class="popup-meta" id="popupMeta"><span>38.500 km</span><span>•</span><span>İstanbul</span></div>
+        <div class="popup-actions">
+          <button class="popup-btn" onclick="closePopup()">♡ Favorile</button>
+          <button class="popup-btn primary" onclick="window.location.href='ilan_detay.html'">İlana Git →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP CONTROLS -->
+    <div class="map-controls">
+      <div class="map-ctrl-btn" onclick="zoom(1)" title="Yakınlaştır">+</div>
+      <div class="map-ctrl-btn" onclick="zoom(-1)" title="Uzaklaştır">−</div>
+    </div>
+    <div class="map-locate" title="Konumum">📍</div>
+
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#c00"></div> Normal ilan</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f0a000"></div> Vitrin ilan</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0a7d3a"></div> Uygun fiyat</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#333"></div> Küme</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR LIST -->
+  <div class="map-sidebar">
+    <div class="sidebar-head">
+      <h4>📍 Haritadaki İlanlar</h4>
+      <p>Görünen alanda <strong>2.841</strong> ilan var</p>
+    </div>
+    <div class="sidebar-list" id="sidebarList">
+      <div class="slist-item active" onclick="showPopup(null,0,this)">
+        <div class="slist-img" style="background:#dde8f5">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2022 BMW 520d M Sport – VİTRİN</div>
+          <div class="slist-price">3.850.000 TL</div>
+          <div class="slist-meta">38.500 km • İstanbul / Kadıköy</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,1,this)">
+        <div class="slist-img" style="background:#e8eef5">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2021 BMW 320i M Sport</div>
+          <div class="slist-price">2.450.000 TL</div>
+          <div class="slist-meta">42.000 km • İstanbul / Beşiktaş</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,2,this)">
+        <div class="slist-img" style="background:#f0edf8">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2023 BMW M3 Competition</div>
+          <div class="slist-price">6.500.000 TL</div>
+          <div class="slist-meta">22.000 km • İstanbul / Şişli</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,4,this)">
+        <div class="slist-img" style="background:#e8f5e8">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2019 BMW 520d Luxury Line</div>
+          <div class="slist-price">2.100.000 TL</div>
+          <div class="slist-meta">87.000 km • Ankara / Çankaya</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,5,this)">
+        <div class="slist-img" style="background:#e8f0f5">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2018 BMW 118i M Sport</div>
+          <div class="slist-price">1.150.000 TL</div>
+          <div class="slist-meta">112.000 km • Ankara / Keçiören</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,7,this)">
+        <div class="slist-img" style="background:#f5ede8">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2023 BMW X5 xDrive40d – VİTRİN</div>
+          <div class="slist-price">7.200.000 TL</div>
+          <div class="slist-meta">18.000 km • İzmir / Karşıyaka</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,8,this)">
+        <div class="slist-img" style="background:#f0f5e8">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2017 BMW 520i Standart</div>
+          <div class="slist-price">1.480.000 TL</div>
+          <div class="slist-meta">95.000 km • Adana / Seyhan</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+      <div class="slist-item" onclick="showPopup(null,10,this)">
+        <div class="slist-img" style="background:#fdf5e0">🚗</div>
+        <div class="slist-info">
+          <div class="slist-title">2020 BMW 730d xDrive</div>
+          <div class="slist-price">4.800.000 TL</div>
+          <div class="slist-meta">65.000 km • Antalya / Muratpaşa</div>
+        </div>
+        <div class="slist-fav">♡</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ilanlar=[
+    {title:'2022 BMW 520d M Sport',price:'3.850.000 TL',meta:'38.500 km • İstanbul',emoji:'🚗',color:'#dde8f5'},
+    {title:'2021 BMW 320i M Sport',price:'2.450.000 TL',meta:'42.000 km • İstanbul',emoji:'🚗',color:'#e8eef5'},
+    {title:'2023 BMW M3 Competition',price:'6.500.000 TL',meta:'22.000 km • İstanbul',emoji:'🚗',color:'#f0edf8'},
+    {title:'BMW Küme (14 ilan)',price:'Çeşitli fiyatlar',meta:'İstanbul',emoji:'🗺️',color:'#eee'},
+    {title:'2019 BMW 520d Luxury',price:'2.100.000 TL',meta:'87.000 km • Ankara',emoji:'🚗',color:'#e8f5e8'},
+    {title:'2018 BMW 118i M Sport',price:'1.150.000 TL',meta:'112.000 km • Ankara',emoji:'🚗',color:'#e8f0f5'},
+    {title:'BMW Küme (8 ilan)',price:'Çeşitli fiyatlar',meta:'Ankara',emoji:'🗺️',color:'#eee'},
+    {title:'2023 BMW X5 xDrive40d',price:'7.200.000 TL',meta:'18.000 km • İzmir',emoji:'🚗',color:'#f5ede8'},
+    {title:'2017 BMW 520i Standart',price:'1.480.000 TL',meta:'95.000 km • Adana',emoji:'🚗',color:'#f0f5e8'},
+    {title:'BMW Küme (5 ilan)',price:'Çeşitli fiyatlar',meta:'Konya',emoji:'🗺️',color:'#eee'},
+    {title:'2020 BMW 730d xDrive',price:'4.800.000 TL',meta:'65.000 km • Antalya',emoji:'🚗',color:'#fdf5e0'},
+  ];
+  function showPopup(e,idx,sitem){
+    if(e)e.stopPropagation();
+    const d=ilanlar[idx];
+    const popup=document.getElementById('mapPopup');
+    document.getElementById('popupTitle').textContent=d.title;
+    document.getElementById('popupPrice').textContent=d.price;
+    document.getElementById('popupMeta').innerHTML=d.meta;
+    document.getElementById('popupImg').style.background=d.color;
+    document.getElementById('popupImg').childNodes[0].textContent=d.emoji;
+    // position
+    if(e){
+      const rect=document.getElementById('mapArea').getBoundingClientRect();
+      let x=e.clientX-rect.left+10;
+      let y=e.clientY-rect.top-10;
+      if(x+250>rect.width)x=e.clientX-rect.left-260;
+      popup.style.left=x+'px';popup.style.top=y+'px';
+    } else {
+      popup.style.left='50px';popup.style.top='50px';
+    }
+    popup.classList.add('show');
+    if(sitem){document.querySelectorAll('.slist-item').forEach(s=>s.classList.remove('active'));sitem.classList.add('active')}
+  }
+  function closePopup(){document.getElementById('mapPopup').classList.remove('show')}
+  document.getElementById('mapArea').addEventListener('click',function(e){if(e.target===this||e.target.classList.contains('map-bg')||e.target.classList.contains('map-road-h')||e.target.classList.contains('map-road-v'))closePopup()})
+  let zoom=1;
+  function zoom(d){zoom=Math.max(.5,Math.min(2,zoom+d*.1));document.getElementById('mapArea').style.transform=`scale(${zoom})`;document.getElementById('mapArea').style.transformOrigin='center center'}
+  document.querySelectorAll('.slist-fav').forEach(f=>f.addEventListener('click',function(e){e.stopPropagation();this.textContent=this.textContent==='♡'?'♥':'♡';this.style.color=this.textContent==='♥'?'#c00':'#ddd'}))
+</script>
+</body>
+</html>
+

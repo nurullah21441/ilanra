@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiyat Geçmişi – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:860px;margin:16px auto;padding:0 16px}
+  .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;margin-bottom:12px}
+  .card-head{background:#fafafa;border-bottom:1px solid #eee;padding:11px 16px;font-size:13px;font-weight:700;color:#333;display:flex;justify-content:space-between;align-items:center}
+  .card-body{padding:16px}
+
+  .ilan-strip{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid #eee;background:#fafafa}
+  .is-img{width:72px;height:54px;background:#dde8f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+  .is-title{font-size:14px;font-weight:700;color:#111;margin-bottom:3px}
+  .is-price{font-size:18px;font-weight:700;color:#c00}
+  .is-change{font-size:12px;color:#0a0;margin-left:8px}
+
+  /* CHART */
+  .price-chart{position:relative;height:220px;margin:8px 0 24px}
+  .chart-line{position:absolute;bottom:0;left:40px;right:0;top:0}
+  .y-axis{position:absolute;left:0;top:0;bottom:20px;width:36px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end}
+  .y-label{font-size:10px;color:#aaa}
+  .x-axis{position:absolute;bottom:0;left:40px;right:0;display:flex;justify-content:space-between}
+  .x-label{font-size:10px;color:#aaa}
+
+  /* TABLE */
+  .hist-table{width:100%;border-collapse:collapse}
+  .hist-table th{font-size:11px;color:#888;font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid #eee;background:#fafafa}
+  .hist-table td{padding:10px 12px;border-bottom:1px solid #f5f5f5;font-size:12px}
+  .hist-table tr:last-child td{border-bottom:none}
+  .price-up{color:#c00}.price-down{color:#0a0}.price-same{color:#888}
+  .change-badge{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:700}
+  .cb-down{background:#e0f0e0;color:#0a0}
+  .cb-up{background:#fde0e0;color:#c00}
+  .cb-same{background:#f0f0f0;color:#888}
+
+  /* SIMILAR PRICE */
+  .similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sim-card{border:1px solid #e8e8e8;border-radius:4px;overflow:hidden;cursor:pointer;transition:all .15s}
+  .sim-card:hover{border-color:#c00}
+  .sim-img{height:90px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:32px}
+  .sim-body{padding:8px}
+  .sim-title{font-size:11px;font-weight:600;color:#111;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sim-price{font-size:14px;font-weight:700;color:#c00}
+  .sim-meta{font-size:10px;color:#aaa;margin-top:2px}
+
+  /* ANALYSIS */
+  .analysis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .an-box{text-align:center;padding:12px;background:#fafafa;border:1px solid #eee;border-radius:4px}
+  .an-num{font-size:18px;font-weight:700;color:#111;margin-bottom:3px}
+  .an-lbl{font-size:10px;color:#888}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="ilan_detay.html" class="topbar-link">← İlana Dön</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+  </div>
+</div>
+<div class="breadcrumb"><a href="anasayfa.html">Anasayfa</a> › <a href="ilanra_liste.html">Vasıta</a> › <a href="ilan_detay.html">2022 BMW 520d M Sport</a> › <span>Fiyat Geçmişi</span></div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="ilan-strip">
+      <div class="is-img">🚗</div>
+      <div>
+        <div class="is-title">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge</div>
+        <div><span class="is-price">3.850.000 TL</span><span class="is-change">↓ %7.2 son 3 ayda</span></div>
+        <div style="font-size:11px;color:#888;margin-top:2px">İlan No: 1087234561 • Yayın: 15 Mayıs 2026</div>
+      </div>
+    </div>
+    <div class="card-head" style="border-top:none">
+      📈 Fiyat Grafiği
+      <select style="height:26px;padding:0 8px;border:1px solid #ddd;border-radius:3px;font-size:11px" onchange="drawChart(this.value)">
+        <option value="90">Son 90 gün</option>
+        <option value="180">Son 6 ay</option>
+        <option value="365">Son 1 yıl</option>
+      </select>
+    </div>
+    <div class="card-body">
+      <div class="price-chart">
+        <div class="y-axis" id="yAxis"></div>
+        <svg id="priceChart" style="position:absolute;left:40px;right:0;top:0;bottom:20px;width:calc(100% - 40px);height:calc(100% - 20px)" preserveAspectRatio="none"></svg>
+        <div class="x-axis" id="xAxis"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS -->
+  <div class="card">
+    <div class="card-head">📊 Fiyat Analizi</div>
+    <div class="card-body">
+      <div class="analysis-grid">
+        <div class="an-box"><div class="an-num" style="color:#c00">4.150.000 TL</div><div class="an-lbl">En yüksek fiyat</div></div>
+        <div class="an-box"><div class="an-num" style="color:#0a0">3.750.000 TL</div><div class="an-lbl">En düşük fiyat</div></div>
+        <div class="an-box"><div class="an-num">3.920.000 TL</div><div class="an-lbl">Ortalama fiyat</div></div>
+        <div class="an-box"><div class="an-num" style="color:#0a0">↓ 300.000 TL</div><div class="an-lbl">Toplam düşüş</div></div>
+        <div class="an-box"><div class="an-num">5</div><div class="an-lbl">Fiyat değişimi</div></div>
+        <div class="an-box"><div class="an-num">90 gün</div><div class="an-lbl">Yayında kalma</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TABLE -->
+  <div class="card">
+    <div class="card-head">🕐 Fiyat Değişim Geçmişi</div>
+    <div class="card-body" style="padding:0">
+      <table class="hist-table">
+        <tr><th>Tarih</th><th>Fiyat</th><th>Değişim</th><th>Açıklama</th></tr>
+        <tr><td>30 May 2026 (Bugün)</td><td class="price-up" style="font-weight:700">3.850.000 TL</td><td><span class="change-badge cb-same">Değişmedi</span></td><td style="color:#888">—</td></tr>
+        <tr><td>18 May 2026</td><td>3.850.000 TL</td><td><span class="change-badge cb-down">↓ 150.000 TL</span></td><td style="color:#555">Fiyat düşürüldü</td></tr>
+        <tr><td>5 May 2026</td><td>4.000.000 TL</td><td><span class="change-badge cb-down">↓ 50.000 TL</span></td><td style="color:#555">Fiyat düşürüldü</td></tr>
+        <tr><td>20 Nis 2026</td><td>4.050.000 TL</td><td><span class="change-badge cb-down">↓ 100.000 TL</span></td><td style="color:#555">Takas seçeneği eklendi</td></tr>
+        <tr><td>8 Mar 2026</td><td>4.150.000 TL</td><td><span class="change-badge cb-up">↑ 150.000 TL</span></td><td style="color:#555">Piyasa değerlendirmesi</td></tr>
+        <tr><td>15 Şub 2026</td><td style="color:#0a0;font-weight:700">4.000.000 TL</td><td><span class="change-badge cb-same">İlk Fiyat</span></td><td style="color:#555">İlan yayınlandı</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIMILAR -->
+  <div class="card">
+    <div class="card-head">🔍 Benzer İlanlarla Karşılaştırma</div>
+    <div class="card-body">
+      <div style="font-size:12px;color:#555;margin-bottom:12px">Bu ilanın fiyatı benzer araçlarla karşılaştırıldığında: <strong style="color:#0a0">Piyasaya Uygun ✓</strong></div>
+      <div class="similar-grid">
+        <div class="sim-card" onclick="window.location.href='ilan_detay.html'">
+          <div class="sim-img" style="background:#dde8f5">🚗</div>
+          <div class="sim-body">
+            <div class="sim-title">2022 BMW 520d M Sport (Bu İlan)</div>
+            <div class="sim-price" style="color:#c00">3.850.000 TL ←</div>
+            <div class="sim-meta">38.500 km • İstanbul</div>
+          </div>
+        </div>
+        <div class="sim-card" onclick="window.location.href='ilan_detay.html'">
+          <div class="sim-img" style="background:#e8f5e8">🚗</div>
+          <div class="sim-body">
+            <div class="sim-title">2021 BMW 520d M Sport</div>
+            <div class="sim-price">3.450.000 TL</div>
+            <div class="sim-meta">52.000 km • Ankara</div>
+          </div>
+        </div>
+        <div class="sim-card" onclick="window.location.href='ilan_detay.html'">
+          <div class="sim-img" style="background:#f5ede8">🚗</div>
+          <div class="sim-body">
+            <div class="sim-title">2022 BMW 520i M Sport</div>
+            <div class="sim-price">3.650.000 TL</div>
+            <div class="sim-meta">28.000 km • İstanbul</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+
+<script>
+  const priceData=[
+    {day:0,price:4000000},{day:21,price:4150000},{day:55,price:4050000},
+    {day:70,price:4000000},{day:85,price:3850000},{day:90,price:3850000}
+  ];
+  function drawChart(days){
+    const svg=document.getElementById('priceChart');
+    const W=svg.clientWidth||600,H=svg.clientHeight||180;
+    const prices=priceData.map(d=>d.price);
+    const minP=3400000,maxP=4300000;
+    const pts=priceData.filter(d=>d.day<=parseInt(days));
+    const scaleX=d=>(d/parseInt(days))*W;
+    const scaleY=p=>H-(((p-minP)/(maxP-minP))*H*0.8+H*0.1);
+    const pathD=pts.map((d,i)=>`${i===0?'M':'L'}${scaleX(d.day)},${scaleY(d.price)}`).join(' ');
+    const areaD=pathD+` L${scaleX(pts[pts.length-1].day)},${H} L${scaleX(pts[0].day)},${H} Z`;
+    svg.innerHTML=`
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c00" stop-opacity="0.15"/><stop offset="1" stop-color="#c00" stop-opacity="0"/></linearGradient></defs>
+      ${[0,25,50,75,100].map(pct=>{const y=H-(pct/100*H*0.8+H*0.1);return `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#eee" stroke-width="1"/>`}).join('')}
+      <path d="${areaD}" fill="url(#g)"/>
+      <path d="${pathD}" fill="none" stroke="#c00" stroke-width="2.5"/>
+      ${pts.map(d=>`<circle cx="${scaleX(d.day)}" cy="${scaleY(d.price)}" r="4" fill="#c00" stroke="#fff" stroke-width="2"><title>${(d.price/1000000).toFixed(2)}M TL</title></circle>`).join('')}
+    `;
+    const ya=document.getElementById('yAxis');
+    ya.innerHTML=[4300,4000,3700,3400].map(p=>`<div class="y-label">${(p/1000000).toFixed(1)}M</div>`).join('');
+    const xa=document.getElementById('xAxis');
+    const labels=parseInt(days)<=90?['90g önce','60g','30g','Bugün']:parseInt(days)<=180?['6ay önce','4ay','2ay','Bugün']:['1yıl önce','9ay','6ay','Bugün'];
+    xa.innerHTML=labels.map(l=>`<div class="x-label">${l}</div>`).join('');
+  }
+  setTimeout(()=>drawChart('90'),100);
+</script>
+</body>
+</html>
+
