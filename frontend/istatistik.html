@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İlan İstatistikleri – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:960px;margin:16px auto;padding:0 16px;display:flex;gap:14px;align-items:flex-start}
+  .left{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+  .right{width:250px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+
+  .ilan-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:14px;display:flex;align-items:center;gap:12px}
+  .ilan-img{width:80px;height:60px;background:#dde8f5;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+  .ilan-info .title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px}
+  .ilan-info .price{font-size:18px;font-weight:700;color:#c00;margin-bottom:4px}
+  .ilan-info .meta{font-size:11px;color:#888}
+  .ilan-status{margin-left:auto;text-align:right}
+  .status-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px}
+  .s-vitrin{background:#fff9c4;color:#a07000}
+  .s-active{background:#e0f0e0;color:#0a0}
+  .days-left{font-size:11px;color:#888;margin-top:4px}
+
+  .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden}
+  .card-head{background:#fafafa;border-bottom:1px solid #eee;padding:11px 16px;font-size:13px;font-weight:700;color:#333;display:flex;justify-content:space-between;align-items:center}
+  .card-head select{height:26px;padding:0 8px;border:1px solid #ddd;border-radius:3px;font-size:11px;color:#555}
+  .card-body{padding:16px}
+
+  /* STAT CARDS */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stat{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:14px;text-align:center}
+  .stat .num{font-size:26px;font-weight:700;color:#111;margin-bottom:3px}
+  .stat .lbl{font-size:11px;color:#888}
+  .stat .change{font-size:11px;margin-top:4px}
+  .up{color:#0a0}.down{color:#c00}
+
+  /* CHART */
+  .chart-wrap{height:180px;position:relative;display:flex;align-items:flex-end;gap:6px;padding:0 0 24px}
+  .bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+  .bar{width:100%;border-radius:3px 3px 0 0;transition:opacity .15s;position:relative}
+  .bar:hover{opacity:.8}
+  .bar-label{font-size:10px;color:#aaa;text-align:center}
+  .bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:#333;white-space:nowrap;display:none}
+  .bar:hover .bar-val{display:block}
+  .chart-yaxis{position:absolute;left:0;top:0;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:#ccc}
+
+  /* DONUT */
+  .donut-wrap{display:flex;align-items:center;gap:20px}
+  .donut-svg{flex-shrink:0}
+  .donut-legend{flex:1}
+  .dl-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+  .dl-dot{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+  .dl-label{flex:1;color:#555}
+  .dl-val{font-weight:700;color:#111}
+  .dl-pct{color:#aaa;font-size:11px}
+
+  /* HEATMAP */
+  .heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .hm-day-label{font-size:10px;color:#aaa;text-align:center;padding:2px}
+  .hm-cell{height:24px;border-radius:3px;cursor:pointer;transition:opacity .1s}
+  .hm-cell:hover{opacity:.7}
+
+  /* TABLE */
+  .ref-table{width:100%;border-collapse:collapse}
+  .ref-table th{font-size:11px;color:#888;font-weight:500;text-align:left;padding:7px 10px;border-bottom:1px solid #eee;background:#fafafa}
+  .ref-table td{padding:8px 10px;border-bottom:1px solid #f5f5f5;font-size:12px}
+  .ref-table tr:last-child td{border-bottom:none}
+  .ref-bar{height:6px;border-radius:3px;background:#c00;display:inline-block}
+
+  /* SUGGESTIONS */
+  .sug-box{background:#fff8e0;border:1px solid #f0d060;border-radius:6px;padding:14px}
+  .sug-box h4{font-size:13px;font-weight:700;color:#a07000;margin-bottom:10px}
+  .sug-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#555;margin-bottom:10px;line-height:1.4}
+  .sug-item:last-child{margin-bottom:0}
+  .sug-icon{font-size:16px;flex-shrink:0}
+  .btn-boost{width:100%;padding:9px;background:#f0a000;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px}
+  .btn-boost:hover{background:#d08000}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="bildirimler.html" class="topbar-link">🔔</a>
+    <a href="mesajlar.html" class="topbar-link">💬 Mesajlar</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb"><a href="anasayfa.html">Anasayfa</a> › <a href="profil.html">Hesabım</a> › <a href="profil.html">İlanlarım</a> › <span>İstatistikler</span></div>
+
+<div class="container">
+  <div class="left">
+
+    <!-- İLAN KARTI -->
+    <div class="ilan-card">
+      <div class="ilan-img">🚗</div>
+      <div class="ilan-info">
+        <div class="title">2022 BMW 5 Serisi 520d M Sport</div>
+        <div class="price">3.850.000 TL</div>
+        <div class="meta">İlan No: 1087234561 • Yayın tarihi: 15 Mayıs 2026</div>
+      </div>
+      <div class="ilan-status">
+        <div><span class="status-badge s-vitrin">VİTRİN</span></div>
+        <div style="margin-top:4px"><span class="status-badge s-active">AKTİF</span></div>
+        <div class="days-left">12 gün kaldı</div>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat"><div style="font-size:20px;margin-bottom:4px">👁</div><div class="num">1.284</div><div class="lbl">Toplam Görüntülenme</div><div class="change up">↑ %23 bu hafta</div></div>
+      <div class="stat"><div style="font-size:20px;margin-bottom:4px">❤️</div><div class="num">47</div><div class="lbl">Favoriye Ekleme</div><div class="change up">↑ %8 bu hafta</div></div>
+      <div class="stat"><div style="font-size:20px;margin-bottom:4px">💬</div><div class="num">18</div><div class="lbl">Mesaj / Talep</div><div class="change up">↑ %15 bu hafta</div></div>
+      <div class="stat"><div style="font-size:20px;margin-bottom:4px">📞</div><div class="num">34</div><div class="lbl">Telefon Görüntüleme</div><div class="change down">↓ %4 bu hafta</div></div>
+    </div>
+
+    <!-- GÜNLÜK GÖRÜNTÜLENMEler -->
+    <div class="card">
+      <div class="card-head">
+        📈 Günlük Görüntülenme
+        <select onchange="updateChart(this.value)"><option value="14">Son 14 gün</option><option value="30">Son 30 gün</option><option value="7">Son 7 gün</option></select>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap" id="chart">
+          <div class="chart-yaxis" id="yaxis"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KAYNAKLAR -->
+    <div class="card">
+      <div class="card-head">🔗 Trafik Kaynakları</div>
+      <div class="card-body">
+        <table class="ref-table">
+          <tr><th>Kaynak</th><th>Görüntülenme</th><th>Oran</th><th></th></tr>
+          <tr><td>🔍 ilanra Arama</td><td><strong>642</strong></td><td>50%</td><td><div class="ref-bar" style="width:100px"></div></td></tr>
+          <tr><td>⭐ Vitrin Listesi</td><td><strong>321</strong></td><td>25%</td><td><div class="ref-bar" style="width:50px;background:#f0a000"></div></td></tr>
+          <tr><td>❤️ Favorilerden</td><td><strong>193</strong></td><td>15%</td><td><div class="ref-bar" style="width:30px;background:#0066cc"></div></td></tr>
+          <tr><td>🌐 Dış Kaynak</td><td><strong>128</strong></td><td>10%</td><td><div class="ref-bar" style="width:20px;background:#888"></div></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ZİYARETÇİ HARİTASI (HEATMAP) -->
+    <div class="card">
+      <div class="card-head">📅 Günlük Aktivite Haritası</div>
+      <div class="card-body">
+        <div style="display:flex;gap:4px;align-items:flex-start">
+          <div style="display:flex;flex-direction:column;gap:3px;margin-right:4px;padding-top:22px">
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Pzt</div>
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Sal</div>
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Çar</div>
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Per</div>
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Cum</div>
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Cmt</div>
+            <div style="font-size:10px;color:#aaa;height:24px;display:flex;align-items:center">Paz</div>
+          </div>
+          <div style="flex:1">
+            <div id="heatmapGrid"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:#888">
+          Az <div style="display:flex;gap:2px"><div style="width:12px;height:12px;border-radius:2px;background:#eee"></div><div style="width:12px;height:12px;border-radius:2px;background:#ffcccc"></div><div style="width:12px;height:12px;border-radius:2px;background:#ff8888"></div><div style="width:12px;height:12px;border-radius:2px;background:#cc0000"></div><div style="width:12px;height:12px;border-radius:2px;background:#880000"></div></div> Çok
+        </div>
+      </div>
+    </div>
+
+    <!-- ZİYARETÇİ DAĞILIMI -->
+    <div class="card">
+      <div class="card-head">🌍 Ziyaretçi Dağılımı</div>
+      <div class="card-body">
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#eee" stroke-width="18"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#c00" stroke-width="18" stroke-dasharray="141 141" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#f0a000" stroke-width="18" stroke-dasharray="70 212" stroke-dashoffset="-141" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#0066cc" stroke-width="18" stroke-dasharray="42 240" stroke-dashoffset="-211" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#888" stroke-width="18" stroke-dasharray="30 252" stroke-dashoffset="-253" transform="rotate(-90 60 60)"/>
+            <text x="60" y="55" text-anchor="middle" font-size="13" font-weight="700" fill="#111">1.284</text>
+            <text x="60" y="70" text-anchor="middle" font-size="9" fill="#888">görüntülenme</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="dl-item"><div class="dl-dot" style="background:#c00"></div><span class="dl-label">İstanbul</span><span class="dl-val">642</span><span class="dl-pct"> %50</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#f0a000"></div><span class="dl-label">Ankara</span><span class="dl-val">257</span><span class="dl-pct"> %20</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#0066cc"></div><span class="dl-label">İzmir</span><span class="dl-val">193</span><span class="dl-pct"> %15</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:#888"></div><span class="dl-label">Diğer</span><span class="dl-val">192</span><span class="dl-pct"> %15</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COL -->
+  <div class="right">
+    <div class="sug-box">
+      <h4>💡 Öneriler</h4>
+      <div class="sug-item"><div class="sug-icon">📷</div><div>Daha fazla fotoğraf ekle — 10+ fotoğraflı ilanlar 2x daha fazla tıklanıyor.</div></div>
+      <div class="sug-item"><div class="sug-icon">🕐</div><div>En yoğun saat 19:00–22:00 arası. İlanını o saatte yenile.</div></div>
+      <div class="sug-item"><div class="sug-icon">💰</div><div>Fiyatın %3 altındaki ilanlar daha fazla tıklanıyor. 3.750.000 TL deneyin.</div></div>
+      <div class="sug-item"><div class="sug-icon">🚀</div><div>Süper Vitrin ile görüntülenmeni 10x artır.</div></div>
+      <button class="btn-boost" onclick="window.location.href='odeme.html'">🚀 İlanı Öne Çıkar</button>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📊 Rekabet Analizi</div>
+      <div class="card-body">
+        <div style="font-size:12px;color:#555;margin-bottom:10px">Benzer BMW 520d ilanlarıyla karşılaştırma:</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:11px;color:#888;margin-bottom:3px">Ortalama fiyat</div>
+          <div style="font-size:15px;font-weight:700;color:#111">3.720.000 TL</div>
+          <div style="font-size:11px;color:#c00">Senin fiyatın %3.5 üstünde</div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:11px;color:#888;margin-bottom:3px">Ortalama görüntülenme (30 gün)</div>
+          <div style="font-size:15px;font-weight:700;color:#111">890</div>
+          <div style="font-size:11px;color:#0a0">Senin ilanın %44 daha iyi ✓</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#888;margin-bottom:3px">Toplam rakip ilan</div>
+          <div style="font-size:15px;font-weight:700;color:#111">48 ilan</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📱 Cihaz Dağılımı</div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>📱 Mobil</span><span style="font-weight:700">68%</span></div><div style="height:8px;background:#eee;border-radius:4px"><div style="height:8px;background:#c00;border-radius:4px;width:68%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>💻 Masaüstü</span><span style="font-weight:700">24%</span></div><div style="height:8px;background:#eee;border-radius:4px"><div style="height:8px;background:#f0a000;border-radius:4px;width:24%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>📟 Tablet</span><span style="font-weight:700">8%</span></div><div style="height:8px;background:#eee;border-radius:4px"><div style="height:8px;background:#888;border-radius:4px;width:8%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+
+<script>
+  const data14=[12,8,45,32,67,89,54,43,78,92,110,88,134,127];
+  const data7=[78,92,110,88,134,127,145];
+  const data30=[...Array(30)].map(()=>Math.floor(Math.random()*100+20));
+
+  function updateChart(days){
+    const d=days==='7'?data7:days==='14'?data14:data30;
+    const chart=document.getElementById('chart');
+    chart.innerHTML='';
+    const max=Math.max(...d);
+    d.forEach((v,i)=>{
+      const g=document.createElement('div');
+      g.className='bar-group';
+      const pct=(v/max)*140;
+      const date=new Date();date.setDate(date.getDate()-(d.length-1-i));
+      const label=days==='30'?`${date.getDate()}/${date.getMonth()+1}`:`${['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'][date.getDay()===0?6:date.getDay()-1]}`;
+      g.innerHTML=`<div class="bar" style="height:${pct}px;background:${i===d.length-1?'#c00':'#ffcccc'};"><div class="bar-val">${v}</div></div><div class="bar-label">${label}</div>`;
+      chart.appendChild(g);
+    });
+  }
+  updateChart('14');
+
+  // Heatmap
+  const weeks=8;
+  const hg=document.getElementById('heatmapGrid');
+  hg.style.display='grid';
+  hg.style.gridTemplateColumns=`repeat(${weeks},1fr)`;
+  hg.style.gap='3px';
+  // week labels
+  const wlRow=document.createElement('div');
+  wlRow.style.gridColumn=`1/${weeks+1}`;
+  wlRow.style.display='grid';
+  wlRow.style.gridTemplateColumns=`repeat(${weeks},1fr)`;
+  wlRow.style.gap='3px';
+  wlRow.style.marginBottom='3px';
+  for(let w=0;w<weeks;w++){const d=document.createElement('div');d.style.fontSize='10px';d.style.color='#aaa';d.style.textAlign='center';const dd=new Date();dd.setDate(dd.getDate()-(weeks-1-w)*7);d.textContent=`${dd.getDate()}/${dd.getMonth()+1}`;wlRow.appendChild(d)}
+  hg.appendChild(wlRow);
+  const colors=['#eee','#ffcccc','#ff9999','#cc0000','#880000'];
+  for(let day=0;day<7;day++){
+    for(let week=0;week<weeks;week++){
+      const cell=document.createElement('div');
+      cell.className='hm-cell';
+      const v=Math.floor(Math.random()*5);
+      cell.style.background=colors[v];
+      const val=[0,5,15,35,60][v];
+      cell.title=`${val} görüntülenme`;
+      hg.appendChild(cell);
+    }
+  }
+</script>
+</body>
+</html>
+

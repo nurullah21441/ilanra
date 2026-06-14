@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kayıtlı Aramalar – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:860px;margin:16px auto;padding:0 16px}
+
+  .page-header{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+  .page-header h2{font-size:16px;font-weight:700;color:#111}
+  .page-header p{font-size:12px;color:#888;margin-top:3px}
+  .btn-new{background:#c00;color:#fff;border:none;padding:9px 18px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer}
+  .btn-new:hover{background:#a00}
+
+  .saved-item{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+  .saved-icon{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .saved-body{flex:1;min-width:0}
+  .saved-title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px}
+  .saved-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+  .sf-tag{background:#f5f5f5;border:1px solid #e8e8e8;border-radius:20px;padding:3px 10px;font-size:11px;color:#555}
+  .saved-meta{font-size:11px;color:#888;display:flex;gap:12px;flex-wrap:wrap}
+  .saved-meta strong{color:#c00}
+  .saved-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+  .notif-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:#555}
+  .toggle{width:38px;height:22px;background:#ddd;border-radius:11px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .toggle.on{background:#0a0}
+  .toggle::after{content:'';width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle.on::after{transform:translateX(16px)}
+  .saved-actions{display:flex;gap:5px}
+  .sa-btn{height:28px;padding:0 10px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#555;white-space:nowrap}
+  .sa-btn:hover{background:#f5f5f5}
+  .sa-btn.danger:hover{border-color:#c00;color:#c00}
+  .sa-btn.primary{background:#c00;color:#fff;border-color:#c00}
+
+  .new-count{background:#c00;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px}
+
+  /* NEW SEARCH MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:8px;padding:24px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto}
+  .modal h3{font-size:16px;font-weight:700;margin-bottom:16px}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px}
+  .form-group input,.form-group select{width:100%;height:36px;border:1px solid #ccc;border-radius:4px;padding:0 10px;font-size:13px;color:#111;outline:none}
+  .form-row{display:flex;gap:8px}.form-row .form-group{flex:1}
+  .modal-actions{display:flex;gap:8px;margin-top:16px}
+  .btn-save{flex:1;padding:10px;background:#c00;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer}
+  .btn-cancel{flex:1;padding:10px;background:#fff;color:#555;border:1px solid #ccc;border-radius:4px;font-size:13px;cursor:pointer}
+
+  .empty-state{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:48px;text-align:center}
+  .empty-state .e-icon{font-size:48px;margin-bottom:12px}
+  .empty-state h3{font-size:16px;font-weight:700;color:#111;margin-bottom:6px}
+  .empty-state p{font-size:13px;color:#888;margin-bottom:16px}
+
+  .info-box{background:#e0f0ff;border:1px solid #b0d0f0;border-radius:6px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#0055aa;display:flex;align-items:flex-start;gap:8px}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="bildirimler.html" class="topbar-link">🔔</a>
+    <a href="mesajlar.html" class="topbar-link">💬</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb"><a href="anasayfa.html">Anasayfa</a> › <a href="profil.html">Hesabım</a> › <span>Kayıtlı Aramalar</span></div>
+
+<div class="container">
+  <div class="info-box">
+    ℹ️ Kayıtlı aramalarınız her gün kontrol edilir. Kriterlere uyan yeni ilan çıktığında e-posta ve bildirim ile haberdar edilirsiniz.
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h2>🔔 Kayıtlı Aramalar</h2>
+      <p>4 kayıtlı arama · Son 30 günde 47 yeni ilan bulundu</p>
+    </div>
+    <button class="btn-new" onclick="document.getElementById('newModal').classList.add('open')">+ Yeni Arama Kaydet</button>
+  </div>
+
+  <div class="saved-item">
+    <div class="saved-icon" style="background:#e0eaf5">🚗</div>
+    <div class="saved-body">
+      <div class="saved-title">BMW 5 Serisi – Otomatik Dizel <span class="new-count">12 yeni</span></div>
+      <div class="saved-filters">
+        <span class="sf-tag">BMW</span>
+        <span class="sf-tag">5 Serisi</span>
+        <span class="sf-tag">Otomatik</span>
+        <span class="sf-tag">Dizel</span>
+        <span class="sf-tag">2019–2023</span>
+        <span class="sf-tag">2M–5M TL</span>
+        <span class="sf-tag">İstanbul</span>
+      </div>
+      <div class="saved-meta">
+        <span>📋 <strong>12</strong> yeni ilan (bu hafta)</span>
+        <span>👁 Toplam <strong>284</strong> ilan</span>
+        <span>📅 3 gün önce kaydedildi</span>
+      </div>
+    </div>
+    <div class="saved-right">
+      <div class="notif-toggle">
+        <span>Bildirim</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="saved-actions">
+        <button class="sa-btn primary" onclick="window.location.href='arama_sonuclari.html'">İlanları Gör</button>
+        <button class="sa-btn">Düzenle</button>
+        <button class="sa-btn danger" onclick="deleteSaved(this)">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="saved-item">
+    <div class="saved-icon" style="background:#e0f0e0">🏠</div>
+    <div class="saved-body">
+      <div class="saved-title">Kiralık 2+1 Daire – Adana <span class="new-count">5 yeni</span></div>
+      <div class="saved-filters">
+        <span class="sf-tag">Kiralık</span>
+        <span class="sf-tag">2+1</span>
+        <span class="sf-tag">Adana</span>
+        <span class="sf-tag">Seyhan / Yüreğir</span>
+        <span class="sf-tag">15K–30K TL/ay</span>
+        <span class="sf-tag">80–120 m²</span>
+      </div>
+      <div class="saved-meta">
+        <span>📋 <strong>5</strong> yeni ilan (bu hafta)</span>
+        <span>👁 Toplam <strong>89</strong> ilan</span>
+        <span>📅 1 hafta önce kaydedildi</span>
+      </div>
+    </div>
+    <div class="saved-right">
+      <div class="notif-toggle">
+        <span>Bildirim</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="saved-actions">
+        <button class="sa-btn primary">İlanları Gör</button>
+        <button class="sa-btn">Düzenle</button>
+        <button class="sa-btn danger" onclick="deleteSaved(this)">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="saved-item">
+    <div class="saved-icon" style="background:#fdf5e0">📱</div>
+    <div class="saved-body">
+      <div class="saved-title">iPhone 16 Pro – İstanbul</div>
+      <div class="saved-filters">
+        <span class="sf-tag">iPhone 16 Pro</span>
+        <span class="sf-tag">İstanbul</span>
+        <span class="sf-tag">70K–100K TL</span>
+        <span class="sf-tag">Sıfır / Az Kullanılmış</span>
+      </div>
+      <div class="saved-meta">
+        <span>📋 <strong>0</strong> yeni ilan (bu hafta)</span>
+        <span>👁 Toplam <strong>42</strong> ilan</span>
+        <span>📅 2 hafta önce kaydedildi</span>
+      </div>
+    </div>
+    <div class="saved-right">
+      <div class="notif-toggle">
+        <span>Bildirim</span>
+        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="saved-actions">
+        <button class="sa-btn primary">İlanları Gör</button>
+        <button class="sa-btn">Düzenle</button>
+        <button class="sa-btn danger" onclick="deleteSaved(this)">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="saved-item">
+    <div class="saved-icon" style="background:#f8e8f8">🎮</div>
+    <div class="saved-body">
+      <div class="saved-title">PlayStation 5 – Tüm Türkiye <span class="new-count">30 yeni</span></div>
+      <div class="saved-filters">
+        <span class="sf-tag">PlayStation 5</span>
+        <span class="sf-tag">Tüm Türkiye</span>
+        <span class="sf-tag">0–30K TL</span>
+      </div>
+      <div class="saved-meta">
+        <span>📋 <strong>30</strong> yeni ilan (bu hafta)</span>
+        <span>👁 Toplam <strong>612</strong> ilan</span>
+        <span>📅 1 ay önce kaydedildi</span>
+      </div>
+    </div>
+    <div class="saved-right">
+      <div class="notif-toggle">
+        <span>Bildirim</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="saved-actions">
+        <button class="sa-btn primary">İlanları Gör</button>
+        <button class="sa-btn">Düzenle</button>
+        <button class="sa-btn danger" onclick="deleteSaved(this)">Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW SEARCH MODAL -->
+<div class="modal-overlay" id="newModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h3>🔔 Yeni Arama Kaydet</h3>
+    <div class="form-group"><label>Arama Adı</label><input type="text" placeholder="örn: BMW 5 Serisi Ankara" /></div>
+    <div class="form-group"><label>Kategori</label><select><option>Vasıta</option><option>Emlak</option><option>Elektronik</option></select></div>
+    <div class="form-group"><label>Anahtar Kelime</label><input type="text" placeholder="örn: BMW 520d" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Min Fiyat (TL)</label><input type="number" placeholder="0" /></div>
+      <div class="form-group"><label>Max Fiyat (TL)</label><input type="number" placeholder="5.000.000" /></div>
+    </div>
+    <div class="form-group"><label>Şehir</label><select><option>Tüm Türkiye</option><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Adana</option></select></div>
+    <div class="form-group">
+      <label>Bildirim Sıklığı</label>
+      <select><option>Anlık (yeni ilan çıkınca)</option><option>Günlük özet</option><option>Haftalık özet</option></select>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#555;margin-bottom:4px">
+      <input type="checkbox" checked style="accent-color:#c00" /> E-posta bildirimi
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#555">
+      <input type="checkbox" checked style="accent-color:#c00" /> Uygulama bildirimi
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('newModal').classList.remove('open')">İptal</button>
+      <button class="btn-save" onclick="saveSearch()">Aramayı Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+<script>
+  function deleteSaved(btn){if(confirm('Bu kayıtlı aramayı silmek istediğinizden emin misiniz?')){btn.closest('.saved-item').style.transition='opacity .3s';btn.closest('.saved-item').style.opacity='0';setTimeout(()=>btn.closest('.saved-item').remove(),300)}}
+  function saveSearch(){alert('✓ Aramanız kaydedildi! Yeni ilan çıktığında bildirim alacaksınız.');document.getElementById('newModal').classList.remove('open')}
+</script>
+</body>
+</html>
+

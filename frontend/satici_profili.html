@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mert Otomotiv – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+
+  /* COVER */
+  .cover{height:160px;background:linear-gradient(135deg,#1a1a2e,#16213e);position:relative;overflow:hidden}
+  .cover::before{content:'🚗';font-size:200px;position:absolute;right:-20px;top:-30px;opacity:.05}
+  .cover-content{position:absolute;bottom:0;left:0;right:0;padding:0 24px 16px;display:flex;align-items:flex-end;gap:16px}
+  .seller-av{width:80px;height:80px;border-radius:50%;background:#FFE000;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#111;border:4px solid #fff;flex-shrink:0}
+  .seller-cover-info .name{font-size:20px;font-weight:700;color:#fff;margin-bottom:3px}
+  .seller-cover-info .type{font-size:12px;color:#FFE000;font-weight:600}
+
+  .container{max-width:1060px;margin:16px auto;padding:0 16px;display:flex;gap:14px;align-items:flex-start}
+  .left{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+  .right{width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+
+  .card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden}
+  .card-head{background:#fafafa;border-bottom:1px solid #eee;padding:11px 16px;font-size:13px;font-weight:700;color:#333;display:flex;justify-content:space-between;align-items:center}
+  .card-head a{font-size:11px;color:#c00;cursor:pointer}
+  .card-body{padding:14px 16px}
+
+  /* INFO */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .info-item .lbl{font-size:11px;color:#888;margin-bottom:2px}
+  .info-item .val{font-size:13px;color:#111;font-weight:500}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .stat-box{text-align:center;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:10px}
+  .stat-box .n{font-size:20px;font-weight:700;color:#c00}
+  .stat-box .l{font-size:10px;color:#888;margin-top:2px}
+
+  /* LISTINGS GRID */
+  .listings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .listing-card{border:1px solid #e8e8e8;border-radius:4px;overflow:hidden;cursor:pointer;transition:all .15s}
+  .listing-card:hover{border-color:#c00;transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+  .lc-img{height:110px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+  .lc-badge{position:absolute;top:5px;left:5px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px}
+  .lc-body{padding:8px}
+  .lc-title{font-size:11px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+  .lc-price{font-size:14px;font-weight:700;color:#c00;margin-bottom:2px}
+  .lc-meta{font-size:10px;color:#aaa}
+
+  /* REVIEWS */
+  .review-summary{display:flex;gap:20px;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee}
+  .big-rating{text-align:center;flex-shrink:0}
+  .big-num{font-size:48px;font-weight:700;color:#111;line-height:1}
+  .big-stars{color:#f0a000;font-size:18px;margin:4px 0}
+  .big-count{font-size:11px;color:#888}
+  .rating-bars{flex:1}
+  .rb-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .rb-label{font-size:11px;color:#888;width:20px;text-align:right;flex-shrink:0}
+  .rb-bar{flex:1;height:8px;background:#eee;border-radius:4px;overflow:hidden}
+  .rb-fill{height:100%;background:#f0a000;border-radius:4px}
+  .rb-count{font-size:11px;color:#888;width:24px;flex-shrink:0}
+
+  .review-item{padding:12px 0;border-bottom:1px solid #f5f5f5}
+  .review-item:last-child{border-bottom:none}
+  .review-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .rev-av{width:32px;height:32px;border-radius:50%;background:#FFE000;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#111;flex-shrink:0}
+  .rev-name{font-size:12px;font-weight:600;color:#111}
+  .rev-stars{color:#f0a000;font-size:13px}
+  .rev-date{font-size:10px;color:#aaa;margin-left:auto}
+  .rev-text{font-size:12px;color:#555;line-height:1.5}
+  .rev-reply{background:#fafafa;border-left:3px solid #FFE000;padding:8px 10px;margin-top:8px;font-size:11px;color:#555;border-radius:0 4px 4px 0}
+  .rev-reply strong{color:#111}
+
+  /* CONTACT */
+  .btn-call{width:100%;padding:11px;background:#0a0;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .btn-msg2{width:100%;padding:11px;background:#fff;color:#333;border:1px solid #ccc;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .btn-wapp2{width:100%;padding:11px;background:#25D366;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px}
+  .verify-badge{background:#e0f0e0;border:1px solid #c0e0c0;border-radius:4px;padding:8px 10px;font-size:11px;color:#0a0;display:flex;align-items:center;gap:6px}
+
+  .map-mini{height:130px;background:#e8eff8;border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-top:10px;cursor:pointer}
+  .map-mini::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 19px,#d0dcea 19px,#d0dcea 20px),repeating-linear-gradient(90deg,transparent,transparent 19px,#d0dcea 19px,#d0dcea 20px)}
+  .map-pin-big{position:absolute;font-size:32px}
+  .map-addr{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:#fff;padding:3px 10px;border-radius:10px;font-size:11px;color:#333;border:1px solid #ccc;white-space:nowrap}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="arama_sonuclari.html" class="topbar-link">Arama</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb"><a href="anasayfa.html">Anasayfa</a> › <a href="ilanra_liste.html">Vasıta</a> › <span>Mert Otomotiv</span></div>
+
+<div class="cover">
+  <div class="cover-content">
+    <div class="seller-av">MO</div>
+    <div class="seller-cover-info">
+      <div class="name">Mert Otomotiv</div>
+      <div class="type">✓ Onaylı Galeri • İstanbul / Kadıköy</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="left">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-box"><div class="n">48</div><div class="l">Aktif İlan</div></div>
+      <div class="stat-box"><div class="n">4.8</div><div class="l">Ortalama Puan</div></div>
+      <div class="stat-box"><div class="n">126</div><div class="l">Değerlendirme</div></div>
+      <div class="stat-box"><div class="n">2018</div><div class="l">Üyelik Yılı</div></div>
+    </div>
+
+    <!-- AKTIF İLANLAR -->
+    <div class="card">
+      <div class="card-head">🚗 Aktif İlanlar (48) <a>Tümünü Gör →</a></div>
+      <div class="card-body">
+        <div class="listings-grid">
+          <div class="listing-card" onclick="window.location.href='ilan_detay.html'">
+            <div class="lc-img" style="background:#dde8f5"><div class="lc-badge" style="background:#FFE000;color:#111">VİTRİN</div>🚗</div>
+            <div class="lc-body"><div class="lc-title">2022 BMW 520d M Sport</div><div class="lc-price">3.850.000 TL</div><div class="lc-meta">38.500 km • Bugün</div></div>
+          </div>
+          <div class="listing-card" onclick="window.location.href='ilan_detay.html'">
+            <div class="lc-img" style="background:#e8eef5">🚗</div>
+            <div class="lc-body"><div class="lc-title">2021 BMW 320i M Sport</div><div class="lc-price">2.450.000 TL</div><div class="lc-meta">42.000 km • Bugün</div></div>
+          </div>
+          <div class="listing-card" onclick="window.location.href='ilan_detay.html'">
+            <div class="lc-img" style="background:#f0edf8"><div class="lc-badge" style="background:#f0a000;color:#fff">ÖNE ÇIKAN</div>🚗</div>
+            <div class="lc-body"><div class="lc-title">2023 BMW X5 xDrive40d</div><div class="lc-price">7.200.000 TL</div><div class="lc-meta">18.000 km • Dün</div></div>
+          </div>
+          <div class="listing-card" onclick="window.location.href='ilan_detay.html'">
+            <div class="lc-img" style="background:#e8f5e8">🚗</div>
+            <div class="lc-body"><div class="lc-title">2020 BMW 730d xDrive</div><div class="lc-price">4.800.000 TL</div><div class="lc-meta">65.000 km • Dün</div></div>
+          </div>
+          <div class="listing-card" onclick="window.location.href='ilan_detay.html'">
+            <div class="lc-img" style="background:#fdf5e0">🚗</div>
+            <div class="lc-body"><div class="lc-title">2019 BMW M3 Competition</div><div class="lc-price">3.200.000 TL</div><div class="lc-meta">54.000 km • 2 gün</div></div>
+          </div>
+          <div class="listing-card" onclick="window.location.href='ilan_detay.html'">
+            <div class="lc-img" style="background:#f5ede8">🚗</div>
+            <div class="lc-body"><div class="lc-title">2022 BMW 118i M Sport</div><div class="lc-price">1.850.000 TL</div><div class="lc-meta">28.000 km • 3 gün</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GALERİ HAKKINDA -->
+    <div class="card">
+      <div class="card-head">ℹ️ Galeri Hakkında</div>
+      <div class="card-body">
+        <div class="info-grid" style="margin-bottom:12px">
+          <div class="info-item"><div class="lbl">Galeri Adı</div><div class="val">Mert Otomotiv</div></div>
+          <div class="info-item"><div class="lbl">Kuruluş Yılı</div><div class="val">2015</div></div>
+          <div class="info-item"><div class="lbl">Adres</div><div class="val">Kadıköy, İstanbul</div></div>
+          <div class="info-item"><div class="lbl">Çalışma Saatleri</div><div class="val">09:00 – 19:00</div></div>
+          <div class="info-item"><div class="lbl">Uzmanlaştığı Marka</div><div class="val">BMW, Mercedes, Audi</div></div>
+          <div class="info-item"><div class="lbl">Garanti</div><div class="val">6 ay servis garantisi</div></div>
+        </div>
+        <p style="font-size:12px;color:#555;line-height:1.7">Mert Otomotiv olarak 2015'ten bu yana İstanbul'da premium araç alım-satımı yapıyoruz. Tüm araçlarımız ekspertiz ve servis bakımından geçmiş, hasar kayıtsız ve garantilidir. Takas, kredi ve kiralama seçenekleri mevcuttur.</p>
+        <div class="map-mini" onclick="window.location.href='harita.html'">
+          <div class="map-pin-big">📍</div>
+          <div class="map-addr">Kadıköy, İstanbul — Haritada Gör</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEĞERLENDİRMELER -->
+    <div class="card">
+      <div class="card-head">⭐ Değerlendirmeler (126)</div>
+      <div class="card-body">
+        <div class="review-summary">
+          <div class="big-rating">
+            <div class="big-num">4.8</div>
+            <div class="big-stars">★★★★★</div>
+            <div class="big-count">126 yorum</div>
+          </div>
+          <div class="rating-bars">
+            <div class="rb-row"><div class="rb-label">5★</div><div class="rb-bar"><div class="rb-fill" style="width:88%"></div></div><div class="rb-count">111</div></div>
+            <div class="rb-row"><div class="rb-label">4★</div><div class="rb-bar"><div class="rb-fill" style="width:8%"></div></div><div class="rb-count">10</div></div>
+            <div class="rb-row"><div class="rb-label">3★</div><div class="rb-bar"><div class="rb-fill" style="width:3%"></div></div><div class="rb-count">4</div></div>
+            <div class="rb-row"><div class="rb-label">2★</div><div class="rb-bar"><div class="rb-fill" style="width:1%"></div></div><div class="rb-count">1</div></div>
+            <div class="rb-row"><div class="rb-label">1★</div><div class="rb-bar"><div class="rb-fill" style="width:0%"></div></div><div class="rb-count">0</div></div>
+          </div>
+        </div>
+        <div class="review-item">
+          <div class="review-header"><div class="rev-av">MÖ</div><div><div class="rev-name">Mert Öztürk</div><div class="rev-stars">★★★★★</div></div><div class="rev-date">15 May 2026</div></div>
+          <div class="rev-text">Çok güvenilir bir galeri. Araç ilanda göründüğü gibiydi, ekspertiz raporunu hazır getirdiler. Kesinlikle tavsiye ederim!</div>
+          <div class="rev-reply"><strong>Mert Otomotiv:</strong> Teşekkür ederiz, aracınızla keyifli yolculuklar dileriz! 🚗</div>
+        </div>
+        <div class="review-item">
+          <div class="review-header"><div class="rev-av" style="background:#e0eaf5;color:#0066cc">AY</div><div><div class="rev-name">Ayşe Yılmaz</div><div class="rev-stars">★★★★★</div></div><div class="rev-date">3 Nis 2026</div></div>
+          <div class="rev-text">Hızlı ve sorunsuz işlem. Test sürüşünden kağıt işlemlerine kadar her şeyi hallettiler. Fiyat konusunda da makul davrandılar.</div>
+        </div>
+        <div class="review-item">
+          <div class="review-header"><div class="rev-av" style="background:#f8e0e0;color:#c00">CK</div><div><div class="rev-name">Can Kaya</div><div class="rev-stars">★★★★☆</div></div><div class="rev-date">12 Mar 2026</div></div>
+          <div class="rev-text">Genel olarak memnun kaldım. Bekleme süreci biraz uzun oldu ama sonuç itibarıyla iyi bir araç aldım.</div>
+          <div class="rev-reply"><strong>Mert Otomotiv:</strong> Geri bildiriminiz için teşekkürler, süreçleri iyileştirmeye devam ediyoruz.</div>
+        </div>
+        <div style="text-align:center;margin-top:12px"><a style="font-size:12px;color:#c00;cursor:pointer">Tüm yorumları gör (126) →</a></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="card">
+      <div class="card-head">📞 İletişim</div>
+      <div class="card-body">
+        <button class="btn-call">📞 0212 XXX XX XX</button>
+        <button class="btn-msg2" onclick="window.location.href='mesajlar.html'">✉️ Mesaj Gönder</button>
+        <button class="btn-wapp2">💬 WhatsApp</button>
+        <div class="verify-badge">✓ Onaylı Galeri &nbsp;|&nbsp; ✓ Kimlik Doğrulandı</div>
+        <div style="font-size:11px;color:#888;margin-top:8px;text-align:center">🕐 Yanıt süresi: Ortalama 15 dakika</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🏆 Rozetler</div>
+      <div class="card-body" style="display:flex;flex-wrap:wrap;gap:8px">
+        <div style="background:#fff9c4;border:1px solid #f0d060;border-radius:4px;padding:6px 10px;font-size:11px;color:#a07000;text-align:center">⭐ Süper Satıcı</div>
+        <div style="background:#e0f0e0;border:1px solid #c0e0c0;border-radius:4px;padding:6px 10px;font-size:11px;color:#0a0;text-align:center">✓ Kimlik Doğrulandı</div>
+        <div style="background:#e0eaf8;border:1px solid #c0d0e8;border-radius:4px;padding:6px 10px;font-size:11px;color:#0066cc;text-align:center">🏅 5 Yıllık Üye</div>
+        <div style="background:#f8e8f8;border:1px solid #e0c0e0;border-radius:4px;padding:6px 10px;font-size:11px;color:#663399;text-align:center">🚀 Hızlı Yanıt</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📊 İlan Özeti</div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#888">Toplam İlan</span><span style="font-weight:700">48</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#888">Vitrin</span><span style="font-weight:700">12</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#888">Satılan (30 gün)</span><span style="font-weight:700;color:#0a0">7</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#888">Ort. Satış Süresi</span><span style="font-weight:700">8 gün</span></div>
+      </div>
+    </div>
+
+    <div style="background:#fff8e0;border:1px solid #f0d060;border-radius:6px;padding:12px 14px;">
+      <div style="font-size:12px;font-weight:700;color:#a07000;margin-bottom:6px">⚠️ Güvenli Alışveriş</div>
+      <ul style="font-size:11px;color:#7a5a00;padding-left:14px;line-height:1.8">
+        <li>Aracı görmeden para göndermeyin</li>
+        <li>Ekspertiz raporu isteyin</li>
+        <li>Noter ile işlem yapın</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+</body>
+</html>
+

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gizlilik & KVKK & Kullanım Koşulları – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .tl{padding:5px 8px;border-radius:3px;cursor:pointer}.tl:hover{background:rgba(0,0,0,.08)}
+
+  .page-tabs{background:#fff;border-bottom:2px solid #eee;display:flex;padding:0 16px;position:sticky;top:52px;z-index:90;overflow-x:auto}
+  .ptab{padding:12px 18px;font-size:13px;font-weight:500;color:#888;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+  .ptab.active{color:#c00;border-bottom-color:#c00}
+  .ptab:hover{color:#c00}
+
+  .layout{max-width:960px;margin:0 auto;padding:20px 16px;display:flex;gap:16px;align-items:flex-start}
+  .sidebar{width:200px;flex-shrink:0;background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px;position:sticky;top:100px}
+  .sidebar h4{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .sidebar a{display:block;font-size:12px;color:#555;padding:5px 8px;border-radius:3px;cursor:pointer;margin-bottom:2px}
+  .sidebar a:hover,.sidebar a.active{background:#fff5f5;color:#c00}
+  .content{flex:1;min-width:0}
+
+  .section{display:none}.section.active{display:block}
+  .doc-header{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px;margin-bottom:14px}
+  .doc-header h1{font-size:20px;font-weight:700;color:#111;margin-bottom:6px}
+  .doc-header .meta{font-size:12px;color:#888;display:flex;gap:14px;flex-wrap:wrap}
+
+  .doc-section{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px;margin-bottom:10px}
+  .doc-section h2{font-size:15px;font-weight:700;color:#111;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:8px}
+  .doc-section h3{font-size:13px;font-weight:700;color:#333;margin:12px 0 6px}
+  .doc-section p{font-size:13px;color:#555;line-height:1.8;margin-bottom:8px}
+  .doc-section ul{padding-left:18px;margin-bottom:8px}
+  .doc-section ul li{font-size:13px;color:#555;line-height:1.8;margin-bottom:3px}
+  .doc-section table{width:100%;border-collapse:collapse;margin:10px 0}
+  .doc-section th{background:#f7f7f7;font-size:11px;font-weight:700;color:#555;text-align:left;padding:8px 10px;border:1px solid #e0e0e0}
+  .doc-section td{font-size:12px;padding:8px 10px;border:1px solid #e0e0e0;color:#555;line-height:1.5}
+  .doc-section tr:nth-child(even) td{background:#fafafa}
+
+  .highlight-box{background:#fff8e0;border:1px solid #f0d060;border-radius:4px;padding:12px 14px;margin:10px 0;font-size:12px;color:#7a5a00;line-height:1.6}
+  .info-box{background:#e0f0ff;border:1px solid #b0d8f8;border-radius:4px;padding:12px 14px;margin:10px 0;font-size:12px;color:#0055aa;line-height:1.6}
+
+  .cookie-table th{width:20%}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5}
+  .toggle-row:last-child{border-bottom:none}
+  .tr-info .tr-title{font-size:13px;font-weight:600;color:#111;margin-bottom:2px}
+  .tr-info .tr-sub{font-size:11px;color:#888}
+  .toggle{width:38px;height:22px;background:#ddd;border-radius:11px;position:relative;cursor:pointer;flex-shrink:0}
+  .toggle.on{background:#0a0}.toggle.required{background:#0a0;cursor:default}
+  .toggle::after{content:'';width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle.on::after,.toggle.required::after{transform:translateX(16px)}
+
+  .rights-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  .right-box{background:#fafafa;border:1px solid #eee;border-radius:4px;padding:12px}
+  .right-box .rb-icon{font-size:20px;margin-bottom:6px}
+  .right-box .rb-title{font-size:12px;font-weight:700;color:#111;margin-bottom:4px}
+  .right-box .rb-desc{font-size:11px;color:#666;line-height:1.5}
+  .right-box .rb-btn{margin-top:8px;padding:5px 12px;background:#c00;color:#fff;border:none;border-radius:3px;font-size:11px;cursor:pointer}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="anasayfa.html" class="tl">Ana Sayfa</a>
+    <a href="giris.html" class="tl">Giriş Yap</a>
+  </div>
+</div>
+
+<div class="page-tabs">
+  <div class="ptab active" onclick="showTab('gizlilik',this)">🔒 Gizlilik Politikası</div>
+  <div class="ptab" onclick="showTab('kvkk',this)">🛡️ KVKK Aydınlatma Metni</div>
+  <div class="ptab" onclick="showTab('kosullar',this)">📋 Kullanım Koşulları</div>
+  <div class="ptab" onclick="showTab('cerez',this)">🍪 Çerez Politikası</div>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="docSidebar">
+    <h4>İçindekiler</h4>
+    <a class="active" onclick="scrollTo(0,0)">1. Giriş</a>
+    <a onclick="scrollTo(0,200)">2. Toplanan Veriler</a>
+    <a onclick="scrollTo(0,400)">3. Veri Kullanımı</a>
+    <a onclick="scrollTo(0,600)">4. Üçüncü Taraflar</a>
+    <a onclick="scrollTo(0,800)">5. Güvenlik</a>
+    <a onclick="scrollTo(0,1000)">6. Haklarınız</a>
+    <a onclick="scrollTo(0,1200)">7. İletişim</a>
+  </div>
+
+  <div class="content">
+
+    <!-- GİZLİLİK -->
+    <div class="section active" id="tab-gizlilik">
+      <div class="doc-header">
+        <h1>🔒 Gizlilik Politikası</h1>
+        <div class="meta">
+          <span>📅 Son Güncelleme: 1 Ocak 2026</span>
+          <span>📄 Versiyon: 4.2</span>
+          <span>🌐 Türkçe</span>
+        </div>
+      </div>
+
+      <div class="doc-section">
+        <h2>1. Giriş</h2>
+        <p>İlanra Elektronik Ticaret A.Ş. ("ilanra.com", "biz") olarak kişisel verilerinizin korunmasını ciddiye alıyoruz. Bu Gizlilik Politikası, ilanra.com platformunu kullandığınızda verilerinizi nasıl topladığımızı, kullandığımızı ve koruduğumuzu açıklamaktadır.</p>
+        <div class="highlight-box">⚠️ Bu politikayı dikkatlice okuyunuz. Platformumuzu kullanarak bu politikayı kabul etmiş sayılırsınız.</div>
+      </div>
+
+      <div class="doc-section">
+        <h2>2. Topladığımız Veriler</h2>
+        <h3>2.1 Doğrudan Sağladığınız Veriler</h3>
+        <ul>
+          <li>Kimlik bilgileri (ad, soyad, doğum tarihi)</li>
+          <li>İletişim bilgileri (e-posta, telefon, adres)</li>
+          <li>Hesap bilgileri (kullanıcı adı, şifre hash'i)</li>
+          <li>İlan bilgileri (ürün tanımları, fotoğraflar)</li>
+          <li>Ödeme bilgileri (kart numarası saklanmaz, yalnızca son 4 hane)</li>
+        </ul>
+        <h3>2.2 Otomatik Toplanan Veriler</h3>
+        <ul>
+          <li>IP adresi ve konum bilgisi</li>
+          <li>Tarayıcı türü ve cihaz bilgileri</li>
+          <li>Sayfa görüntüleme ve tıklama geçmişi</li>
+          <li>Çerez ve oturum verileri</li>
+        </ul>
+      </div>
+
+      <div class="doc-section">
+        <h2>3. Veri Kullanımı</h2>
+        <p>Topladığımız verileri aşağıdaki amaçlarla kullanırız:</p>
+        <table>
+          <tr><th>Amaç</th><th>Hukuki Dayanak</th></tr>
+          <tr><td>Hesap oluşturma ve yönetimi</td><td>Sözleşme ifası</td></tr>
+          <tr><td>İlan yayınlama ve yönetimi</td><td>Sözleşme ifası</td></tr>
+          <tr><td>Müşteri desteği sağlama</td><td>Meşru menfaat</td></tr>
+          <tr><td>Dolandırıcılık tespiti ve önleme</td><td>Yasal yükümlülük</td></tr>
+          <tr><td>Pazarlama ve kişiselleştirme</td><td>Açık rıza</td></tr>
+          <tr><td>Platform iyileştirmesi</td><td>Meşru menfaat</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-section">
+        <h2>6. Haklarınız</h2>
+        <div class="rights-grid">
+          <div class="right-box"><div class="rb-icon">👁</div><div class="rb-title">Erişim Hakkı</div><div class="rb-desc">Hakkınızda işlediğimiz kişisel verilere erişme hakkınız vardır.</div><button class="rb-btn" onclick="alert('Veri erişim talebiniz alınmıştır.')">Talep Et</button></div>
+          <div class="right-box"><div class="rb-icon">✏️</div><div class="rb-title">Düzeltme Hakkı</div><div class="rb-desc">Yanlış veya eksik verilerinizi düzelttirme hakkınız vardır.</div><button class="rb-btn" onclick="window.location.href='profil.html'">Profili Düzenle</button></div>
+          <div class="right-box"><div class="rb-icon">🗑️</div><div class="rb-title">Silme Hakkı</div><div class="rb-desc">Belirli koşullar altında verilerinizin silinmesini talep edebilirsiniz.</div><button class="rb-btn" onclick="alert('Silme talebiniz alınmıştır.')">Talep Et</button></div>
+          <div class="right-box"><div class="rb-icon">📤</div><div class="rb-title">Taşınabilirlik Hakkı</div><div class="rb-desc">Verilerinizi yapılandırılmış formatta alma hakkınız vardır.</div><button class="rb-btn" onclick="alert('Veri dışa aktarma başlatıldı.')">İndir</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KVKK -->
+    <div class="section" id="tab-kvkk">
+      <div class="doc-header">
+        <h1>🛡️ KVKK Aydınlatma Metni</h1>
+        <div class="meta"><span>📅 1 Ocak 2026</span><span>6698 sayılı KVKK kapsamında</span></div>
+      </div>
+      <div class="doc-section">
+        <h2>Veri Sorumlusu</h2>
+        <p>6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında veri sorumlusu sıfatıyla İlanra Elektronik Ticaret A.Ş. (Büyükdere Cad. No:185, Şişli/İstanbul) hareket etmektedir.</p>
+        <div class="info-box">📞 KVKK başvurularınız için: kvkk@ilanra.com | Tel: 444 0 888</div>
+      </div>
+      <div class="doc-section">
+        <h2>İşlenen Kişisel Veriler</h2>
+        <table>
+          <tr><th>Veri Kategorisi</th><th>Örnekler</th><th>İşleme Amacı</th></tr>
+          <tr><td>Kimlik Verileri</td><td>Ad, soyad, TC kimlik no</td><td>Hesap doğrulama</td></tr>
+          <tr><td>İletişim Verileri</td><td>E-posta, telefon</td><td>Bildirim gönderme</td></tr>
+          <tr><td>Finansal Veriler</td><td>Ödeme yöntemi bilgileri</td><td>İşlem güvenliği</td></tr>
+          <tr><td>Lokasyon Verileri</td><td>Şehir, ilçe</td><td>İlan lokasyonu</td></tr>
+          <tr><td>İşlem Güvenliği</td><td>IP adresi, oturum logları</td><td>Güvenlik & dolandırıcılık önleme</td></tr>
+        </table>
+      </div>
+      <div class="doc-section">
+        <h2>KVKK Kapsamındaki Haklarınız (Madde 11)</h2>
+        <ul>
+          <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme</li>
+          <li>Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme</li>
+          <li>Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+          <li>Kişisel verilerinizin eksik veya yanlış işlenmiş olması halinde bunların düzeltilmesini isteme</li>
+          <li>KVKK'nın 7. maddesi çerçevesinde kişisel verilerinizin silinmesini veya yok edilmesini isteme</li>
+          <li>İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme</li>
+          <li>Kişisel verilerinizin kanuna aykırı olarak işlenmesi sebebiyle zarara uğramanız halinde zararın giderilmesini talep etme</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- KULLANIM KOŞULLARI -->
+    <div class="section" id="tab-kosullar">
+      <div class="doc-header">
+        <h1>📋 Kullanım Koşulları</h1>
+        <div class="meta"><span>📅 1 Ocak 2026</span><span>Versiyon: 8.1</span></div>
+      </div>
+      <div class="doc-section">
+        <h2>1. Taraflar ve Kapsam</h2>
+        <p>Bu Kullanım Koşulları, İlanra Elektronik Ticaret A.Ş. ile ilanra.com platformunu kullanan gerçek ve tüzel kişiler ("Kullanıcı") arasındaki ilişkiyi düzenlemektedir.</p>
+        <div class="highlight-box">Platformu kullanarak bu koşulları kabul etmiş sayılırsınız. Kabul etmiyorsanız platformu kullanmayınız.</div>
+      </div>
+      <div class="doc-section">
+        <h2>2. Üyelik Koşulları</h2>
+        <ul>
+          <li>18 yaşını doldurmuş olmak</li>
+          <li>Gerçek ve doğru bilgi vermek</li>
+          <li>Hesabınızı üçüncü kişilere devretmemek</li>
+          <li>Şifrenizi güvenli tutmak</li>
+          <li>Bir gerçek kişinin tek bir hesabı olabilir</li>
+        </ul>
+      </div>
+      <div class="doc-section">
+        <h2>3. Yasaklı İçerikler</h2>
+        <ul>
+          <li>Sahte, yanıltıcı veya gerçeğe aykırı ilanlar</li>
+          <li>Yasadışı ürün ve hizmetler</li>
+          <li>Telif hakkı ihlali içeren içerikler</li>
+          <li>Nefret söylemi veya ayrımcı içerikler</li>
+          <li>Spam veya zincir mesajlar</li>
+          <li>Başkalarının kişisel bilgilerini paylaşmak</li>
+        </ul>
+      </div>
+      <div class="doc-section">
+        <h2>5. Sorumluluk Sınırlaması</h2>
+        <p>ilanra.com bir ilan platformudur. Alıcı ile satıcı arasındaki işlemlerde taraf değildir. Kullanıcılar arasındaki anlaşmazlıklarda ilanra.com'un sorumluluğu bulunmamaktadır.</p>
+        <p>Platform, ilanların gerçekliğini garanti etmez ancak içerik denetim sistemi ile sahte ilanları tespit etmeye çalışır.</p>
+      </div>
+    </div>
+
+    <!-- ÇEREZ -->
+    <div class="section" id="tab-cerez">
+      <div class="doc-header">
+        <h1>🍪 Çerez Politikası</h1>
+        <div class="meta"><span>📅 1 Ocak 2026</span></div>
+      </div>
+      <div class="doc-section">
+        <h2>Çerez Tercihleri</h2>
+        <p style="margin-bottom:14px">Çerez tercihlerinizi aşağıdan yönetebilirsiniz. Zorunlu çerezler platformun çalışması için gereklidir ve devre dışı bırakılamaz.</p>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-title">Zorunlu Çerezler</div><div class="tr-sub">Oturum, güvenlik, temel işlevler</div></div><div class="toggle required"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-title">Performans Çerezleri</div><div class="tr-sub">Sayfa hızı, hata raporlama, analitik</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-title">Kişiselleştirme Çerezleri</div><div class="tr-sub">Tercihlerinizi hatırlama, öneriler</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-title">Pazarlama Çerezleri</div><div class="tr-sub">Hedefli reklamlar, sosyal medya</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+        <button style="margin-top:14px;padding:9px 20px;background:#c00;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer" onclick="alert('Çerez tercihleriniz kaydedildi!')">Tercihleri Kaydet</button>
+      </div>
+      <div class="doc-section">
+        <h2>Kullandığımız Çerezler</h2>
+        <table class="cookie-table">
+          <tr><th>Çerez Adı</th><th>Tür</th><th>Süre</th><th>Amaç</th></tr>
+          <tr><td>shb_session</td><td>Zorunlu</td><td>Oturum</td><td>Kullanıcı oturumu</td></tr>
+          <tr><td>shb_csrf</td><td>Zorunlu</td><td>Oturum</td><td>Güvenlik token</td></tr>
+          <tr><td>shb_prefs</td><td>Kişiselleştirme</td><td>1 yıl</td><td>Kullanıcı tercihleri</td></tr>
+          <tr><td>shb_track</td><td>Performans</td><td>30 gün</td><td>Kullanım analizi</td></tr>
+          <tr><td>_ga</td><td>Performans</td><td>2 yıl</td><td>Google Analytics</td></tr>
+          <tr><td>fbp</td><td>Pazarlama</td><td>3 ay</td><td>Facebook Pixel</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com | Tüm hakları saklıdır.</div>
+</footer>
+
+<script>
+  function showTab(tab,el){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>
+

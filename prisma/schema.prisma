@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  phone               String?
+  showPhoneOnListings Boolean   @default(false)
+  avatar        String?
+  role          Role      @default(USER)
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  listings      Listing[]
+  sentMessages     Message[] @relation("sender")
+  receivedMessages Message[] @relation("receiver")
+  favorites     Favorite[]
+  resetTokens   PasswordResetToken[]
+  verifyTokens  EmailVerificationToken[]
+  reports       ListingReport[]
+  savedSearches SavedSearch[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  name     String
+  slug     String     @unique
+  icon     String
+  parentId String?
+  parent   Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  children Category[] @relation("SubCategories")
+  listings Listing[]
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  currency    String        @default("TRY")
+  condition   Condition     @default(USED)
+  status      ListingStatus @default(ACTIVE)
+  isFeatured  Boolean       @default(false)
+  featuredAt  DateTime?
+  views       Int           @default(0)
+  city        String
+  district    String?
+  attributes  Json?
+  images      ListingImage[]
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites   Favorite[]
+  messages    Message[]
+  reports     ListingReport[]
+  savedSearchAlerts SavedSearchAlert[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum Condition {
+  NEW
+  LIKE_NEW
+  USED
+  DEFECTIVE
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  INACTIVE
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  url       String
+  order     Int     @default(0)
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  content    String
+  isRead     Boolean  @default(false)
+  senderId   String
+  receiverId String
+  listingId  String?
+  sender     User     @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  listing    Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@unique([userId, listingId])
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+model ListingReport {
+  id         String       @id @default(cuid())
+  listingId  String
+  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  details    String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  @@unique([listingId, reporterId])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
+  filters   Json
+  createdAt DateTime @default(now())
+  alerts    SavedSearchAlert[]
+}
+
+model SavedSearchAlert {
+  id            String      @id @default(cuid())
+  savedSearchId String
+  savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
+  listingId     String
+  listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@unique([savedSearchId, listingId])
+}

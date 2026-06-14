@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Şifre Sıfırla – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2;min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;font-size:12px;display:flex;gap:10px}
+  .topbar-right a{color:#111;cursor:pointer}.topbar-right a:hover{text-decoration:underline}
+  .main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 16px}
+  .card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;width:100%;max-width:420px;overflow:hidden}
+  .card-header{background:#f7f7f7;border-bottom:1px solid #eee;padding:18px 24px;text-align:center}
+  .card-header .icon{font-size:36px;margin-bottom:8px}
+  .card-header h2{font-size:18px;font-weight:700;color:#111}
+  .card-header p{font-size:12px;color:#888;margin-top:4px;line-height:1.5}
+  .card-body{padding:24px}
+  .step{display:none}.step.active{display:block}
+  .form-group{margin-bottom:16px}
+  .form-group label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px}
+  .form-group input{width:100%;height:40px;border:1px solid #ccc;border-radius:4px;padding:0 12px;font-size:13px;color:#111;outline:none;transition:border-color .2s}
+  .form-group input:focus{border-color:#888}
+  .form-group .hint{font-size:11px;color:#aaa;margin-top:4px}
+  .btn-primary{width:100%;height:42px;background:#c00;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-primary:hover{background:#a00}
+  .btn-secondary{width:100%;height:40px;background:#fff;color:#555;border:1px solid #ccc;border-radius:4px;font-size:13px;cursor:pointer;margin-top:8px}
+  .btn-secondary:hover{background:#f5f5f5}
+
+  /* OTP */
+  .otp-inputs{display:flex;gap:10px;justify-content:center;margin:16px 0}
+  .otp-input{width:48px;height:56px;border:2px solid #ddd;border-radius:6px;text-align:center;font-size:22px;font-weight:700;color:#111;outline:none;transition:border-color .2s}
+  .otp-input:focus{border-color:#c00}
+  .otp-input.filled{border-color:#0a0;background:#f0fff0}
+  .resend-row{text-align:center;font-size:12px;color:#888;margin-top:12px}
+  .resend-link{color:#c00;cursor:pointer;font-weight:600}.resend-link:hover{text-decoration:underline}
+
+  /* PASSWORD STRENGTH */
+  .strength-bar{height:4px;background:#eee;border-radius:2px;margin-top:6px;overflow:hidden}
+  .strength-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+  .strength-label{font-size:11px;margin-top:4px}
+
+  /* PASS TOGGLE */
+  .pass-wrap{position:relative}
+  .pass-wrap input{padding-right:40px}
+  .pass-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#aaa;font-size:16px}
+
+  /* SUCCESS */
+  .success-box{text-align:center;padding:16px 0}
+  .success-box .s-icon{font-size:56px;margin-bottom:16px}
+  .success-box h3{font-size:18px;font-weight:700;color:#111;margin-bottom:8px}
+  .success-box p{font-size:13px;color:#666;line-height:1.6;margin-bottom:20px}
+
+  .progress-steps{display:flex;align-items:center;padding:0 24px 16px;gap:0}
+  .ps{display:flex;align-items:center;gap:6px;flex:1}
+  .ps-num{width:24px;height:24px;border-radius:50%;background:#eee;color:#aaa;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ps.active .ps-num{background:#c00;color:#fff}
+  .ps.done .ps-num{background:#0a0;color:#fff}
+  .ps-label{font-size:11px;color:#aaa}
+  .ps.active .ps-label{color:#c00;font-weight:600}
+  .ps.done .ps-label{color:#0a0}
+  .ps-line{flex:1;height:1px;background:#ddd;margin:0 4px}
+  .ps-line.done{background:#0a0}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="anasayfa.html">Ana Sayfa</a>
+    <a href="giris.html">Giriş Yap</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🔐</div>
+      <h2>Şifre Sıfırlama</h2>
+      <p>Hesabınıza erişimi yeniden kazanın</p>
+    </div>
+
+    <div class="progress-steps" id="progressSteps">
+      <div class="ps active" id="ps1"><div class="ps-num">1</div><div class="ps-label">E-posta</div></div>
+      <div class="ps-line" id="pl1"></div>
+      <div class="ps" id="ps2"><div class="ps-num">2</div><div class="ps-label">Doğrulama</div></div>
+      <div class="ps-line" id="pl2"></div>
+      <div class="ps" id="ps3"><div class="ps-num">3</div><div class="ps-label">Yeni Şifre</div></div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- STEP 1: EMAIL -->
+      <div class="step active" id="step1">
+        <div class="form-group">
+          <label>E-posta Adresiniz</label>
+          <input type="email" id="emailInput" placeholder="ornek@email.com" />
+          <div class="hint">Kayıtlı e-posta adresinize doğrulama kodu göndereceğiz</div>
+        </div>
+        <button class="btn-primary" onclick="goStep2()">Kod Gönder →</button>
+        <button class="btn-secondary" onclick="window.location.href='giris.html'">← Girişe Dön</button>
+      </div>
+
+      <!-- STEP 2: OTP -->
+      <div class="step" id="step2">
+        <p style="font-size:13px;color:#555;margin-bottom:16px;line-height:1.6">
+          <strong id="emailDisplay"></strong> adresine 6 haneli doğrulama kodu gönderdik. Kodunuzu girin:
+        </p>
+        <div class="otp-inputs">
+          <input class="otp-input" type="text" maxlength="1" id="otp0" oninput="otpInput(0)" onkeydown="otpKey(event,0)" />
+          <input class="otp-input" type="text" maxlength="1" id="otp1" oninput="otpInput(1)" onkeydown="otpKey(event,1)" />
+          <input class="otp-input" type="text" maxlength="1" id="otp2" oninput="otpInput(2)" onkeydown="otpKey(event,2)" />
+          <input class="otp-input" type="text" maxlength="1" id="otp3" oninput="otpInput(3)" onkeydown="otpKey(event,3)" />
+          <input class="otp-input" type="text" maxlength="1" id="otp4" oninput="otpInput(4)" onkeydown="otpKey(event,4)" />
+          <input class="otp-input" type="text" maxlength="1" id="otp5" oninput="otpInput(5)" onkeydown="otpKey(event,5)" />
+        </div>
+        <div class="resend-row">Kod gelmedi mi? <span class="resend-link" id="resendLink" onclick="resendCode()">Tekrar Gönder</span> <span id="resendTimer"></span></div>
+        <button class="btn-primary" style="margin-top:16px" onclick="goStep3()">Doğrula →</button>
+        <button class="btn-secondary" onclick="goBackStep1()">← Geri</button>
+      </div>
+
+      <!-- STEP 3: NEW PASSWORD -->
+      <div class="step" id="step3">
+        <div class="form-group">
+          <label>Yeni Şifre</label>
+          <div class="pass-wrap">
+            <input type="password" id="newPass" placeholder="En az 8 karakter" oninput="checkStrength(this.value)" />
+            <button class="pass-eye" onclick="toggleEye('newPass',this)">👁</button>
+          </div>
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel"></div>
+        </div>
+        <div class="form-group">
+          <label>Şifre Tekrar</label>
+          <div class="pass-wrap">
+            <input type="password" id="newPass2" placeholder="Şifrenizi tekrar girin" />
+            <button class="pass-eye" onclick="toggleEye('newPass2',this)">👁</button>
+          </div>
+        </div>
+        <div style="background:#f0f8ff;border:1px solid #b0d8f8;border-radius:4px;padding:10px 12px;font-size:11px;color:#0055aa;margin-bottom:14px;line-height:1.7">
+          ✓ En az 8 karakter<br>✓ Büyük ve küçük harf içermeli<br>✓ Rakam veya özel karakter içermeli
+        </div>
+        <button class="btn-primary" onclick="goSuccess()">Şifremi Değiştir ✓</button>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="step" id="stepSuccess">
+        <div class="success-box">
+          <div class="s-icon">🎉</div>
+          <h3>Şifreniz Değiştirildi!</h3>
+          <p>Yeni şifreniz başarıyla kaydedildi. Artık hesabınıza giriş yapabilirsiniz.</p>
+          <button class="btn-primary" onclick="window.location.href='giris.html'">Giriş Yap →</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+
+<script>
+  let timerInterval;
+  function setStep(n){
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    document.getElementById(n==='success'?'stepSuccess':'step'+n).classList.add('active');
+    if(typeof n==='number'){
+      [1,2,3].forEach(i=>{
+        const ps=document.getElementById('ps'+i);
+        ps.className='ps'+(i<n?' done':i===n?' active':'');
+        if(i<3)document.getElementById('pl'+i).className='ps-line'+(i<n?' done':'');
+      });
+    }
+  }
+  function goStep2(){
+    const email=document.getElementById('emailInput').value.trim();
+    if(!email.includes('@')){alert('Geçerli bir e-posta adresi girin.');return}
+    document.getElementById('emailDisplay').textContent=email;
+    setStep(2);
+    startResendTimer(60);
+    setTimeout(()=>{
+      ['1','2','3','4','5','6'].forEach((v,i)=>{
+        const inp=document.getElementById('otp'+i);
+        inp.value=v;
+        inp.classList.add('filled');
+      });
+    },1500);
+  }
+  function goBackStep1(){clearInterval(timerInterval);setStep(1)}
+  function goStep3(){
+    const code=[...Array(6)].map((_,i)=>document.getElementById('otp'+i).value).join('');
+    if(code.length<6){alert('6 haneli kodu eksiksiz girin.');return}
+    setStep(3);
+  }
+  function goSuccess(){
+    const p=document.getElementById('newPass').value;
+    const p2=document.getElementById('newPass2').value;
+    if(p.length<8){alert('Şifre en az 8 karakter olmalıdır.');return}
+    if(p!==p2){alert('Şifreler eşleşmiyor.');return}
+    setStep('success');
+  }
+  function otpInput(i){
+    const v=document.getElementById('otp'+i).value;
+    document.getElementById('otp'+i).classList.toggle('filled',v.length>0);
+    if(v&&i<5)document.getElementById('otp'+(i+1)).focus();
+  }
+  function otpKey(e,i){if(e.key==='Backspace'&&!document.getElementById('otp'+i).value&&i>0)document.getElementById('otp'+(i-1)).focus()}
+  function startResendTimer(sec){
+    const link=document.getElementById('resendLink');
+    const timer=document.getElementById('resendTimer');
+    link.style.pointerEvents='none';link.style.opacity='.4';
+    clearInterval(timerInterval);
+    let s=sec;
+    timerInterval=setInterval(()=>{
+      s--;timer.textContent=`(${s}s)`;
+      if(s<=0){clearInterval(timerInterval);link.style.pointerEvents='';link.style.opacity='1';timer.textContent=''}
+    },1000);
+  }
+  function resendCode(){alert('Kod tekrar gönderildi!');startResendTimer(60)}
+  function toggleEye(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈'}
+  function checkStrength(v){
+    const f=document.getElementById('strengthFill');
+    const l=document.getElementById('strengthLabel');
+    let s=0;
+    if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+    const levels=[{w:'0%',c:'#eee',t:''},{w:'25%',c:'#c00',t:'Zayıf'},{w:'50%',c:'#f0a000',t:'Orta'},{w:'75%',c:'#88bb00',t:'İyi'},{w:'100%',c:'#0a0',t:'Güçlü'}];
+    const lv=levels[s]||levels[0];
+    f.style.width=lv.w;f.style.background=lv.c;l.textContent=lv.t;l.style.color=lv.c;
+  }
+</script>
+</body>
+</html>
+

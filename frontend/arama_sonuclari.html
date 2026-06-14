@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>"BMW" için arama sonuçları – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px;flex-shrink:0}.logo span{color:#c00}
+  .search-wrap{flex:1;max-width:600px;display:flex;height:36px;margin:0 auto}
+  .search-cat{border:1.5px solid #aaa;border-right:none;background:#fff;padding:0 10px;font-size:12px;color:#333;border-radius:4px 0 0 4px;cursor:pointer}
+  .search-input{flex:1;border:1.5px solid #aaa;border-right:none;padding:0 12px;font-size:13px;color:#111;background:#fff;outline:none}
+  .search-btn{background:#e00;border:none;color:#fff;padding:0 18px;border-radius:0 4px 4px 0;font-size:13px;font-weight:600;cursor:pointer}
+  .topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;font-size:12px}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px;flex-wrap:wrap}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;gap:12px}
+
+  /* SIDEBAR */
+  .sidebar{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .filter-box{background:#fff;border:1px solid #e0e0e0;border-radius:4px;overflow:hidden}
+  .filter-header{background:#f7f7f7;border-bottom:1px solid #e8e8e8;padding:9px 12px;font-size:12px;font-weight:700;color:#333}
+  .filter-body{padding:10px 12px}
+  .filter-body label{display:flex;align-items:center;gap:7px;font-size:12px;color:#444;margin-bottom:7px;cursor:pointer}
+  .filter-body input[type=checkbox]{width:13px;height:13px;accent-color:#c00;cursor:pointer}
+  .filter-body input[type=text],.filter-body select{width:100%;height:30px;border:1px solid #ccc;border-radius:3px;padding:0 8px;font-size:12px;color:#333;background:#fff}
+  .range-row{display:flex;gap:5px}.range-row input{flex:1;width:0}
+  .btn-filtrele{width:100%;padding:9px;background:#c00;color:#fff;border:none;border-radius:3px;font-size:13px;font-weight:700;cursor:pointer}
+
+  /* LISTINGS */
+  .listings{flex:1;min-width:0}
+  .search-info{background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .search-info .query{font-size:14px;color:#111}<br>
+  .search-info .query strong{color:#c00}
+  .search-info .count{font-size:13px;color:#666}
+  .sort-wrap{display:flex;align-items:center;gap:6px}
+  .sort-wrap select{height:28px;padding:0 8px;border:1px solid #ccc;border-radius:3px;font-size:12px}
+  .view-btns{display:flex;gap:3px}
+  .vbtn{width:28px;height:28px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#777}
+  .vbtn.active{background:#f0f0f0;border-color:#999;color:#333}
+
+  /* SUGGESTIONS */
+  .suggestions{background:#fff8e0;border:1px solid #f0d060;border-radius:4px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#555}
+  .suggestions strong{color:#a07000}
+  .sug-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .sug-tag{background:#fff;border:1px solid #ddd;border-radius:20px;padding:4px 12px;font-size:12px;color:#444;cursor:pointer}
+  .sug-tag:hover{border-color:#c00;color:#c00}
+
+  /* LIST VIEW */
+  .list-item{background:#fff;border:1px solid #e0e0e0;border-radius:4px;display:flex;margin-bottom:6px;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s;position:relative}
+  .list-item:hover{border-color:#c00;box-shadow:0 1px 6px rgba(200,0,0,.1)}
+  .list-item.featured{border-color:#f0a000}
+  .list-item.featured::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#f0a000}
+  .item-img{width:165px;flex-shrink:0;height:124px;background:#f5f5f5;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .item-img .badge{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:2px}
+  .badge-vitrin{background:#FFE000;color:#111}.badge-one{background:#f0a000;color:#fff}.badge-acil{background:#c00;color:#fff}
+  .item-img .photo-count{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:2px 6px;border-radius:2px}
+  .emoji-car{font-size:48px;opacity:.3}
+  .item-info{flex:1;padding:10px 13px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+  .item-title{font-size:14px;font-weight:600;color:#111;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item-spec{font-size:11px;color:#777;margin-bottom:6px}
+  .item-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+  .item-tag{font-size:10px;background:#f5f5f5;border:1px solid #e0e0e0;color:#555;padding:2px 7px;border-radius:2px}
+  .item-price{font-size:19px;font-weight:700;color:#c00}
+  .item-meta{font-size:11px;color:#aaa;display:flex;gap:12px;margin-top:5px}
+  .item-seller{font-size:11px;color:#0066cc;margin-top:3px}
+  .item-right{width:46px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:10px 6px 10px 0;gap:10px}
+  .fav-btn{width:30px;height:30px;border:1px solid #e0e0e0;border-radius:50%;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:16px}
+  .fav-btn:hover,.fav-btn.active{border-color:#c00;color:#c00}
+
+  /* GRID VIEW */
+  .grid-view{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .grid-card{background:#fff;border:1px solid #e0e0e0;border-radius:4px;overflow:hidden;cursor:pointer;transition:all .15s}
+  .grid-card:hover{border-color:#c00;transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+  .grid-card .gc-img{height:130px;display:flex;align-items:center;justify-content:center;position:relative}
+  .grid-card .gc-body{padding:10px}
+  .gc-title{font-size:12px;font-weight:600;color:#111;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gc-price{font-size:15px;font-weight:700;color:#c00;margin-bottom:4px}
+  .gc-meta{font-size:10px;color:#aaa}
+  .gc-fav{position:absolute;top:6px;right:6px;width:26px;height:26px;background:rgba(255,255,255,.9);border:1px solid #ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#ccc;cursor:pointer}
+  .gc-fav:hover{color:#c00;border-color:#c00}
+  .gc-badge{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:2px}
+
+  .pagination{display:flex;justify-content:center;gap:4px;margin-top:16px}
+  .page-btn{min-width:32px;height:32px;padding:0 8px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:12px;color:#444;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .page-btn:hover{background:#f5f5f5;border-color:#999}
+  .page-btn.active{background:#c00;color:#fff;border-color:#c00;font-weight:700}
+
+  {background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:16px}
+  .-logo{font-size:15px;font-weight:700;color:#FFE000}.-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="search-wrap">
+    <select class="search-cat"><option>Tüm Kategoriler</option><option selected>Vasıta</option><option>Emlak</option></select>
+    <input class="search-input" type="text" id="sq" value="BMW" onkeydown="if(event.key==='Enter')doSearch()" />
+    <button class="search-btn" onclick="doSearch()">Ara</button>
+  </div>
+  <div class="topbar-right">
+    <a href="bildirimler.html" class="topbar-link">🔔</a>
+    <a href="mesajlar.html" class="topbar-link">💬</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb">
+  <a href="anasayfa.html">Anasayfa</a> › <a href="ilanra_liste.html">Vasıta</a> › <span>"BMW" arama sonuçları</span>
+</div>
+
+<div class="container">
+  <div class="sidebar">
+    <div class="filter-box">
+      <div class="filter-header">Marka</div>
+      <div class="filter-body">
+        <label><input type="checkbox" checked /> BMW (2.841)</label>
+        <label><input type="checkbox" /> Mercedes (1.204)</label>
+        <label><input type="checkbox" /> Audi (892)</label>
+      </div>
+    </div>
+    <div class="filter-box">
+      <div class="filter-header">Fiyat (TL)</div>
+      <div class="filter-body">
+        <div class="range-row"><input type="text" placeholder="Min" /><span style="line-height:30px;color:#999;font-size:12px;">—</span><input type="text" placeholder="Max" /></div>
+      </div>
+    </div>
+    <div class="filter-box">
+      <div class="filter-header">Yıl</div>
+      <div class="filter-body">
+        <div class="range-row"><input type="text" placeholder="2015" /><span style="line-height:30px;color:#999;font-size:12px;">—</span><input type="text" placeholder="2024" /></div>
+      </div>
+    </div>
+    <div class="filter-box">
+      <div class="filter-header">Km</div>
+      <div class="filter-body">
+        <div class="range-row"><input type="text" placeholder="0" /><span style="line-height:30px;color:#999;font-size:12px;">—</span><input type="text" placeholder="200.000" /></div>
+      </div>
+    </div>
+    <div class="filter-box">
+      <div class="filter-header">Yakıt Tipi</div>
+      <div class="filter-body">
+        <label><input type="checkbox" checked /> Dizel (1.482)</label>
+        <label><input type="checkbox" /> Benzin (921)</label>
+        <label><input type="checkbox" /> Hibrit (284)</label>
+        <label><input type="checkbox" /> Elektrik (154)</label>
+      </div>
+    </div>
+    <div class="filter-box">
+      <div class="filter-header">Şanzıman</div>
+      <div class="filter-body">
+        <label><input type="checkbox" checked /> Otomatik (2.104)</label>
+        <label><input type="checkbox" /> Manuel (737)</label>
+      </div>
+    </div>
+    <div class="filter-box">
+      <div class="filter-header">İl</div>
+      <div class="filter-body">
+        <select><option>Tüm Türkiye</option><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option selected>Adana</option></select>
+      </div>
+    </div>
+    <button class="btn-filtrele">Filtrele</button>
+  </div>
+
+  <div class="listings">
+    <div class="search-info">
+      <div>
+        <div class="query">«<strong>BMW</strong>» için arama sonuçları — Vasıta</div>
+        <div class="count" style="font-size:12px;color:#666;margin-top:2px;"><strong>2.841</strong> ilan bulundu</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="sort-wrap"><label style="font-size:12px;color:#666">Sırala:</label>
+          <select><option>En yeni</option><option>En düşük fiyat</option><option>En yüksek fiyat</option><option>En az km</option></select>
+        </div>
+        <div class="view-btns">
+          <button class="vbtn active" id="listViewBtn" onclick="setView('list')">≡</button>
+          <button class="vbtn" id="gridViewBtn" onclick="setView('grid')">⊞</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="suggestions">
+      <strong>💡 İlgili aramalar:</strong>
+      <div class="sug-tags">
+        <div class="sug-tag">BMW 3 Serisi</div>
+        <div class="sug-tag">BMW 5 Serisi</div>
+        <div class="sug-tag">BMW X5</div>
+        <div class="sug-tag">BMW M3</div>
+        <div class="sug-tag">BMW 520d</div>
+        <div class="sug-tag">BMW X3</div>
+        <div class="sug-tag">BMW 730d</div>
+      </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="listView">
+      <div class="list-item featured" onclick="window.location.href='ilan_detay.html'">
+        <div class="item-img" style="background:#dde8f5"><div class="badge badge-vitrin">VİTRİN</div><div class="emoji-car">🚗</div><div class="photo-count">📷 12</div></div>
+        <div class="item-info">
+          <div><div class="item-title">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge</div>
+          <div class="item-spec">2022 • Otomatik • Dizel • 38.500 km</div>
+          <div class="item-tags"><span class="item-tag">M Sport</span><span class="item-tag">Sunroof</span><span class="item-tag">HUD</span></div></div>
+          <div><div class="item-price">3.850.000 TL</div>
+          <div class="item-meta"><span>📍 İstanbul / Kadıköy</span><span>🕐 Bugün</span></div>
+          <div class="item-seller">Mert Otomotiv (Galeri) ✓</div></div>
+        </div>
+        <div class="item-right"><button class="fav-btn" onclick="fav(event,this)">♡</button></div>
+      </div>
+
+      <div class="list-item" onclick="window.location.href='ilan_detay.html'">
+        <div class="item-img" style="background:#e8eef5"><div class="emoji-car">🚗</div><div class="photo-count">📷 8</div></div>
+        <div class="item-info">
+          <div><div class="item-title">2021 BMW 3 Serisi 320i M Sport – Türkiye'nin En Temiz</div>
+          <div class="item-spec">2021 • Otomatik • Benzin • 42.000 km</div>
+          <div class="item-tags"><span class="item-tag">M Sport</span><span class="item-tag">LED Far</span></div></div>
+          <div><div class="item-price">2.450.000 TL</div>
+          <div class="item-meta"><span>📍 Ankara / Çankaya</span><span>🕐 Bugün</span></div></div>
+        </div>
+        <div class="item-right"><button class="fav-btn" onclick="fav(event,this)">♡</button></div>
+      </div>
+
+      <div class="list-item featured" onclick="window.location.href='ilan_detay.html'">
+        <div class="item-img" style="background:#f0edf8"><div class="badge badge-one">ÖNE ÇIKAN</div><div class="emoji-car">🚗</div><div class="photo-count">📷 15</div></div>
+        <div class="item-info">
+          <div><div class="item-title">2023 BMW X5 xDrive40d M Sport – Panoramik – Full Paket</div>
+          <div class="item-spec">2023 • Otomatik • Dizel • 18.000 km</div>
+          <div class="item-tags"><span class="item-tag">xDrive</span><span class="item-tag">Panoramik</span><span class="item-tag">M Sport</span><span class="item-tag">Harman Kardon</span></div></div>
+          <div><div class="item-price">7.200.000 TL</div>
+          <div class="item-meta"><span>📍 İzmir / Karşıyaka</span><span>🕐 Dün</span></div>
+          <div class="item-seller">Başaran Otomotiv Yetkili Bayi</div></div>
+        </div>
+        <div class="item-right"><button class="fav-btn" onclick="fav(event,this)">♡</button></div>
+      </div>
+
+      <div class="list-item" onclick="window.location.href='ilan_detay.html'">
+        <div class="item-img" style="background:#e8f5e8"><div class="badge badge-acil">ACİL</div><div class="emoji-car">🚗</div><div class="photo-count">📷 6</div></div>
+        <div class="item-info">
+          <div><div class="item-title">2019 BMW 520d Luxury Line – Servis Bakımlı</div>
+          <div class="item-spec">2019 • Otomatik • Dizel • 87.000 km</div>
+          <div class="item-tags"><span class="item-tag">Luxury Line</span><span class="item-tag">Isıtmalı Koltuk</span></div></div>
+          <div><div class="item-price">2.100.000 TL</div>
+          <div class="item-meta"><span>📍 Adana / Seyhan</span><span>🕐 Dün</span></div></div>
+        </div>
+        <div class="item-right"><button class="fav-btn" onclick="fav(event,this)">♡</button></div>
+      </div>
+
+      <div class="list-item" onclick="window.location.href='ilan_detay.html'">
+        <div class="item-img" style="background:#f5ede8"><div class="emoji-car">🚗</div><div class="photo-count">📷 9</div></div>
+        <div class="item-info">
+          <div><div class="item-title">2020 BMW 730d xDrive – Sürücü Asistanı Paketi</div>
+          <div class="item-spec">2020 • Otomatik • Dizel • 65.000 km</div>
+          <div class="item-tags"><span class="item-tag">xDrive</span><span class="item-tag">Cam Tavan</span><span class="item-tag">Masaj</span></div></div>
+          <div><div class="item-price">4.800.000 TL</div>
+          <div class="item-meta"><span>📍 Bursa / Nilüfer</span><span>🕐 2 gün önce</span></div></div>
+        </div>
+        <div class="item-right"><button class="fav-btn" onclick="fav(event,this)">♡</button></div>
+      </div>
+
+      <div class="list-item" onclick="window.location.href='ilan_detay.html'">
+        <div class="item-img" style="background:#e8f0f5"><div class="emoji-car">🚗</div><div class="photo-count">📷 7</div></div>
+        <div class="item-info">
+          <div><div class="item-title">2018 BMW 118i M Sport Hatchback</div>
+          <div class="item-spec">2018 • Otomatik • Benzin • 112.000 km</div>
+          <div class="item-tags"><span class="item-tag">M Sport</span></div></div>
+          <div><div class="item-price">1.150.000 TL</div>
+          <div class="item-meta"><span>📍 Antalya / Muratpaşa</span><span>🕐 3 gün önce</span></div></div>
+        </div>
+        <div class="item-right"><button class="fav-btn" onclick="fav(event,this)">♡</button></div>
+      </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div id="gridView" style="display:none" class="grid-view">
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#dde8f5"><div class="gc-badge badge-vitrin">VİTRİN</div><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2022 BMW 520d M Sport</div><div class="gc-price">3.850.000 TL</div><div class="gc-meta">38.500 km • İstanbul</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#e8eef5"><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2021 BMW 320i M Sport</div><div class="gc-price">2.450.000 TL</div><div class="gc-meta">42.000 km • Ankara</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#f0edf8"><div class="gc-badge badge-one">ÖNE ÇIKAN</div><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2023 BMW X5 xDrive40d</div><div class="gc-price">7.200.000 TL</div><div class="gc-meta">18.000 km • İzmir</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#e8f5e8"><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2019 BMW 520d Luxury</div><div class="gc-price">2.100.000 TL</div><div class="gc-meta">87.000 km • Adana</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#f5ede8"><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2020 BMW 730d xDrive</div><div class="gc-price">4.800.000 TL</div><div class="gc-meta">65.000 km • Bursa</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#e8f0f5"><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2018 BMW 118i M Sport</div><div class="gc-price">1.150.000 TL</div><div class="gc-meta">112.000 km • Antalya</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#e0e8f0"><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2022 BMW M3 Competition</div><div class="gc-price">6.500.000 TL</div><div class="gc-meta">22.000 km • İstanbul</div></div></div>
+      <div class="grid-card" onclick="window.location.href='ilan_detay.html'"><div class="gc-img" style="background:#f0f5e8"><span style="font-size:48px;opacity:.3">🚗</span><div class="gc-fav" onclick="fav(event,this)">♡</div></div><div class="gc-body"><div class="gc-title">2017 BMW 520i Standart</div><div class="gc-price">1.480.000 TL</div><div class="gc-meta">95.000 km • Konya</div></div></div>
+    </div>
+
+    <div class="pagination">
+      <button class="page-btn" style="color:#ccc">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn" onclick="goPage(this)">2</button>
+      <button class="page-btn" onclick="goPage(this)">3</button>
+      <button class="page-btn" onclick="goPage(this)">4</button>
+      <button class="page-btn">...</button>
+      <button class="page-btn" onclick="goPage(this)">142</button>
+      <button class="page-btn" onclick="goPage(this)">›</button>
+    </div>
+  </div>
+</div>
+
+<>
+  <div class="-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</>
+
+<script>
+  function fav(e,btn){e.stopPropagation();btn.classList.toggle('active');btn.textContent=btn.classList.contains('active')?'♥':'♡'}
+  function setView(v){
+    document.getElementById('listView').style.display=v==='list'?'block':'none';
+    document.getElementById('gridView').style.display=v==='grid'?'grid':'none';
+    document.getElementById('listViewBtn').classList.toggle('active',v==='list');
+    document.getElementById('gridViewBtn').classList.toggle('active',v==='grid');
+  }
+  function goPage(btn){document.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+  function doSearch(){const q=document.getElementById('sq').value.trim();if(q)document.title=`"${q}" için arama sonuçları – ilanra.com`}
+</script>
+</body>
+</html>
+

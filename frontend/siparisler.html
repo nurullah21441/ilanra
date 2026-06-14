@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siparişlerim – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .tl{padding:5px 8px;border-radius:3px;cursor:pointer}.tl:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:900px;margin:16px auto;padding:0 16px}
+
+  .page-tabs{background:#fff;border:1px solid #e0e0e0;border-radius:6px;display:flex;overflow:hidden;margin-bottom:14px}
+  .ptab{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:500;color:#888;cursor:pointer;border-bottom:2px solid transparent}
+  .ptab.active{color:#c00;border-bottom-color:#c00}
+  .ptab:hover{color:#c00}
+
+  .order-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;margin-bottom:12px;overflow:hidden}
+  .order-header{background:#fafafa;border-bottom:1px solid #eee;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .order-num{font-size:12px;color:#888}
+  .order-num strong{color:#111}
+  .order-date{font-size:12px;color:#888}
+  .order-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .os-delivered{background:#e0f0e0;color:#0a0}
+  .os-cargo{background:#e0eaf8;color:#0055aa}
+  .os-processing{background:#fff8e0;color:#a07000}
+  .os-cancelled{background:#f0f0f0;color:#888}
+  .order-body{padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+  .order-img{width:80px;height:60px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+  .order-info{flex:1;min-width:0}
+  .order-title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px;cursor:pointer}
+  .order-title:hover{color:#c00}
+  .order-meta{font-size:12px;color:#888;display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .order-price{font-size:18px;font-weight:700;color:#c00}
+  .order-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+  .obtn{height:30px;padding:0 12px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#555;white-space:nowrap;display:block;text-align:center;line-height:30px}
+  .obtn:hover{background:#f5f5f5}
+  .obtn.primary{background:#c00;color:#fff;border-color:#c00}
+
+  /* CARGO TRACKING */
+  .cargo-track{border-top:1px solid #eee;padding:14px 16px;background:#fafafa}
+  .cargo-track h4{font-size:12px;font-weight:700;color:#333;margin-bottom:12px}
+  .track-steps{display:flex;align-items:flex-start;gap:0}
+  .track-step{display:flex;flex-direction:column;align-items:center;flex:1}
+  .ts-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .ts-done{background:#0a0;color:#fff}
+  .ts-active{background:#c00;color:#fff;box-shadow:0 0 0 4px rgba(200,0,0,.15)}
+  .ts-pending{background:#eee;color:#aaa}
+  .ts-label{font-size:10px;color:#888;text-align:center;margin-top:5px}
+  .ts-done+.ts-label{color:#0a0;font-weight:600}
+  .ts-active+.ts-label,.track-step.active .ts-label{color:#c00;font-weight:600}
+  .track-line{flex:1;height:2px;margin-top:15px}
+  .tl-done{background:#0a0}
+  .tl-pending{background:#eee}
+
+  .cargo-detail{margin-top:10px;font-size:11px;color:#555;background:#fff;border:1px solid #eee;border-radius:4px;padding:8px 12px}
+  .cd-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #f5f5f5}
+  .cd-row:last-child{border-bottom:none}
+  .cd-icon{width:20px;text-align:center;flex-shrink:0}
+  .cd-time{color:#aaa;width:80px;flex-shrink:0}
+  .cd-text{flex:1}
+
+  .review-prompt{border-top:1px solid #eee;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:#fffbe6}
+  .review-prompt p{font-size:12px;color:#a07000}
+  .btn-review{padding:7px 16px;background:#f0a000;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="bildirimler.html" class="tl">🔔</a>
+    <a href="mesajlar.html" class="tl">💬</a>
+    <a href="profil.html" class="tl">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb"><a href="anasayfa.html">Anasayfa</a> › <a href="profil.html">Hesabım</a> › <span>Siparişlerim</span></div>
+
+<div class="container">
+  <div class="page-tabs">
+    <div class="ptab active" onclick="switchTab(this,'tumü')">Tümü (4)</div>
+    <div class="ptab" onclick="switchTab(this,'kargo')">📦 Kargoda (1)</div>
+    <div class="ptab" onclick="switchTab(this,'teslim')">✓ Teslim Edildi (2)</div>
+    <div class="ptab" onclick="switchTab(this,'iptal')">✗ İptal (1)</div>
+  </div>
+
+  <!-- KARGODA -->
+  <div class="order-card">
+    <div class="order-header">
+      <div class="order-num">Sipariş No: <strong>#SHB-2026-88421</strong></div>
+      <div class="order-date">📅 28 Mayıs 2026</div>
+      <span class="order-status os-cargo">📦 Kargoda</span>
+    </div>
+    <div class="order-body">
+      <div class="order-img" style="background:#fdf5e0">📱</div>
+      <div class="order-info">
+        <div class="order-title" onclick="window.location.href='ilan_detay.html'">iPhone 16 Pro Max 256GB – Mavi Titanyum – Kutulu</div>
+        <div class="order-meta">
+          <span>👤 Satıcı: TechStore İstanbul</span>
+          <span>📦 Kargo: Yurtiçi Kargo</span>
+          <span>🔢 Takip: YK-8847521036</span>
+        </div>
+        <div class="order-price">85.000 TL</div>
+      </div>
+      <div class="order-right">
+        <button class="obtn primary">📦 Kargo Takip</button>
+        <button class="obtn" onclick="window.location.href='mesajlar.html'">💬 Satıcıya Yaz</button>
+        <button class="obtn">🔖 Fatura İndir</button>
+      </div>
+    </div>
+    <div class="cargo-track">
+      <h4>📍 Kargo Takibi — Tahmini teslimat: 31 Mayıs 2026</h4>
+      <div class="track-steps">
+        <div class="track-step">
+          <div class="ts-icon ts-done">✓</div>
+          <div class="ts-label ts-done">Sipariş<br>Alındı</div>
+        </div>
+        <div class="track-line tl-done"></div>
+        <div class="track-step">
+          <div class="ts-icon ts-done">✓</div>
+          <div class="ts-label ts-done">Hazırlandı<br>& Gönderildi</div>
+        </div>
+        <div class="track-line tl-done"></div>
+        <div class="track-step active">
+          <div class="ts-icon ts-active">🚚</div>
+          <div class="ts-label">Dağıtımda<br>Adana</div>
+        </div>
+        <div class="track-line tl-pending"></div>
+        <div class="track-step">
+          <div class="ts-icon ts-pending">🏠</div>
+          <div class="ts-label">Teslim<br>Edilecek</div>
+        </div>
+      </div>
+      <div class="cargo-detail" style="margin-top:12px">
+        <div class="cd-row"><div class="cd-icon">🚚</div><div class="cd-time">Bugün 08:45</div><div class="cd-text">Adana dağıtım merkezine ulaştı, dağıtıma çıktı</div></div>
+        <div class="cd-row"><div class="cd-icon">📦</div><div class="cd-time">Dün 22:10</div><div class="cd-text">Adana aktarma merkezine ulaştı</div></div>
+        <div class="cd-row"><div class="cd-icon">✈️</div><div class="cd-time">Dün 14:30</div><div class="cd-text">İstanbul'dan Adana'ya hareket etti</div></div>
+        <div class="cd-row"><div class="cd-icon">📬</div><div class="cd-time">28 May 16:00</div><div class="cd-text">Satıcı tarafından kargoya verildi</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESLİM EDİLDİ -->
+  <div class="order-card">
+    <div class="order-header">
+      <div class="order-num">Sipariş No: <strong>#SHB-2026-71203</strong></div>
+      <div class="order-date">📅 15 Mayıs 2026</div>
+      <span class="order-status os-delivered">✓ Teslim Edildi</span>
+    </div>
+    <div class="order-body">
+      <div class="order-img" style="background:#e8eef5">💻</div>
+      <div class="order-info">
+        <div class="order-title">MacBook Pro M3 16" – 512GB – Space Siyahı</div>
+        <div class="order-meta">
+          <span>👤 Satıcı: Ahmet Y.</span>
+          <span>📅 Teslim: 18 Mayıs 2026</span>
+        </div>
+        <div class="order-price">128.000 TL</div>
+      </div>
+      <div class="order-right">
+        <button class="obtn">🔖 Fatura İndir</button>
+        <button class="obtn">↩ İade Talebi</button>
+      </div>
+    </div>
+    <div class="review-prompt">
+      <p>⭐ Bu ürünü nasıl buldunuz? Değerlendirmeniz diğer alıcılara yardımcı olur.</p>
+      <button class="btn-review" onclick="openReview()">Değerlendir</button>
+    </div>
+  </div>
+
+  <div class="order-card">
+    <div class="order-header">
+      <div class="order-num">Sipariş No: <strong>#SHB-2026-54891</strong></div>
+      <div class="order-date">📅 3 Mayıs 2026</div>
+      <span class="order-status os-delivered">✓ Teslim Edildi</span>
+    </div>
+    <div class="order-body">
+      <div class="order-img" style="background:#f8e8f8">🎮</div>
+      <div class="order-info">
+        <div class="order-title">PlayStation 5 Slim + 3 Oyun – Garantili</div>
+        <div class="order-meta">
+          <span>👤 Satıcı: GameZone</span>
+          <span>📅 Teslim: 6 Mayıs 2026</span>
+        </div>
+        <div class="order-price">28.500 TL</div>
+      </div>
+      <div class="order-right">
+        <button class="obtn">🔖 Fatura İndir</button>
+        <button class="obtn">⭐ Değerlendir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- İPTAL -->
+  <div class="order-card" style="opacity:.7">
+    <div class="order-header">
+      <div class="order-num">Sipariş No: <strong>#SHB-2026-33012</strong></div>
+      <div class="order-date">📅 20 Nisan 2026</div>
+      <span class="order-status os-cancelled">✗ İptal Edildi</span>
+    </div>
+    <div class="order-body">
+      <div class="order-img" style="background:#f0f5e8">🎧</div>
+      <div class="order-info">
+        <div class="order-title">Sony WH-1000XM5 Kulaklık – Siyah</div>
+        <div class="order-meta">
+          <span>👤 Satıcı: AudioPlus</span>
+          <span style="color:#c00">✗ İptal Sebebi: Satıcı stok hatası</span>
+        </div>
+        <div class="order-price" style="color:#888;text-decoration:line-through">12.000 TL</div>
+      </div>
+      <div class="order-right">
+        <button class="obtn">💬 Destek</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+<script>
+  function switchTab(el,tab){document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));el.classList.add('active')}
+  function openReview(){
+    const stars=['★','★★','★★★','★★★★','★★★★★'];
+    const rating=prompt('Kaç yıldız? (1-5)','5');
+    if(rating&&parseInt(rating)>=1&&parseInt(rating)<=5){
+      const comment=prompt('Yorumunuz:','Çok memnun kaldım, tavsiye ederim!');
+      if(comment)alert('✓ Değerlendirmeniz gönderildi! Teşekkürler.');
+    }
+  }
+</script>
+</body>
+</html>
+

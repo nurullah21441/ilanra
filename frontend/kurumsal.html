@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hakkımızda / SSS / İletişim – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .topbar-link{padding:5px 8px;border-radius:3px;cursor:pointer}.topbar-link:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+
+  /* TABS */
+  .page-tabs{background:#fff;border-bottom:2px solid #eee;display:flex;padding:0 16px;position:sticky;top:52px;z-index:90}
+  .ptab{padding:13px 20px;font-size:13px;font-weight:500;color:#888;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+  .ptab.active{color:#c00;border-bottom-color:#c00}
+  .ptab:hover{color:#c00}
+
+  .section{display:none;max-width:960px;margin:0 auto;padding:24px 16px}
+  .section.active{display:block}
+
+  /* HERO */
+  .about-hero{background:linear-gradient(135deg,#111,#333);border-radius:8px;padding:40px;text-align:center;margin-bottom:24px;color:#fff}
+  .about-hero h1{font-size:28px;font-weight:700;margin-bottom:8px;color:#FFE000}
+  .about-hero p{font-size:15px;color:#ccc;max-width:600px;margin:0 auto}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+  .stat-box{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px;text-align:center}
+  .stat-box .n{font-size:28px;font-weight:700;color:#c00;margin-bottom:4px}
+  .stat-box .l{font-size:12px;color:#888}
+
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+  .about-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px}
+  .about-card h3{font-size:15px;font-weight:700;color:#111;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .about-card p{font-size:13px;color:#555;line-height:1.7}
+
+  .timeline{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px;margin-bottom:24px}
+  .timeline h3{font-size:15px;font-weight:700;color:#111;margin-bottom:16px}
+  .tl-item{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start}
+  .tl-year{width:50px;font-size:13px;font-weight:700;color:#c00;flex-shrink:0;text-align:right}
+  .tl-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+  .tl-dot{width:12px;height:12px;border-radius:50%;background:#c00;flex-shrink:0}
+  .tl-connector{flex:1;width:2px;background:#eee;margin:3px 0}
+  .tl-content{flex:1}
+  .tl-title{font-size:13px;font-weight:600;color:#111;margin-bottom:2px}
+  .tl-desc{font-size:12px;color:#666}
+
+  /* SSS */
+  .faq-search{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-bottom:16px;display:flex;gap:10px}
+  .faq-search input{flex:1;height:38px;border:1px solid #ddd;border-radius:4px;padding:0 12px;font-size:13px;outline:none}
+  .faq-search button{height:38px;padding:0 18px;background:#c00;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer}
+  .faq-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .faq-cat{background:#fff;border:1px solid #ddd;border-radius:20px;padding:6px 16px;font-size:12px;color:#555;cursor:pointer}
+  .faq-cat.active{background:#c00;color:#fff;border-color:#c00}
+  .faq-item{background:#fff;border:1px solid #e0e0e0;border-radius:6px;margin-bottom:6px;overflow:hidden}
+  .faq-q{padding:14px 16px;font-size:13px;font-weight:600;color:#111;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .faq-q:hover{background:#fafafa}
+  .faq-arrow{font-size:16px;color:#aaa;transition:transform .2s;flex-shrink:0}
+  .faq-a{padding:0 16px;font-size:13px;color:#555;line-height:1.7;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+  .faq-item.open .faq-a{max-height:300px;padding:0 16px 14px}
+  .faq-item.open .faq-arrow{transform:rotate(180deg)}
+
+  /* İLETİŞİM */
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .contact-box{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px;text-align:center}
+  .contact-box .cb-icon{font-size:36px;margin-bottom:10px}
+  .contact-box h4{font-size:14px;font-weight:700;color:#111;margin-bottom:6px}
+  .contact-box p{font-size:12px;color:#888;margin-bottom:10px;line-height:1.5}
+  .contact-box .cb-val{font-size:16px;font-weight:700;color:#c00}
+  .contact-box .cb-hours{font-size:11px;color:#aaa;margin-top:4px}
+  .form-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px}
+  .form-card h3{font-size:15px;font-weight:700;color:#111;margin-bottom:16px}
+  .form-group{margin-bottom:12px}
+  .form-group label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:4px}
+  .form-group input,.form-group select,.form-group textarea{width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 12px;font-size:13px;color:#111;background:#fff;outline:none;font-family:inherit}
+  .form-group textarea{min-height:100px;resize:vertical}
+  .form-row{display:flex;gap:10px}.form-row .form-group{flex:1}
+  .btn-submit{padding:11px 28px;background:#c00;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-submit:hover{background:#a00}
+
+  .office-card{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;display:flex;gap:14px;margin-bottom:10px}
+  .office-icon{font-size:28px;flex-shrink:0}
+  .office-info h4{font-size:13px;font-weight:700;color:#111;margin-bottom:4px}
+  .office-info p{font-size:12px;color:#666;line-height:1.6}
+
+  /* LIVE CHAT BUTTON */
+  .live-chat-btn{position:fixed;bottom:24px;right:24px;background:#c00;color:#fff;border:none;border-radius:50px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(200,0,0,.4);display:flex;align-items:center;gap:8px;z-index:300;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 4px 16px rgba(200,0,0,.4)}50%{box-shadow:0 4px 24px rgba(200,0,0,.7)}}
+  .chat-window{position:fixed;bottom:80px;right:24px;width:320px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:299;display:none;overflow:hidden}
+  .chat-window.open{display:block}
+  .cw-header{background:#c00;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+  .cw-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .cw-info .cw-name{font-size:14px;font-weight:700}
+  .cw-info .cw-status{font-size:11px;opacity:.8}
+  .cw-close{margin-left:auto;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;opacity:.7}
+  .cw-close:hover{opacity:1}
+  .cw-messages{height:260px;overflow-y:auto;padding:12px;background:#fafafa;display:flex;flex-direction:column;gap:8px}
+  .cw-msg{max-width:80%}
+  .cw-msg.bot{align-self:flex-start}
+  .cw-msg.user{align-self:flex-end}
+  .cw-bubble{padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.5}
+  .cw-msg.bot .cw-bubble{background:#fff;border:1px solid #e8e8e8;color:#333;border-bottom-left-radius:4px}
+  .cw-msg.user .cw-bubble{background:#c00;color:#fff;border-bottom-right-radius:4px}
+  .cw-time{font-size:10px;color:#bbb;margin-top:2px}
+  .cw-msg.user .cw-time{text-align:right}
+  .cw-input-area{padding:10px;border-top:1px solid #eee;display:flex;gap:6px}
+  .cw-input{flex:1;height:34px;border:1px solid #ddd;border-radius:17px;padding:0 12px;font-size:12px;outline:none;font-family:inherit}
+  .cw-send{width:34px;height:34px;border-radius:50%;background:#c00;border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  footer{background:#222;color:#aaa;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:30px}
+  .footer-logo{font-size:16px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+  .footer-links{display:flex;gap:14px;font-size:11px;flex-wrap:wrap}
+  .footer-links a{cursor:pointer}.footer-links a:hover{color:#fff}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="anasayfa.html" class="topbar-link">Ana Sayfa</a>
+    <a href="profil.html" class="topbar-link">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+
+<div class="page-tabs">
+  <div class="ptab active" onclick="showTab('about',this)">🏢 Hakkımızda</div>
+  <div class="ptab" onclick="showTab('faq',this)">❓ Sıkça Sorulan Sorular</div>
+  <div class="ptab" onclick="showTab('contact',this)">📞 İletişim</div>
+  <div class="ptab" onclick="showTab('careers',this)">💼 Kariyer</div>
+</div>
+
+<!-- HAKKIMIZDA -->
+<div class="section active" id="tab-about">
+  <div class="about-hero">
+    <h1>ilanra.com</h1>
+    <p>Türkiye'nin en büyük online alışveriş platformu olarak 1998'den bu yana milyonlarca alıcı ve satıcıyı buluşturuyoruz.</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="n">24M+</div><div class="l">Aktif İlan</div></div>
+    <div class="stat-box"><div class="n">18M+</div><div class="l">Kayıtlı Üye</div></div>
+    <div class="stat-box"><div class="n">650K+</div><div class="l">Günlük Ziyaretçi</div></div>
+    <div class="stat-box"><div class="n">1998</div><div class="l">Kuruluş Yılı</div></div>
+  </div>
+  <div class="about-grid">
+    <div class="about-card"><h3>🎯 Misyonumuz</h3><p>Türkiye'deki alıcı ve satıcıları güvenli, kolay ve şeffaf bir platformda buluşturmak. Her işlemi basit, her deneyimi güvenilir kılmak için teknoloji ve yeniliği ön planda tutuyoruz.</p></div>
+    <div class="about-card"><h3>👁 Vizyonumuz</h3><p>Türkiye'nin dijital ekonomisinde en güvenilir ikinci el pazar yeri olmak ve kullanıcılarımıza dünya standartlarında bir alışveriş deneyimi sunmak.</p></div>
+    <div class="about-card"><h3>🔒 Güven & Güvenlik</h3><p>Tüm ilanlar ve kullanıcılar otomatik sistemler ve insan moderasyonuyla denetleniyor. Dolandırıcılık önleme ekibimiz 7/24 çalışıyor.</p></div>
+    <div class="about-card"><h3>🌱 Sürdürülebilirlik</h3><p>İkinci el ekonomisini destekleyerek tüketimi azaltıyor, çevre dostu bir alışveriş kültürü oluşturuyoruz. Her satılan ürün geri dönüştürülmüş bir üründür.</p></div>
+  </div>
+  <div class="timeline">
+    <h3>📅 Tarihçemiz</h3>
+    <div class="tl-item"><div class="tl-year">1998</div><div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">Kuruluş</div><div class="tl-desc">ilanra.com, Türkiye'nin ilk online ilan platformu olarak İstanbul'da kuruldu.</div></div></div>
+    <div class="tl-item"><div class="tl-year">2005</div><div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">1 Milyon Üye</div><div class="tl-desc">Platform 1 milyon kayıtlı üyeye ulaştı ve Türkiye'nin en büyük ilan sitesi oldu.</div></div></div>
+    <div class="tl-item"><div class="tl-year">2012</div><div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">Mobil Uygulama</div><div class="tl-desc">iOS ve Android için mobil uygulamalar yayınlandı. Kullanıcı sayısı 5 milyonu geçti.</div></div></div>
+    <div class="tl-item"><div class="tl-year">2018</div><div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">10 Milyon Üye</div><div class="tl-desc">Platforma üye sayısı 10 milyonu aştı. Günlük aktif kullanıcı 500 bine ulaştı.</div></div></div>
+    <div class="tl-item"><div class="tl-year">2026</div><div class="tl-line"><div class="tl-dot"></div></div><div class="tl-content"><div class="tl-title">Bugün</div><div class="tl-desc">18M+ kayıtlı üye, 24M+ aktif ilan ile Türkiye'nin tartışmasız en büyük ilan platformuyuz.</div></div></div>
+  </div>
+</div>
+
+<!-- SSS -->
+<div class="section" id="tab-faq">
+  <div class="faq-search">
+    <input type="text" placeholder="Sorunuzu arayın..." id="faqSearch" oninput="filterFaq(this.value)" />
+    <button>Ara</button>
+  </div>
+  <div class="faq-cats">
+    <div class="faq-cat active" onclick="filterCat('all',this)">Tümü</div>
+    <div class="faq-cat" onclick="filterCat('hesap',this)">Hesap</div>
+    <div class="faq-cat" onclick="filterCat('ilan',this)">İlan</div>
+    <div class="faq-cat" onclick="filterCat('odeme',this)">Ödeme</div>
+    <div class="faq-cat" onclick="filterCat('guvenlik',this)">Güvenlik</div>
+  </div>
+  <div id="faqList">
+    <div class="faq-item" data-cat="hesap" onclick="toggleFaq(this)"><div class="faq-q">Nasıl üye olabilirim? <span class="faq-arrow">▾</span></div><div class="faq-a">Üye olmak tamamen ücretsizdir. Sağ üst köşedeki "Giriş Yap / Üye Ol" butonuna tıklayarak e-posta adresiniz veya Google hesabınızla kayıt olabilirsiniz. Kayıt işlemi 1 dakikadan kısa sürer.</div></div>
+    <div class="faq-item" data-cat="ilan" onclick="toggleFaq(this)"><div class="faq-q">İlan vermek ücretli mi? <span class="faq-arrow">▾</span></div><div class="faq-a">Standart ilanlar tamamen ücretsizdir. Ancak ilanınızın daha fazla görünür olmasını istiyorsanız Vitrin (149 TL/15 gün) veya Süper Vitrin (299 TL/30 gün) paketlerinden yararlanabilirsiniz.</div></div>
+    <div class="faq-item" data-cat="ilan" onclick="toggleFaq(this)"><div class="faq-q">İlanım ne kadar süre yayında kalır? <span class="faq-arrow">▾</span></div><div class="faq-a">Standart ilanlar 30 gün yayında kalır. Vitrin paketi 15 gün, Süper Vitrin paketi ise 30 gün süreyle aktif kalır. Süre dolduğunda ilanı yenileyebilirsiniz.</div></div>
+    <div class="faq-item" data-cat="odeme" onclick="toggleFaq(this)"><div class="faq-q">Hangi ödeme yöntemlerini kabul ediyorsunuz? <span class="faq-arrow">▾</span></div><div class="faq-a">Kredi kartı (Visa, Mastercard, TROY, Amex), banka kartı, EFT/Havale ve dijital cüzdan ile ödeme yapabilirsiniz. Tüm ödemeler 256-bit SSL ile şifrelenmektedir.</div></div>
+    <div class="faq-item" data-cat="guvenlik" onclick="toggleFaq(this)"><div class="faq-q">Dolandırıcılığa karşı nasıl korunabilirim? <span class="faq-arrow">▾</span></div><div class="faq-a">Aracı veya ürünü görmeden para göndermeyin. Satıcının kimliğini doğrulayın. Ödemeleri güvenli bir ortamda ve noter huzurunda yapın. Şüpheli durumları hemen bize bildirin.</div></div>
+    <div class="faq-item" data-cat="hesap" onclick="toggleFaq(this)"><div class="faq-q">Şifremi unuttum, ne yapmalıyım? <span class="faq-arrow">▾</span></div><div class="faq-a">Giriş sayfasındaki "Şifremi Unuttum" bağlantısına tıklayın. E-posta adresinizi girerek şifre sıfırlama bağlantısı alabilirsiniz. Bağlantı 24 saat geçerlidir.</div></div>
+    <div class="faq-item" data-cat="ilan" onclick="toggleFaq(this)"><div class="faq-q">İlanımı nasıl düzenleyebilirim? <span class="faq-arrow">▾</span></div><div class="faq-a">Hesabım > İlanlarım bölümüne giderek ilgili ilanın yanındaki "Düzenle" butonuna tıklayabilirsiniz. Fiyat, açıklama ve fotoğrafları istediğiniz zaman güncelleyebilirsiniz.</div></div>
+    <div class="faq-item" data-cat="guvenlik" onclick="toggleFaq(this)"><div class="faq-q">Kişisel verilerim güvende mi? <span class="faq-arrow">▾</span></div><div class="faq-a">Evet. Tüm kişisel verileriniz KVKK kapsamında işlenir ve korunur. Verilerinizi üçüncü taraflarla paylaşmıyoruz. Gizlilik politikamızı inceleyebilirsiniz.</div></div>
+  </div>
+</div>
+
+<!-- İLETİŞİM -->
+<div class="section" id="tab-contact">
+  <div class="contact-grid">
+    <div class="contact-box"><div class="cb-icon">📞</div><h4>Telefon Desteği</h4><p>7/24 çağrı merkezimiz hizmetinizde</p><div class="cb-val">444 0 888</div><div class="cb-hours">Pazartesi – Pazar, 08:00 – 22:00</div></div>
+    <div class="contact-box"><div class="cb-icon">✉️</div><h4>E-posta</h4><p>Sorularınızı e-posta ile iletebilirsiniz</p><div class="cb-val">destek@ilanra.com</div><div class="cb-hours">Yanıt süresi: Ortalama 2 saat</div></div>
+    <div class="contact-box"><div class="cb-icon">💬</div><h4>Canlı Destek</h4><p>Anında yardım için sohbet başlatın</p><div class="cb-val" style="cursor:pointer" onclick="openChat()">Sohbeti Başlat →</div><div class="cb-hours">Şu an çevrimiçi • 3 dk bekleme</div></div>
+    <div class="contact-box"><div class="cb-icon">🤝</div><h4>Kurumsal İletişim</h4><p>Reklam, ortaklık ve kurumsal teklifler</p><div class="cb-val">kurumsal@ilanra.com</div><div class="cb-hours">Pazartesi – Cuma, 09:00 – 18:00</div></div>
+  </div>
+  <div class="form-card" style="margin-bottom:14px">
+    <h3>✉️ Bize Yazın</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Ad Soyad</label><input type="text" placeholder="Adınız" /></div>
+      <div class="form-group"><label>E-posta</label><input type="email" placeholder="ornek@email.com" /></div>
+    </div>
+    <div class="form-group"><label>Konu</label><select><option>Hesap Sorunu</option><option>İlan Sorunu</option><option>Ödeme Sorunu</option><option>Güvenlik / Şikayet</option><option>Kurumsal</option><option>Diğer</option></select></div>
+    <div class="form-group"><label>Mesajınız</label><textarea placeholder="Sorununuzu detaylı açıklayın..."></textarea></div>
+    <button class="btn-submit" onclick="alert('Mesajınız gönderildi! En kısa sürede dönüş yapacağız.')">Gönder</button>
+  </div>
+  <div class="office-card"><div class="office-icon">🏢</div><div class="office-info"><h4>İstanbul Merkez Ofis</h4><p>Levent Mahallesi, Büyükdere Cad. No: 185 Kat: 12<br>Şişli / İstanbul, 34394<br>Tel: 0212 444 08 88</p></div></div>
+  <div class="office-card"><div class="office-icon">🏢</div><div class="office-info"><h4>Ankara Ofisi</h4><p>Çankaya Mahallesi, Kızılırmak Cad. No: 45 Kat: 8<br>Çankaya / Ankara, 06690<br>Tel: 0312 444 08 88</p></div></div>
+</div>
+
+<!-- KARİYER -->
+<div class="section" id="tab-careers">
+  <div class="about-hero" style="background:linear-gradient(135deg,#c00,#800)">
+    <h1 style="color:#fff">Bizimle Çalışmak İster Misin?</h1>
+    <p>ilanra.com ailesine katıl, Türkiye'nin en büyük teknoloji şirketlerinden birinde kariyer yap.</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="n">850+</div><div class="l">Çalışan</div></div>
+    <div class="stat-box"><div class="n">3</div><div class="l">Ofis</div></div>
+    <div class="stat-box"><div class="n">4.2</div><div class="l">Glassdoor Puanı</div></div>
+    <div class="stat-box"><div class="n">%78</div><div class="l">Çalışan Memnuniyeti</div></div>
+  </div>
+  <div class="about-grid">
+    <div class="about-card"><h3>💻 Mühendis / Yazılım Geliştirici</h3><p>Backend, Frontend, Mobile ve DevOps alanlarında deneyimli yazılım geliştiriciler arıyoruz. React, Node.js, Python, Kubernetes deneyimi tercih sebebidir.</p></div>
+    <div class="about-card"><h3>📊 Veri Bilimcisi / Analist</h3><p>Büyük veri setleriyle çalışacak, makine öğrenmesi modelleri geliştirecek veri bilimciler arıyoruz. Python, SQL, TensorFlow deneyimi aranmaktadır.</p></div>
+    <div class="about-card"><h3>🎨 UI/UX Tasarımcı</h3><p>Milyonlarca kullanıcıya dokunan ürünler için Figma, Sketch ve kullanıcı araştırması deneyimine sahip tasarımcılar arıyoruz.</p></div>
+    <div class="about-card"><h3>📢 Dijital Pazarlama Uzmanı</h3><p>SEO, SEM, sosyal medya ve içerik pazarlama konularında uzman, yaratıcı ve analitik düşünen pazarlamacılar arıyoruz.</p></div>
+  </div>
+  <div style="text-align:center;padding:20px"><button class="btn-submit" style="font-size:15px;padding:13px 36px" onclick="alert('Kariyer sayfamıza yönlendiriliyorsunuz!')">🚀 Tüm Açık Pozisyonlar</button></div>
+</div>
+
+<!-- LIVE CHAT -->
+<button class="live-chat-btn" onclick="openChat()">💬 Canlı Destek</button>
+<div class="chat-window" id="chatWindow">
+  <div class="cw-header">
+    <div class="cw-av">🤖</div>
+    <div class="cw-info"><div class="cw-name">Destek Ekibi</div><div class="cw-status">🟢 Çevrimiçi</div></div>
+    <button class="cw-close" onclick="document.getElementById('chatWindow').classList.remove('open')">×</button>
+  </div>
+  <div class="cw-messages" id="cwMessages">
+    <div class="cw-msg bot"><div class="cw-bubble">Merhaba! 👋 ilanra.com destek ekibine hoş geldiniz. Size nasıl yardımcı olabilirim?</div><div class="cw-time">Şimdi</div></div>
+    <div class="cw-msg bot"><div class="cw-bubble">Aşağıdaki konulardan birini seçebilirsiniz: 🔑 Hesap, 📋 İlan, 💳 Ödeme, 🛡️ Güvenlik</div><div class="cw-time">Şimdi</div></div>
+  </div>
+  <div class="cw-input-area">
+    <input class="cw-input" type="text" id="cwInput" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter')sendChatMsg()" />
+    <button class="cw-send" onclick="sendChatMsg()">➤</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div class="footer-links"><a>Gizlilik Politikası</a><a>Kullanım Koşulları</a><a>Çerez Politikası</a><a>KVKK</a></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+
+<script>
+  function showTab(tab,el){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    el.classList.add('active');
+  }
+  function toggleFaq(el){el.classList.toggle('open')}
+  function filterFaq(q){document.querySelectorAll('.faq-item').forEach(f=>{f.style.display=f.querySelector('.faq-q').textContent.toLowerCase().includes(q.toLowerCase())?'block':'none'})}
+  function filterCat(cat,el){
+    document.querySelectorAll('.faq-cat').forEach(c=>c.classList.remove('active'));el.classList.add('active');
+    document.querySelectorAll('.faq-item').forEach(f=>{f.style.display=(cat==='all'||f.dataset.cat===cat)?'block':'none'})
+  }
+  function openChat(){document.getElementById('chatWindow').classList.toggle('open')}
+  const botReplies=['Anlıyorum, size yardımcı olmaya çalışacağım.','Bu konuda destek ekibimiz size yardımcı olacak.','Lütfen biraz bekleyin, bilginizi kontrol ediyorum...','Sorununuz için üzgünüm. Hemen çözüm buluyoruz!','Başka bir sorunuz var mı?'];
+  let ri=0;
+  function sendChatMsg(){
+    const inp=document.getElementById('cwInput');
+    const txt=inp.value.trim();if(!txt)return;
+    const msgs=document.getElementById('cwMessages');
+    const now=new Date(),t=`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const um=document.createElement('div');um.className='cw-msg user';um.innerHTML=`<div class="cw-bubble">${txt}</div><div class="cw-time">${t}</div>`;
+    msgs.appendChild(um);inp.value='';msgs.scrollTop=msgs.scrollHeight;
+    setTimeout(()=>{
+      const bm=document.createElement('div');bm.className='cw-msg bot';bm.innerHTML=`<div class="cw-bubble">${botReplies[ri%botReplies.length]}</div><div class="cw-time">Şimdi</div>`;
+      msgs.appendChild(bm);msgs.scrollTop=msgs.scrollHeight;ri++;
+    },1000);
+  }
+</script>
+</body>
+</html>
+

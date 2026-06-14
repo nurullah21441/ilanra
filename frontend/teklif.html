@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tekliflerim – ilanra.com</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#333;background:#f2f2f2}
+  .topbar{background:#FFE000;height:52px;display:flex;align-items:center;padding:0 16px;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+  .logo{font-size:20px;font-weight:700;color:#111;letter-spacing:-.5px}.logo span{color:#c00}
+  .topbar-right{margin-left:auto;display:flex;gap:8px;font-size:12px;align-items:center}
+  .tl{padding:5px 8px;border-radius:3px;cursor:pointer}.tl:hover{background:rgba(0,0,0,.08)}
+  .btn-ilan{background:#111;color:#FFE000;border:none;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+  .breadcrumb{background:#fff;padding:7px 16px;border-bottom:1px solid #eee;font-size:11px;color:#888;display:flex;gap:4px}
+  .breadcrumb a{color:#c00;cursor:pointer}
+  .container{max-width:900px;margin:16px auto;padding:0 16px}
+
+  .tabs{background:#fff;border:1px solid #e0e0e0;border-radius:6px;display:flex;overflow:hidden;margin-bottom:14px}
+  .tab{flex:1;padding:12px;text-align:center;font-size:13px;font-weight:500;color:#888;cursor:pointer;border-bottom:2px solid transparent}
+  .tab.active{color:#c00;border-bottom-color:#c00;background:#fff5f5}
+  .tab:hover{color:#c00}
+
+  .teklif-item{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+  .ti-img{width:80px;height:60px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0}
+  .ti-body{flex:1;min-width:0}
+  .ti-title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px;cursor:pointer}
+  .ti-title:hover{color:#c00}
+  .ti-ilan-price{font-size:13px;color:#888;margin-bottom:8px}
+  .ti-ilan-price strong{color:#111}
+  .ti-offer-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .ti-offer-label{font-size:12px;color:#888}
+  .ti-offer-price{font-size:20px;font-weight:700;color:#c00}
+  .ti-diff{font-size:12px;padding:2px 8px;border-radius:3px;font-weight:600}
+  .diff-down{background:#e0f0e0;color:#0a0}
+  .diff-up{background:#fde0e0;color:#c00}
+  .ti-note{font-size:12px;color:#555;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:8px 10px;margin-bottom:8px;line-height:1.5}
+  .ti-meta{font-size:11px;color:#aaa;display:flex;gap:12px;flex-wrap:wrap}
+  .ti-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;min-width:120px}
+  .status-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+  .sb-pending{background:#fff8e0;color:#a07000;border:1px solid #f0d060}
+  .sb-accepted{background:#e0f0e0;color:#0a0;border:1px solid #c0e0c0}
+  .sb-rejected{background:#fde0e0;color:#c00;border:1px solid #f0c0c0}
+  .sb-countered{background:#e0eaf8;color:#0055aa;border:1px solid #b0d0f0}
+  .sb-expired{background:#f0f0f0;color:#888;border:1px solid #ddd}
+  .action-btns{display:flex;gap:5px;flex-wrap:wrap}
+  .abtn{height:30px;padding:0 12px;border:1px solid #ddd;border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:#555;white-space:nowrap}
+  .abtn:hover{background:#f5f5f5}
+  .abtn.accept{background:#0a0;color:#fff;border-color:#0a0}
+  .abtn.reject{background:#c00;color:#fff;border-color:#c00}
+  .abtn.counter{background:#0055aa;color:#fff;border-color:#0055aa}
+
+  /* MODAL */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:8px;padding:24px;max-width:440px;width:90%}
+  .modal h3{font-size:16px;font-weight:700;margin-bottom:6px}
+  .modal .ilan-ref{font-size:12px;color:#888;margin-bottom:16px}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px}
+  .form-group input,.form-group textarea{width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 12px;font-size:13px;color:#111;outline:none;font-family:inherit}
+  .form-group textarea{min-height:80px;resize:vertical}
+  .price-hint{font-size:11px;color:#888;margin-top:4px}
+  .modal-actions{display:flex;gap:8px;margin-top:16px}
+  .mbtn{flex:1;padding:10px;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid #ccc}
+  .mbtn-cancel{background:#fff;color:#555}
+  .mbtn-send{background:#c00;color:#fff;border-color:#c00}
+  .mbtn-accept{background:#0a0;color:#fff;border-color:#0a0}
+  .mbtn-reject{background:#c00;color:#fff;border-color:#c00}
+
+  .empty{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:48px;text-align:center;color:#aaa}
+  .empty .ei{font-size:48px;margin-bottom:12px}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .stat{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:12px;text-align:center}
+  .stat .n{font-size:22px;font-weight:700;color:#111}
+  .stat .l{font-size:10px;color:#888;margin-top:2px}
+
+  footer{background:#222;color:#aaa;padding:14px 24px;display:flex;justify-content:space-between;margin-top:20px}
+  .footer-logo{font-size:15px;font-weight:700;color:#FFE000}.footer-logo span{color:#f88}
+</style>
+  <script src="js/api.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">ilanra<span>.com</span></div>
+  <div class="topbar-right">
+    <a href="bildirimler.html" class="tl">🔔</a>
+    <a href="mesajlar.html" class="tl">💬</a>
+    <a href="profil.html" class="tl">Hesabım</a>
+    <button class="btn-ilan" onclick="window.location.href='ilan_ver.html'">+ İlan Ver</button>
+  </div>
+</div>
+<div class="breadcrumb"><a href="anasayfa.html">Anasayfa</a> › <a href="profil.html">Hesabım</a> › <span>Tekliflerim</span></div>
+
+<div class="container">
+
+  <div class="stats-row">
+    <div class="stat"><div class="n" style="color:#f0a000">5</div><div class="l">Bekleyen</div></div>
+    <div class="stat"><div class="n" style="color:#0a0">3</div><div class="l">Kabul Edilen</div></div>
+    <div class="stat"><div class="n" style="color:#c00">2</div><div class="l">Reddedilen</div></div>
+    <div class="stat"><div class="n" style="color:#0055aa">1</div><div class="l">Karşı Teklif</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'gelen')">📥 Gelen Teklifler <span style="background:#c00;color:#fff;font-size:10px;padding:1px 5px;border-radius:8px">3</span></div>
+    <div class="tab" onclick="switchTab(this,'giden')">📤 Verdiğim Teklifler</div>
+    <div class="tab" onclick="switchTab(this,'tum')">📋 Tüm Teklifler</div>
+  </div>
+
+  <div id="list-gelen">
+
+    <!-- BEKLEYEN -->
+    <div class="teklif-item">
+      <div class="ti-img" style="background:#dde8f5">🚗</div>
+      <div class="ti-body">
+        <div class="ti-title" onclick="window.location.href='ilan_detay.html'">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge</div>
+        <div class="ti-ilan-price">İlan Fiyatı: <strong>3.850.000 TL</strong></div>
+        <div class="ti-offer-row">
+          <span class="ti-offer-label">Teklif:</span>
+          <span class="ti-offer-price">3.600.000 TL</span>
+          <span class="ti-diff diff-down">↓ 250.000 TL indirim</span>
+        </div>
+        <div class="ti-note">«Araç sağlam görünüyor, ekspertizden geçirelim sonra karar verelim. Takas da düşünülebilir.»</div>
+        <div class="ti-meta">
+          <span>👤 Ahmet Yılmaz</span>
+          <span>📅 30 Mayıs 2026, 09:42</span>
+          <span>⏳ 47 saat kaldı</span>
+        </div>
+      </div>
+      <div class="ti-right">
+        <span class="status-badge sb-pending">⏳ Bekliyor</span>
+        <div class="action-btns">
+          <button class="abtn accept" onclick="respond('accept')">✓ Kabul</button>
+          <button class="abtn reject" onclick="respond('reject')">✗ Reddet</button>
+          <button class="abtn counter" onclick="openCounter()">↔ Karşı Teklif</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="teklif-item">
+      <div class="ti-img" style="background:#dde8f5">🚗</div>
+      <div class="ti-body">
+        <div class="ti-title" onclick="window.location.href='ilan_detay.html'">2022 BMW 5 Serisi 520d M Sport – Hayalet Gösterge</div>
+        <div class="ti-ilan-price">İlan Fiyatı: <strong>3.850.000 TL</strong></div>
+        <div class="ti-offer-row">
+          <span class="ti-offer-label">Teklif:</span>
+          <span class="ti-offer-price">3.750.000 TL</span>
+          <span class="ti-diff diff-down">↓ 100.000 TL indirim</span>
+        </div>
+        <div class="ti-note">«Nakitten ödeyebilirim, hemen kapatırız.»</div>
+        <div class="ti-meta">
+          <span>👤 Fatma Kaya</span>
+          <span>📅 29 Mayıs 2026, 18:15</span>
+          <span>⏳ 23 saat kaldı</span>
+        </div>
+      </div>
+      <div class="ti-right">
+        <span class="status-badge sb-pending">⏳ Bekliyor</span>
+        <div class="action-btns">
+          <button class="abtn accept" onclick="respond('accept')">✓ Kabul</button>
+          <button class="abtn reject" onclick="respond('reject')">✗ Reddet</button>
+          <button class="abtn counter" onclick="openCounter()">↔ Karşı Teklif</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="teklif-item">
+      <div class="ti-img" style="background:#e0f0e0">🏠</div>
+      <div class="ti-body">
+        <div class="ti-title">3+1 Satılık Daire – Seyhan / Adana</div>
+        <div class="ti-ilan-price">İlan Fiyatı: <strong>4.200.000 TL</strong></div>
+        <div class="ti-offer-row">
+          <span class="ti-offer-label">Karşı Teklif:</span>
+          <span class="ti-offer-price">3.900.000 TL</span>
+          <span class="ti-diff diff-down">↓ 300.000 TL</span>
+        </div>
+        <div class="ti-note">«4.050.000 TL'de anlaşabiliriz, banka kredisi hazır.»</div>
+        <div class="ti-meta">
+          <span>👤 Mehmet Can</span>
+          <span>📅 28 Mayıs 2026, 14:30</span>
+          <span style="color:#0055aa">↔ Karşı teklifinizi bekliyoruz</span>
+        </div>
+      </div>
+      <div class="ti-right">
+        <span class="status-badge sb-countered">↔ Karşı Teklif</span>
+        <div class="action-btns">
+          <button class="abtn accept" onclick="respond('accept')">✓ Kabul Et</button>
+          <button class="abtn" onclick="openCounter()">↔ Tekrar Teklif</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="teklif-item" style="opacity:.7">
+      <div class="ti-img" style="background:#fdf5e0">📱</div>
+      <div class="ti-body">
+        <div class="ti-title">iPhone 14 Pro 256GB – Kutusuyla</div>
+        <div class="ti-ilan-price">İlan Fiyatı: <strong>42.000 TL</strong></div>
+        <div class="ti-offer-row">
+          <span class="ti-offer-label">Teklif:</span>
+          <span class="ti-offer-price">35.000 TL</span>
+          <span class="ti-diff diff-up">↓ 7.000 TL (%17)</span>
+        </div>
+        <div class="ti-meta">
+          <span>👤 Zeynep Demir</span>
+          <span>📅 25 Mayıs 2026</span>
+          <span style="color:#c00">Süresi doldu</span>
+        </div>
+      </div>
+      <div class="ti-right">
+        <span class="status-badge sb-expired">⌛ Süre Doldu</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="list-giden" style="display:none">
+    <div class="teklif-item">
+      <div class="ti-img" style="background:#e8eef5">🚗</div>
+      <div class="ti-body">
+        <div class="ti-title" onclick="window.location.href='ilan_detay.html'">2021 BMW 320i M Sport – Ankara</div>
+        <div class="ti-ilan-price">İlan Fiyatı: <strong>2.450.000 TL</strong></div>
+        <div class="ti-offer-row">
+          <span class="ti-offer-label">Teklifim:</span>
+          <span class="ti-offer-price">2.300.000 TL</span>
+          <span class="ti-diff diff-down">↓ 150.000 TL indirim istedim</span>
+        </div>
+        <div class="ti-note">«Fotoğraflarda kapı çerçevesinde bir iz gördüm, bu nedenle biraz indirim bekliyorum.»</div>
+        <div class="ti-meta"><span>📅 30 Mayıs 2026, 10:15</span><span>⏳ 71 saat kaldı</span></div>
+      </div>
+      <div class="ti-right">
+        <span class="status-badge sb-pending">⏳ Bekleniyor</span>
+        <div class="action-btns"><button class="abtn" onclick="this.closest('.teklif-item').style.opacity='.5'">Geri Al</button></div>
+      </div>
+    </div>
+    <div class="teklif-item" style="opacity:.8">
+      <div class="ti-img" style="background:#f0edf8">🚗</div>
+      <div class="ti-body">
+        <div class="ti-title">2023 BMW X5 xDrive40d – İzmir</div>
+        <div class="ti-ilan-price">İlan Fiyatı: <strong>7.200.000 TL</strong></div>
+        <div class="ti-offer-row">
+          <span class="ti-offer-label">Teklifim:</span>
+          <span class="ti-offer-price">6.800.000 TL</span>
+        </div>
+        <div class="ti-meta"><span>📅 28 Mayıs 2026</span></div>
+      </div>
+      <div class="ti-right">
+        <span class="status-badge sb-rejected">✗ Reddedildi</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="list-tum" style="display:none">
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:20px;text-align:center;color:#888">Tüm teklifler listeleniyor...</div>
+  </div>
+
+</div>
+
+<!-- KARŞI TEKLİF MODAL -->
+<div class="overlay" id="counterModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h3>↔ Karşı Teklif Gönder</h3>
+    <div class="ilan-ref">2022 BMW 520d M Sport — İlan Fiyatı: 3.850.000 TL</div>
+    <div class="form-group">
+      <label>Karşı Teklif Fiyatı (TL)</label>
+      <input type="number" id="counterPrice" placeholder="örn: 3.700.000" />
+      <div class="price-hint" id="counterHint">—</div>
+    </div>
+    <div class="form-group">
+      <label>Mesajınız (isteğe bağlı)</label>
+      <textarea placeholder="Açıklama ekleyebilirsiniz..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Teklif Geçerlilik Süresi</label>
+      <select style="width:100%;height:36px;border:1px solid #ccc;border-radius:4px;padding:0 10px;font-size:13px">
+        <option>24 saat</option><option selected>48 saat</option><option>72 saat</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="mbtn mbtn-cancel" onclick="document.getElementById('counterModal').classList.remove('open')">İptal</button>
+      <button class="mbtn mbtn-send" onclick="sendCounter()">↔ Gönder</button>
+    </div>
+  </div>
+</div>
+
+<!-- KABUL/RET MODAL -->
+<div class="overlay" id="respondModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" id="respondModalContent"></div>
+</div>
+
+<footer>
+  <div class="footer-logo">ilanra<span>.com</span></div>
+  <div style="font-size:11px;color:#555">© 2026 ilanra.com</div>
+</footer>
+<script>
+  function switchTab(el,tab){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    ['gelen','giden','tum'].forEach(t=>document.getElementById('list-'+t).style.display=t===tab?'block':'none');
+  }
+  function openCounter(){document.getElementById('counterModal').classList.add('open')}
+  document.getElementById('counterPrice').addEventListener('input',function(){
+    const v=parseInt(this.value);
+    const hint=document.getElementById('counterHint');
+    if(v&&!isNaN(v)){const diff=3850000-v;hint.textContent=diff>0?`İlan fiyatından ${diff.toLocaleString('tr')} TL düşük`:`İlan fiyatından ${Math.abs(diff).toLocaleString('tr')} TL yüksek`;hint.style.color=diff>0?'#0a0':'#c00'}else hint.textContent='—';
+  });
+  function sendCounter(){alert('Karşı teklifiniz gönderildi!');document.getElementById('counterModal').classList.remove('open')}
+  function respond(type){
+    const m=document.getElementById('respondModalContent');
+    if(type==='accept'){
+      m.innerHTML=`<h3 style="color:#0a0">✓ Teklifi Kabul Et</h3><p style="color:#555;margin:12px 0;line-height:1.6">3.600.000 TL teklifini kabul etmek üzeresiniz. Alıcı mesaj ile bilgilendirilecek.</p><div class="modal-actions"><button class="mbtn mbtn-cancel" onclick="document.getElementById('respondModal').classList.remove('open')">Vazgeç</button><button class="mbtn mbtn-accept" onclick="alert('Teklif kabul edildi!');document.getElementById('respondModal').classList.remove('open')">✓ Kabul Et</button></div>`;
+    } else {
+      m.innerHTML=`<h3 style="color:#c00">✗ Teklifi Reddet</h3><p style="color:#555;margin:12px 0;line-height:1.6">3.600.000 TL teklifini reddetmek üzeresiniz.</p><textarea style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px;font-size:12px;height:70px" placeholder="Red sebebi (isteğe bağlı)..."></textarea><div class="modal-actions" style="margin-top:10px"><button class="mbtn mbtn-cancel" onclick="document.getElementById('respondModal').classList.remove('open')">Vazgeç</button><button class="mbtn mbtn-reject" onclick="alert('Teklif reddedildi.');document.getElementById('respondModal').classList.remove('open')">✗ Reddet</button></div>`;
+    }
+    document.getElementById('respondModal').classList.add('open');
+  }
+</script>
+</body>
+</html>
+
